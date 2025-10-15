@@ -1,0 +1,37 @@
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# Frontend build / angular
+/frontend/dist/
+/frontend/out-tsc/
+/frontend/.angular/cache
+/frontend/node_modules
+
+# Common build outputs
+/dist
+/build
+/tmp
+/.cache
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs and coverage
+logs/
+*.log
+coverage/
+coverage*.json
+
+# IDEs and editors
+.idea/
+.vscode/
+*.sublime-workspace
+
+# System
+.DS_Store
+Thumbs.db
+*.swp
