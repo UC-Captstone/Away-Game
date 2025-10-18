@@ -1,9 +1,5 @@
 from typing import AsyncIterator
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy import text
 from app.core.config import settings
 
@@ -21,19 +17,9 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 async def init_db() -> None:
-    """
-    Runs once at startup:
-    - Creates (idempotently) the extensions we rely on:
-        * CITEXT  (case-insensitive text)
-        * PostGIS (spatial types & functions)
-    """
     async with async_engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS citext"))
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
 
 async def get_session() -> AsyncIterator[AsyncSession]:
-    """
-    FastAPI dependency that yields an AsyncSession per request.
-    """
     async with AsyncSessionLocal() as session:
         yield session

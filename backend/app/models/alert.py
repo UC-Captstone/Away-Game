@@ -3,10 +3,9 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import ForeignKey, Index, func
+from sqlalchemy import ForeignKey, Index, func, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
-from geoalchemy2 import Geography
 
 from app.db.base import Base
 
@@ -24,9 +23,10 @@ class SafetyAlert(Base):
     )
 
     description: Mapped[Optional[str]]
-    location: Mapped[Optional[str]] = mapped_column(Geography(geometry_type="POINT", srid=4326))
 
-    # Optional linkage to a game that the alert refers to
+    latitude: Mapped[Optional[float]]
+    longitude: Mapped[Optional[float]]
+
     game_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True), ForeignKey("games.game_id", ondelete="SET NULL")
     )
@@ -35,6 +35,7 @@ class SafetyAlert(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
     __table_args__ = (
-        Index("ix_safety_alerts_location", "location", postgresql_using="gist"),
         Index("ix_safety_alerts_game_date", "game_date"),
+        CheckConstraint("(latitude IS NULL OR (latitude >= -90 AND latitude <= 90))", name="ck_alerts_lat_range"),
+        CheckConstraint("(longitude IS NULL OR (longitude >= -180 AND longitude <= 180))", name="ck_alerts_lon_range"),
     )
