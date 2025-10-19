@@ -23,7 +23,7 @@ class Venue(Base):
     longitude: Mapped[float | None]
     capacity: Mapped[int | None]
     is_indoor: Mapped[bool | None]
-    espn_venue_id: Mapped[int | None] = mapped_column(unique=True)
+    espn_venue_id: Mapped[int | None] = mapped_column(unique=True) #TODO I feel like espn should be able to give us this?
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=func.now())
