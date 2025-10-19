@@ -1,29 +1,30 @@
 from __future__ import annotations
-from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, EmailStr
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel
 
 
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
+class UserBase(BaseModel):
     clerk_id: Optional[str] = None
+    username: str
+    email: str
     profile_picture_url: Optional[str] = None
+    is_verified: bool = False
 
+class UserCreate(UserBase):
+    pass
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     profile_picture_url: Optional[str] = None
     is_verified: Optional[bool] = None
 
-
-class UserRead(BaseModel):
+class UserRead(UserBase):
     user_id: UUID
-    username: str
-    email: EmailStr
-    profile_picture_url: Optional[str] = None
-    is_verified: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
