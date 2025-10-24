@@ -1,10 +1,13 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str
-    ENVIRONMENT: str
-    DATABASE_URL: str
-    SECRET_KEY: str
+    project_name: str = "Away-Game"
+    app_env: str = "dev"
+
+    database_url: str
+    database_url_async: str
+
+    secret_key: str | None = None
 
     class Config:
         env_file = ".env"

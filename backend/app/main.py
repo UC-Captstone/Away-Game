@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from app.core.config import settings
+from app.db.session import init_db
 
-app = FastAPI(title=settings.PROJECT_NAME, version="0.1.0")
+app = FastAPI(title="Away-Game API")
 
-@app.get("/")
-async def root():
-    return {"message": "Backend is running successfully"}
+@app.on_event("startup")
+async def _startup() -> None:
+    await init_db()
+    print("Database initialized.")
