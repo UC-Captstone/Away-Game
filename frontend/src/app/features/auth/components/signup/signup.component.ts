@@ -1,16 +1,16 @@
 import { Component } from '@angular/core';
-import { ClerkSignInComponent } from '@jsrob/ngx-clerk';
-import type { SignInProps } from '@clerk/types';
+import { ClerkSignUpComponent } from '@jsrob/ngx-clerk';
+import type { SignUpProps } from '@clerk/types';
 import { dark } from '@clerk/themes';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.html',
-  imports: [ClerkSignInComponent],
+  selector: 'app-signup',
+  templateUrl: './signup.component.html',
+  imports: [ClerkSignUpComponent],
   standalone: true,
 })
-export class Login {
-  signInProps: SignInProps = {
+export class Signup {
+  signUpProps: SignUpProps = {
     appearance: {
       baseTheme: dark,
       variables: {
