@@ -27,6 +27,9 @@ jobs:
       id-token: write
 
     steps:
+      - name: Debug environment variables
+        run: env
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
