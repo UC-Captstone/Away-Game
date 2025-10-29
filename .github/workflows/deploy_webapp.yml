@@ -46,7 +46,7 @@ jobs:
           context: .
           push: true
           tags: mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_9EA267E2F48E4BC8A1FA9C7D065EB362 }}/appsvc/staticsite:${{ github.sha }}
-          file: ./Dockerfile
+          file: ./frontend/dockerfile
 
       - name: Login to Azure (dev)
         uses: azure/login@v2
@@ -94,7 +94,7 @@ jobs:
           context: .
           push: true
           tags: mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_CD960F3877CE431E99B7AF05F1E52B13 }}/appsvc/staticsite:${{ github.sha }}
-          file: ./Dockerfile
+          file: ./frontend/dockerfile
 
       - name: Login to Azure (prd)
         uses: azure/login@v2
