@@ -39,7 +39,7 @@ jobs:
       - name: Log in to container registry (dev)
         uses: docker/login-action@v2
         with:
-          registry: mcr.microsoft.com
+          registry: mcr.microsoft.com/
           username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_9EA267E2F48E4BC8A1FA9C7D065EB362 }}
           password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_8196B9111241463C9A65764E04043F30 }}
 
@@ -51,15 +51,15 @@ jobs:
           tags: mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_9EA267E2F48E4BC8A1FA9C7D065EB362 }}/appsvc/staticsite:${{ github.sha }}
           file: ./frontend/dockerfile
 
-      - name: Login to Azure (dev)
+      - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B5A8B183A5AC42CB8285B1DC09E9EAEA }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_48DA3DB4295D48E79001DD5B29486335 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A48DE33DBA5E4459996CA7BDE9F9BA96 }}
 
-      - name: Deploy to Azure Web App (dev)
-        id: deploy-to-webapp-dev
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'away-game-dev'
