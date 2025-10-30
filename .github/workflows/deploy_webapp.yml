@@ -39,16 +39,18 @@ jobs:
       - name: Log in to container registry (dev)
         uses: docker/login-action@v2
         with:
-          registry: mcr.microsoft.com/
-          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_9EA267E2F48E4BC8A1FA9C7D065EB362 }}
-          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_8196B9111241463C9A65764E04043F30 }}
+          registry: ghcr.io
+          username: ${{ github.actor}}
+          password: ${{ secrets.CR_PAT}}
 
       - name: Build and push container image to registry (dev)
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_9EA267E2F48E4BC8A1FA9C7D065EB362 }}/appsvc/staticsite:${{ github.sha }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/away-game:dev-latest
+            ghcr.io/${{ github.repository_owner }}/away-game:dev-${{ github.sha }}
           file: ./frontend/dockerfile
 
       - name: Login to Azure
@@ -64,7 +66,7 @@ jobs:
         with:
           app-name: 'away-game-dev'
           slot-name: 'Production'
-          images: 'mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_9EA267E2F48E4BC8A1FA9C7D065EB362 }}/appsvc/staticsite:${{ github.sha }}'
+          images: 'ghcr.io/${{ github.repository_owner }}/away-game-dev:dev-latest'
 
   build-and-deploy-prd:
     name: Build, push and deploy to away-game-prd
