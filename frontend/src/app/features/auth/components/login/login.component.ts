@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
-import { ClerkSignInComponent } from '@jsrob/ngx-clerk';
+import { Component, inject, effect, signal } from '@angular/core';
+import { ClerkService, ClerkSignInComponent } from '@jsrob/ngx-clerk';
 import type { SignInProps } from '@clerk/types';
 import { dark } from '@clerk/themes';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -45,4 +47,39 @@ export class Login {
       },
     },
   };
+  private hasSynced = signal(false);
+  private isSyncing = signal(false);
+  private clerkService = inject(ClerkService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  constructor() {
+    effect(() => {
+      const session = this.clerkService.session();
+
+      if (session && session.id && !this.hasSynced() && !this.isSyncing()) {
+        this.isSyncing.set(true);
+
+        this.authService.syncUser().subscribe({
+          next: () => {
+            console.log('User Synced Successfully');
+            this.hasSynced.set(true);
+            this.isSyncing.set(false);
+            this.router.navigate(['/']);
+          },
+          error: (err) => {
+            console.error('Sync Error:', err);
+            this.isSyncing.set(false);
+
+            //Nathan: improve later on to be a popup noti
+            if (err.status === 401) {
+              console.error('Authentication failed. Please try signing in again.');
+            } else if (err.status >= 500) {
+              console.error('Server error. Please try again later.');
+            }
+          },
+        });
+      }
+    });
+  }
 }
