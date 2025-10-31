@@ -7,7 +7,8 @@ class Settings(BaseSettings):
     database_url: str
     database_url_async: str
 
-    secret_key: str | None = None
+    clerk_secret_key: str
+    clerk_domain: str
 
     class Config:
         env_file = ".env"
