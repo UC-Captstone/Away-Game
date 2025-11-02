@@ -5,7 +5,7 @@ import { IHeaderInfo } from './header';
 
 export interface IUserProfile {
   headerInfo: IHeaderInfo;
+  accountSettings: IAccountSettings;
   savedEvents: IEvent[];
   myPosts: IPost[];
-  accountSettings: IAccountSettings;
 }
