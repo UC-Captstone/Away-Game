@@ -98,7 +98,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_CD960F3877CE431E99B7AF05F1E52B13 }}/appsvc/staticsite:${{ github.sha }}
+          tags: |
+            ghcr.io/uc-captstone/away-game:prd-latest
+            ghcr.io/uc-captstone/away-game:prd-${{ github.sha }}
           file: ./frontend/dockerfile
 
       - name: Login to Azure (prd)
@@ -114,4 +116,4 @@ jobs:
         with:
           app-name: 'away-game-prd'
           slot-name: 'Production'
-          images: 'mcr.microsoft.com/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_CD960F3877CE431E99B7AF05F1E52B13 }}/appsvc/staticsite:${{ github.sha }}'
+          images: 'ghcr.io/uc-captstone/away-game:prd-${{ github.sha }}'
