@@ -1,0 +1,101 @@
+<div
+  class="h-screen flex items-center justify-center text-center bg-gradient-to-b from-slate-800 to-slate-900 overflow-auto"
+>
+  <div class="bg-transparent h-11/12 w-full px-6 flex flex-col overflow-hidden">
+    <app-back-button routerLink="/" label="Back"></app-back-button>
+    <app-user-profile-header [profileHeaderInfo]="userProfile.headerInfo"></app-user-profile-header>
+
+    <div class="md:flex mt-5 flex-1">
+      <div
+        class="w-full bg-transparent border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden md:flex"
+      >
+        <div class="tabs-panel bg-transparent w-64 p-4 border-r border-slate-800">
+          <ul
+            class="flex-column space-y space-y-4 text-sm font-medium text-slate-300 mb-0 h-full flex flex-col justify-start"
+          >
+            <li>
+              <a
+                (click)="selectTab('AccountSettings'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                [ngClass]="
+                  selectedTab === 'AccountSettings'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+                [attr.aria-current]="selectedTab === 'AccountSettings' ? 'page' : null"
+              >
+                Account Settings
+              </a>
+            </li>
+            <li>
+              <a
+                (click)="selectTab('SavedEvents'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                [ngClass]="
+                  selectedTab === 'SavedEvents'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+                [attr.aria-current]="selectedTab === 'SavedEvents' ? 'page' : null"
+              >
+                Saved Events
+              </a>
+            </li>
+            <li>
+              <a
+                (click)="selectTab('MyPosts'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                [ngClass]="
+                  selectedTab === 'MyPosts'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+                [attr.aria-current]="selectedTab === 'MyPosts' ? 'page' : null"
+              >
+                My Posts
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          class="content-panel p-6 text-slate-300 w-full h-full overflow-auto flex-1 bg-transparent"
+        >
+          @switch (selectedTab) {
+            @case ('AccountSettings') {
+              <div>
+                <h3 class="text-2xl font-semibold text-sky-400 mb-2">Account Settings</h3>
+                <p class="mb-2 text-slate-400 text-sm">**Account Settings content** goes here.</p>
+              </div>
+            }
+            @case ('SavedEvents') {
+              <div>
+                <h3 class="text-2xl font-semibold text-sky-400 mb-2">Saved Events</h3>
+                <p class="mb-2 text-slate-400 text-sm">
+                  **Saved Events content** goes here. Replace with Saved Events components or
+                  markup.
+                </p>
+              </div>
+            }
+            @case ('MyPosts') {
+              <div>
+                <h3 class="text-2xl font-semibold text-sky-400 mb-2">My Posts</h3>
+                <p class="mb-2 text-slate-400 text-sm">
+                  **My Posts content** goes here. Replace with My Posts components or markup.
+                </p>
+              </div>
+            }
+            @default {
+              <div>
+                <h3 class="text-2xl font-semibold text-sky-400 mb-2">Select a tab</h3>
+                <p class="mb-2 text-slate-400 text-sm">
+                  Choose a tab on the left to update this content.
+                </p>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
