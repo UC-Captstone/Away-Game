@@ -2,7 +2,7 @@
   <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-3 px-5 profile-header flex items-center gap-4 shadow-sm">
     <div class="avatar-area flex items-center justify-center" role="group" aria-label="Profile picture">
       <img
-        class="avatar w-24 h-24 rounded-md object-cover border border-slate-700 cursor-pointer"
+        class="avatar w-20 h-20 rounded-md object-cover border border-slate-700 cursor-pointer"
         [src]="profileHeaderInfo.profilePictureUrl || '/assets/default-avatar.jpg'"
         alt="Profile avatar"
         role="button"
@@ -48,12 +48,12 @@
         <label class="favorites-label text-md text-slate-300">Favorite teams</label>
         <div class="team-logos flex items-center gap-2">
           @if (profileHeaderInfo.favoriteTeams.length) {
-            @for (team of profileHeaderInfo.favoriteTeams | slice : 0 : 5; track team.name) {
+            @for (team of profileHeaderInfo.favoriteTeams | slice : 0 : 5; track team.teamName) {
               <img
                 class="team-logo w-12 h-12 p-1 object-contain rounded-sm border border-slate-700/30 bg-slate-800/10"
                 [src]="team.logoUrl"
-                [alt]="team.name"
-                [title]="team.name"
+                [alt]="team.teamName"
+                [title]="team.teamName"
               />
             }
 
