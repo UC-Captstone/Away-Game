@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: awaygame-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-awaygame}
+      POSTGRES_USER: ${POSTGRES_USER:-awayuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-awaypass}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+      
+#TODO - Add a healthcheck
+volumes:
+  db-data:
