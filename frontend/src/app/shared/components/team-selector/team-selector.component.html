@@ -1,0 +1,156 @@
+<div class="flex gap-3 w-full">
+  <div class="flex-1 min-w-0">
+    <label class="block text-sm font-medium text-slate-300 mb-1.5">Select League</label>
+    <div class="relative">
+      <select
+        [(ngModel)]="selectedLeague"
+        (change)="onLeagueChange()"
+        class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg p-2 pr-10 appearance-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder-slate-400 dark:focus:ring-sky-500 dark:focus:border-sky-500"
+      >
+        <option value="" disabled selected>Select a league</option>
+        @for (league of leagues; track league) {
+          <option
+            [value]="league"
+            class="bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
+          >
+            {{ league }}
+          </option>
+        }
+      </select>
+      <svg
+        class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+  </div>
+
+  <div class="flex-1 min-w-0 relative">
+    <label class="block text-sm font-medium text-slate-300 mb-1.5">Select Favorite Team</label>
+    <button
+      type="button"
+      class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg p-2 flex items-center justify-between gap-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:focus:ring-sky-500 dark:focus:border-sky-500"
+      (click)="toggleDropdown()"
+      (keydown.enter)="toggleDropdown()"
+      (keydown.space)="$event.preventDefault(); toggleDropdown()"
+      [disabled]="!selectedLeague"
+      [attr.aria-disabled]="!selectedLeague"
+      [attr.aria-expanded]="selectedLeague ? isOpen : false"
+      aria-haspopup="listbox"
+      [attr.aria-controls]="'team-listbox'"
+    >
+      <span class="flex items-center gap-2 min-w-0">
+        @if (selectedTeam) {
+          <img
+            [src]="selectedTeam.logoUrl"
+            [alt]="selectedTeam.displayName"
+            class="w-5 h-5 rounded-sm border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 object-contain"
+          />
+          <span class="truncate text-slate-900 dark:text-white">{{
+            selectedTeam.displayName
+          }}</span>
+        } @else {
+          <span class="truncate text-slate-500 dark:text-slate-400">Select a team</span>
+        }
+      </span>
+      <svg
+        class="w-4 h-4 text-slate-400 transition-transform"
+        [ngClass]="{ 'rotate-180': isOpen }"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </button>
+
+    @if (isOpen) {
+      <div
+        class="absolute z-20 mt-2 w-full bg-slate-900/90 border border-slate-800 rounded-xl shadow-xl backdrop-blur-md overflow-hidden"
+        role="region"
+        aria-label="Team selector"
+      >
+        <div class="p-1.5 border-b border-slate-800">
+          <input
+            #searchInput
+            type="text"
+            placeholder="Search teams..."
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()"
+            (keydown)="onSearchKeydown($event)"
+            class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm placeholder-slate-400 rounded-lg py-1.5 px-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors dark:bg-slate-700 dark:border-slate-600 dark:text-white dark:placeholder-slate-400 dark:focus:ring-sky-500 dark:focus:border-sky-500"
+            role="combobox"
+            [attr.aria-expanded]="isOpen"
+            [attr.aria-controls]="'team-listbox'"
+            [attr.aria-activedescendant]="activeIndex >= 0 ? 'team-option-' + activeIndex : null"
+          />
+        </div>
+
+        @if (loading) {
+          <div class="text-center text-sky-400/80 py-2.5 text-sm">Loading teams...</div>
+        } @else if (noTeams) {
+          <div class="text-center text-slate-400 py-2.5 text-sm">No teams found</div>
+        } @else {
+          <ul
+            #teamListbox
+            id="team-listbox"
+            role="listbox"
+            tabindex="0"
+            (keydown)="onListKeydown($event)"
+            class="max-h-56 overflow-auto py-1 focus:outline-none"
+            [attr.aria-activedescendant]="activeIndex >= 0 ? 'team-option-' + activeIndex : null"
+          >
+            @for (team of teams; track team.teamID; let i = $index) {
+              <li
+                [id]="'team-option-' + i"
+                role="option"
+                [attr.aria-selected]="selectedTeamId === team.teamID"
+                (click)="onSelectTeam(team)"
+                class="flex items-center gap-2 px-3 py-1.5 mx-2 mb-1 cursor-pointer hover:bg-slate-800/70 text-slate-200 text-sm transition-colors rounded-xl"
+                [ngClass]="{
+                  'bg-sky-500/10 text-sky-300': selectedTeamId === team.teamID,
+                  'ring-1 ring-sky-500/40 ring-inset': activeIndex === i,
+                }"
+              >
+                <img
+                  [src]="team.logoUrl"
+                  [alt]="team.displayName"
+                  class="w-6 h-6 rounded-sm border border-slate-700 bg-slate-800 object-contain"
+                />
+                <span class="truncate flex-1">{{ team.displayName }}</span>
+
+                @if (selectedTeamId === team.teamID) {
+                  <svg
+                    class="w-4 h-4 text-sky-300 shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M20 6L9 17l-5-5"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </div>
+</div>
