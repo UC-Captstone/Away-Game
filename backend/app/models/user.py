@@ -22,6 +22,7 @@ class User(Base):
 
     profile_picture_url: Mapped[str | None]
     is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
+    pending_verification: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=func.now())
