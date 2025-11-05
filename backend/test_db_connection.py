@@ -14,4 +14,4 @@ try:
         print("connected")
         print("Postgres version:", version)
 except Exception as e:
-    print(f"❌ Connection failed: {e}")
+    print(f"Connection failed: {e}")
