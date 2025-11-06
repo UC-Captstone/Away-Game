@@ -85,7 +85,11 @@ export class TeamService {
     },
   ];
 
-  getTeamsByLeague(leagueId: string, searchTerm: string = ''): Observable<ITeam[]> {
+  getTeamsByLeague(
+    leagueId: string,
+    searchTerm: string = '',
+    limit: number = 4,
+  ): Observable<ITeam[]> {
     //Nathan: replace with real api call
     const teams = this.mockTeams.filter(
       (t) =>
@@ -94,6 +98,6 @@ export class TeamService {
     );
 
     // Simulate network delay
-    return of(teams.slice(0, 5)).pipe(delay(500));
+    return of(teams.slice(0, limit)).pipe(delay(500));
   }
 }

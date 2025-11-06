@@ -8,6 +8,7 @@ import {
   OnInit,
   Output,
   EventEmitter,
+  Input,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LeagueEnum, LeagueIdMap } from '../../models/league-enum';
@@ -32,6 +33,12 @@ import {
 })
 export class TeamSelectorComponent implements OnInit, OnDestroy {
   @Output() teamSelected = new EventEmitter<ITeam>();
+  @Output() teamsSelected = new EventEmitter<ITeam[]>();
+  @Input() multi: boolean = false;
+  @Input() selectedTeams: ITeam[] = [];
+  @Input() dropdownLimit = 4;
+  @Input() fromVerification: boolean = false;
+
   @ViewChild('teamListbox') private teamListbox?: ElementRef<HTMLUListElement>;
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
 
@@ -40,11 +47,7 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   private readonly league$ = new BehaviorSubject<LeagueEnum | null>(null);
   private readonly search$ = new BehaviorSubject<string>('');
 
-  get selectedTeam(): ITeam | undefined {
-    return this.teams.find((t) => t.teamID === this.selectedTeamId);
-  }
-
-  selectedLeague?: LeagueEnum;
+  selectedLeague: LeagueEnum | null = null;
   selectedTeamId = '';
   searchTerm = '';
   teams: ITeam[] = [];
@@ -52,6 +55,10 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   noTeams = false;
   activeIndex = -1;
   isOpen = false;
+
+  get selectedTeam(): ITeam | undefined {
+    return this.teams.find((t) => t.teamID === this.selectedTeamId);
+  }
 
   constructor(
     private readonly teamService: TeamService,
@@ -71,7 +78,7 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
         switchMap(([league, term]) => {
           const leagueId = LeagueIdMap[league];
           return this.teamService
-            .getTeamsByLeague(leagueId, term)
+            .getTeamsByLeague(leagueId, term, this.dropdownLimit)
             .pipe(catchError(() => of([] as ITeam[])));
         }),
         takeUntil(this.destroy$),
@@ -98,6 +105,15 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
     this.search$.next('');
   }
 
+  toggleDropdown(): void {
+    if (!this.selectedLeague) return;
+    this.isOpen = !this.isOpen;
+    if (this.isOpen) {
+      queueMicrotask(() => this.searchInput?.nativeElement.focus());
+      if (this.teams.length) this.activeIndex = Math.max(0, this.activeIndex);
+    }
+  }
+
   onSearchChange(): void {
     this.search$.next(this.searchTerm.trim());
   }
@@ -117,24 +133,27 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleDropdown(): void {
-    if (!this.selectedLeague) return;
-    this.isOpen = !this.isOpen;
-    if (this.isOpen) {
-      queueMicrotask(() => this.searchInput?.nativeElement.focus());
-      if (this.teams.length) this.activeIndex = Math.max(0, this.activeIndex);
-    }
-  }
-
-  closeDropdown(): void {
-    this.isOpen = false;
-  }
-
   onSelectTeam(team: ITeam): void {
+    if (this.multi) {
+      this.toggleTeamSelection(team);
+      return;
+    }
     this.selectedTeamId = team.teamID;
     this.activeIndex = this.teams.findIndex((t) => t.teamID === team.teamID);
     this.teamSelected.emit(team);
     this.closeDropdown();
+  }
+
+  isTeamSelected(team: ITeam): boolean {
+    return this.selectedTeams.some((t) => t.teamID === team.teamID);
+  }
+
+  toggleTeamSelection(team: ITeam): void {
+    const exists = this.isTeamSelected(team);
+    this.selectedTeams = exists
+      ? this.selectedTeams.filter((t) => t.teamID !== team.teamID)
+      : [...this.selectedTeams, team];
+    this.teamsSelected.emit(this.selectedTeams);
   }
 
   onListKeydown(event: KeyboardEvent): void {
@@ -165,7 +184,10 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
       case 'Enter':
       case ' ':
         event.preventDefault();
-        if (this.activeIndex >= 0) this.onSelectTeam(this.teams[this.activeIndex]);
+        if (this.activeIndex >= 0) {
+          const team = this.teams[this.activeIndex];
+          this.multi ? this.toggleTeamSelection(team) : this.onSelectTeam(team);
+        }
         break;
       case 'Escape':
         event.preventDefault();
@@ -178,6 +200,10 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as Node;
     if (!this.elRef.nativeElement.contains(target)) this.closeDropdown();
+  }
+
+  private closeDropdown(): void {
+    this.isOpen = false;
   }
 
   private scrollActiveIntoView(): void {
