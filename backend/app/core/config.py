@@ -1,6 +1,12 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(
+        env_file=".env",
+        extra="ignore"
+    )
+
     project_name: str = "Away-Game"
     app_env: str = "dev"
 
@@ -8,8 +14,5 @@ class Settings(BaseSettings):
     database_url_async: str
 
     secret_key: str | None = None
-
-    class Config:
-        env_file = ".env"
 
 settings = Settings()

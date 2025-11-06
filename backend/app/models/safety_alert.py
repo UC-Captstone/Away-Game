@@ -9,7 +9,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
 class SafetyAlert(Base):
     __tablename__ = "safety_alerts"
 
@@ -17,14 +16,14 @@ class SafetyAlert(Base):
     reporter_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False
     )
-    alert_type_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("alert_types.alert_type_id"), nullable=False
+    alert_type_id: Mapped[str] = mapped_column(
+        ForeignKey("alert_types.code"), nullable=False
     )
-    game_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("games.game_id", ondelete="SET NULL")
+    game_id: Mapped[int | None] = mapped_column(
+        ForeignKey("games.game_id", ondelete="SET NULL")
     )
-    venue_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("venues.venue_id")
+    venue_id: Mapped[int | None] = mapped_column(
+        ForeignKey("venues.venue_id")
     )
     description: Mapped[Optional[str]]
     game_date: Mapped[Optional[datetime]]

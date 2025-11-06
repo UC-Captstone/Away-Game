@@ -1,1 +1,4 @@
-# Database package: will hold connection/session setup when PostgreSQL is ready.
+from sqlalchemy.orm import DeclarativeBase
+
+class Base(DeclarativeBase):
+    pass

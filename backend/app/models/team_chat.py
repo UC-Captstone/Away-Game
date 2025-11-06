@@ -8,14 +8,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
 class TeamChat(Base):
     __tablename__ = "team_chats"
 
     message_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
-    team_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("teams.team_id"), nullable=False
+    team_id: Mapped[int] = mapped_column(
+        ForeignKey("teams.team_id"), nullable=False
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False

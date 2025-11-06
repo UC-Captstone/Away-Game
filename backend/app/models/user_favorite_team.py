@@ -8,15 +8,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
 class UserFavoriteTeams(Base):
     __tablename__ = "user_favorite_teams"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.user_id", ondelete="CASCADE"), primary_key=True
     )
-    team_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("teams.team_id", ondelete="CASCADE"), primary_key=True
+    team_id: Mapped[int] = mapped_column(
+        ForeignKey("teams.team_id", ondelete="CASCADE"), primary_key=True
     )
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
