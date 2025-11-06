@@ -9,7 +9,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
 class Favorite(Base):
     __tablename__ = "favorites"
 
@@ -22,8 +21,8 @@ class Favorite(Base):
     event_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("events.event_id", ondelete="CASCADE")
     )
-    game_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("games.game_id", ondelete="CASCADE")
+    game_id: Mapped[int | None] = mapped_column(
+        ForeignKey("games.game_id", ondelete="CASCADE")
     )
 
     date_time: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)

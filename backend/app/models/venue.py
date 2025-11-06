@@ -1,18 +1,15 @@
 from __future__ import annotations
-import uuid
 from datetime import datetime
 
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import UniqueConstraint, CheckConstraint, func
+from sqlalchemy import Integer, UniqueConstraint, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
 class Venue(Base):
     __tablename__ = "venues"
 
-    venue_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    venue_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str]
     display_name: Mapped[str]
     city: Mapped[str | None]
@@ -23,7 +20,6 @@ class Venue(Base):
     longitude: Mapped[float | None]
     capacity: Mapped[int | None]
     is_indoor: Mapped[bool | None]
-    espn_venue_id: Mapped[int | None] = mapped_column(unique=True) #TODO I feel like espn should be able to give us this?
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=func.now())
