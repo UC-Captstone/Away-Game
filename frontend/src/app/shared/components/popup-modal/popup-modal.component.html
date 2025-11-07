@@ -1,0 +1,32 @@
+@if (open) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center"
+    aria-modal="true"
+    role="dialog"
+    [attr.aria-labelledby]="titleID"
+  >
+    <div class="absolute inset-0 bg-black/60" (click)="onBackdropClick()"></div>
+
+    <div class="relative bg-slate-800 rounded-lg shadow-xl w-full p-6 mx-4 {{ panelSizeClass }}">
+      <div class="flex items-start justify-between mb-4">
+        <h4 [id]="titleID" class="text-lg font-semibold text-slate-100">{{ title }}</h4>
+        <button
+          type="button"
+          (click)="requestClose()"
+          class="text-slate-400 hover:text-slate-200"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <ng-content></ng-content>
+      </div>
+
+      <div class="mt-6">
+        <ng-content select="[modal-footer]"></ng-content>
+      </div>
+    </div>
+  </div>
+}
