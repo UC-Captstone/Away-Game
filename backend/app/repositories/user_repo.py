@@ -41,20 +41,25 @@ class UserRepository:
         self,
         user_id: UUID,
         *,
+        clerk_id: Optional[str] = None,
         username: Optional[str] = None,
         email: Optional[str] = None,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
         profile_picture_url: Optional[str] = None,
         is_verified: Optional[bool] = None,
+        pending_verification: Optional[bool] = None,
     ) -> Optional[User]:
         values = {k: v for k, v in {
+            "clerk_id": clerk_id,
             "username": username,
             "email": email,
             "first_name": first_name,
             "last_name": last_name,
             "profile_picture_url": profile_picture_url,
             "is_verified": is_verified,
+            "pending_verificaiton": pending_verification
+
         }.items() if v is not None}
         if not values:
             return await self.get(user_id)
@@ -75,7 +80,6 @@ class UserRepository:
         last_name: Optional[str] = None,
     ) -> tuple[User, bool]:
         user = await self.get_by_clerk_id(clerk_id)
-
         if user:
             return (user, False)
         
@@ -86,7 +90,8 @@ class UserRepository:
             first_name=first_name,
             last_name=last_name,
             profile_picture_url=None,
-            is_verified=False
+            is_verified=False,
+            pending_verification=False
         )
         await self.add(user)
         await self.db.flush()

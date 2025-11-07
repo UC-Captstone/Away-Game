@@ -44,11 +44,11 @@ async def verify_clerk_token(token: str) -> dict:
         )
         
         return {
-            "clerk_id": decoded.get("sub"),
+            "clerk_id": decoded.get("clerk_id"),
             "email": decoded.get("email"),
-            "username": decoded.get("username") or decoded.get("given_name") or decoded.get("email", "").split("@")[0],
-            "first_name": decoded.get("given_name"),
-            "last_name": decoded.get("family_name"),
+            "username": decoded.get("username"),
+            "first_name": decoded.get("first_name"),
+            "last_name": decoded.get("last_name"),
         }
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -89,7 +89,7 @@ async def sync_user_service(request: Request, db: AsyncSession) -> None:
         email=clerk_data["email"],
         username=clerk_data["username"],
         first_name=clerk_data.get("first_name"),
-        last_name=clerk_data.get("last_name"
+        last_name=clerk_data.get("last_name")
     )
 
     if created:
