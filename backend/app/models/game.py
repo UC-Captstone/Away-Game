@@ -1,31 +1,28 @@
 from __future__ import annotations
-import uuid
 from datetime import datetime
 
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import ForeignKey, UniqueConstraint, CheckConstraint, func
+from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
 class Game(Base):
     __tablename__ = "games"
 
-    game_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    game_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    league_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("leagues.league_id"), nullable=False
+    league_id: Mapped[str] = mapped_column(
+        String(10), ForeignKey("leagues.league_code"), nullable=False
     )
-    home_team_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("teams.team_id"), nullable=False
+    home_team_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("teams.team_id"), nullable=False
     )
-    away_team_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("teams.team_id"), nullable=False
+    away_team_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("teams.team_id"), nullable=False
     )
 
-    venue_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("venues.venue_id")
+    venue_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("venues.venue_id")
     )
 
     date_time: Mapped[datetime]
