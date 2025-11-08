@@ -12,3 +12,4 @@ class League(Base):
     espn_league_id: Mapped[int | None] = mapped_column(unique=True)
 
     teams = relationship("Team", back_populates="league", cascade="all, delete-orphan")
+    games = relationship("Game", back_populates="league")
