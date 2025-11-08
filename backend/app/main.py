@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 from app.db.session import init_db
+from app.routes import games, users
 
 app = FastAPI(title="Away-Game API")
+
+# Include routers
+app.include_router(games.router)
+app.include_router(users.router)
 
 @app.on_event("startup")
 async def _startup() -> None:
