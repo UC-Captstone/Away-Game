@@ -9,8 +9,11 @@ class UserBase(BaseModel):
     clerk_id: Optional[str] = None
     username: str
     email: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     profile_picture_url: Optional[str] = None
     is_verified: bool = False
+    pending_verification: bool = False
 
 class UserCreate(UserBase):
     pass
@@ -18,8 +21,11 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     profile_picture_url: Optional[str] = None
     is_verified: Optional[bool] = None
+    pending_verification: Optional[bool] = None
 
 class UserRead(UserBase):
     user_id: UUID

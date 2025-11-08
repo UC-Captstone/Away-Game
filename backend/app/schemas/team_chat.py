@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class TeamChatBase(BaseModel):
-    team_id: UUID
+    team_id: int
     user_id: UUID
     message_text: str
 
