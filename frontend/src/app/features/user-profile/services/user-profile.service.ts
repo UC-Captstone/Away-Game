@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { IUserProfile } from '../models/user-profile';
 import { IHeaderInfo } from '../models/header';
-import { IEvent } from '../../events/models/event';
 import { IPost } from '../../community/models/post';
+import { LeagueEnum } from '../../../shared/models/league-enum';
+import { IEventTile } from '../../events/models/event-tile';
 
 @Injectable({
   providedIn: 'root',
@@ -18,60 +19,44 @@ export class UserProfileService {
       //profilePictureUrl: 'assets/default-avatar.jpg',
       userName: 'NathanBurns3',
       displayName: 'Nathan Burns',
-      isVerified: true,
+      isVerified: false,
       favoriteTeams: [
         {
-          id: '1',
-          name: 'Team A',
-          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/ari.png',
-          league: 'NFL',
+          teamID: '1',
+          league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
+          homeLocation: 'Los Angeles',
+          teamName: 'Lakers',
+          displayName: 'Los Angeles Lakers',
+          logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
         },
         {
-          id: '2',
-          name: 'Team B',
-          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/gb.png',
-          league: 'NFL',
+          teamID: '2',
+          league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
+          homeLocation: 'Boston',
+          teamName: 'Celtics',
+          displayName: 'Boston Celtics',
+          logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/bos.png',
         },
         {
-          id: '3',
-          name: 'Team C',
-          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/cin.png',
-          league: 'NFL',
-        },
-        {
-          id: '4',
-          name: 'Team D',
-          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/atl.png',
-          league: 'NFL',
-        },
-        {
-          id: '5',
-          name: 'Team E',
-          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/bal.png',
-          league: 'NFL',
-        },
-        {
-          id: '6',
-          name: 'Team F',
-          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/buf.png',
-          league: 'NFL',
-        },
-        {
-          id: '7',
-          name: 'Team G',
-          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/car.png',
-          league: 'NFL',
-        },
-        {
-          id: '8',
-          name: 'Team H',
-          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
-          league: 'NFL',
+          teamID: '3',
+          league: { leagueID: 'nfl-uuid', leagueName: LeagueEnum.NFL },
+          homeLocation: 'Dallas',
+          teamName: 'Cowboys',
+          displayName: 'Dallas Cowboys',
+          logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/dal.png',
         },
       ],
     };
-    const accountSettings = {};
-    const savedEvents: IEvent[] = [];
+    const accountSettings = {
+      firstName: 'Nathan',
+      lastName: 'Burns',
+      email: 'nathan.burns@example.com',
+      appliedForVerification: false,
+      enableNearbyEventNotifications: true,
+      enableFavoriteTeamNotifications: true,
+      enableSafetyAlertNotifications: false,
+    };
+    const savedEvents: IEventTile[] = [];
     const myPosts: IPost[] = [];
 
     const userProfile: IUserProfile = {
