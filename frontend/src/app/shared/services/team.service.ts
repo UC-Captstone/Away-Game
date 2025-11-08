@@ -12,7 +12,6 @@ export class TeamService {
     {
       teamID: '1',
       league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      sportLeague: 'NBA',
       homeLocation: 'Los Angeles',
       teamName: 'Lakers',
       displayName: 'Los Angeles Lakers',
@@ -21,7 +20,6 @@ export class TeamService {
     {
       teamID: '2',
       league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      sportLeague: 'NBA',
       homeLocation: 'Boston',
       teamName: 'Celtics',
       displayName: 'Boston Celtics',
@@ -31,7 +29,6 @@ export class TeamService {
     {
       teamID: '4',
       league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      sportLeague: 'NBA',
       homeLocation: 'Miami',
       teamName: 'Heat',
       displayName: 'Miami Heat',
@@ -40,7 +37,6 @@ export class TeamService {
     {
       teamID: '5',
       league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      sportLeague: 'NBA',
       homeLocation: 'Cleveland',
       teamName: 'Cavaliers',
       displayName: 'Cleveland Cavaliers',
@@ -49,7 +45,6 @@ export class TeamService {
     {
       teamID: '6',
       league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      sportLeague: 'NBA',
       homeLocation: 'Charlotte',
       teamName: 'Hornets',
       displayName: 'Charlotte Hornets',
@@ -58,7 +53,6 @@ export class TeamService {
     {
       teamID: '7',
       league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      sportLeague: 'NBA',
       homeLocation: 'Chicago',
       teamName: 'Bulls',
       displayName: 'Chicago Bulls',
@@ -67,7 +61,6 @@ export class TeamService {
     {
       teamID: '8',
       league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      sportLeague: 'NBA',
       homeLocation: 'Atlanta',
       teamName: 'Hawks',
       displayName: 'Atlanta Hawks',
@@ -77,7 +70,6 @@ export class TeamService {
     {
       teamID: '3',
       league: { leagueID: 'nfl-uuid', leagueName: LeagueEnum.NFL },
-      sportLeague: 'NFL',
       homeLocation: 'Dallas',
       teamName: 'Cowboys',
       displayName: 'Dallas Cowboys',
