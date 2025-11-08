@@ -4,7 +4,6 @@ from app.routes import games, users
 
 app = FastAPI(title="Away-Game API")
 
-# Include routers
 app.include_router(games.router)
 app.include_router(users.router)
 
