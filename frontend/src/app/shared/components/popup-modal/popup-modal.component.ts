@@ -10,7 +10,9 @@ export class PopupModalComponent {
   @Input() title: string = '';
   @Input() size: 'sm' | 'md' | 'lg' | 'xl' = 'lg';
   @Input() closeOnBackdrop: boolean = true;
+  @Input() isLoading: boolean = false;
   @Output() closed = new EventEmitter<void>();
+  @Output() openChange = new EventEmitter<boolean>();
 
   titleID = `modal-title-${Math.random().toString(36).slice(2)}`;
 
@@ -28,10 +30,15 @@ export class PopupModalComponent {
   }
 
   requestClose() {
+    if (this.isLoading) return;
+    this.openChange.emit(false);
     this.closed.emit();
   }
 
   onBackdropClick() {
+    if (this.isLoading) return;
+    if (!this.closeOnBackdrop) return;
+    this.openChange.emit(false);
     this.closed.emit();
   }
 
