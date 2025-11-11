@@ -1,0 +1,302 @@
+<div class="relative mb-4">
+  <h3 class="text-2xl font-semibold text-sky-400 text-center">Account Settings</h3>
+  <div class="absolute inset-y-0 right-0 flex items-center">
+    <button
+      (click)="onInfoUpdate()"
+      [disabled]="!infoChanged && !favoriteTeamsChanged"
+      type="button"
+      class="bg-sky-500 hover:bg-sky-600 text-white font-medium text-xs py-1 px-2 rounded-lg transition-colors disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
+    >
+      Update Settings
+    </button>
+  </div>
+</div>
+
+<div class="grid gap-6 mb-6 md:grid-cols-3">
+  <div>
+    <label class="block mb-2 text-sm font-medium text-white">First Name</label>
+    <input
+      name="firstName"
+      [(ngModel)]="editableAccountSettings.firstName"
+      (ngModelChange)="checkIfChanged()"
+      type="text"
+      class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
+      placeholder="First Name"
+      required
+    />
+  </div>
+  <div>
+    <label class="block mb-2 text-sm font-medium text-white">Last Name</label>
+    <input
+      name="lastName"
+      [(ngModel)]="editableAccountSettings.lastName"
+      (ngModelChange)="checkIfChanged()"
+      type="text"
+      class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
+      placeholder="Last Name"
+      required
+    />
+  </div>
+  <div>
+    <label class="block mb-2 text-sm font-medium text-white">Email Address</label>
+    <input
+      name="email"
+      [(ngModel)]="editableAccountSettings.email"
+      (ngModelChange)="checkIfChanged()"
+      type="email"
+      class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
+      placeholder="Email Address"
+      required
+    />
+  </div>
+</div>
+<div class="grid gap-6 mb-6 md:grid-cols-4">
+  <div>
+    <label class="block mb-2 text-sm font-medium text-white">Current Password</label>
+    <input
+      name="currentPassword"
+      [(ngModel)]="currentPassword"
+      (ngModelChange)="onPasswordChange()"
+      type="password"
+      class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
+      placeholder="•••••••••"
+      required
+    />
+  </div>
+  <div>
+    <label class="block mb-2 text-sm font-medium text-white">New Password</label>
+    <input
+      name="newPassword"
+      [(ngModel)]="newPassword"
+      (ngModelChange)="onPasswordChange()"
+      type="password"
+      class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
+      placeholder="•••••••••"
+      required
+    />
+  </div>
+  <div>
+    <label class="block mb-2 text-sm font-medium text-white">Confirm password</label>
+    <input
+      name="confirmPassword"
+      [(ngModel)]="confirmPassword"
+      (ngModelChange)="onPasswordChange()"
+      type="password"
+      class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
+      placeholder="•••••••••"
+      required
+    />
+  </div>
+  <div class="flex items-end">
+    <button
+      (click)="onUpdatePassword()"
+      [disabled]="!passwordValid"
+      type="button"
+      class="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
+    >
+      Update Password
+    </button>
+  </div>
+</div>
+
+<div class="grid gap-6 mb-6 md:grid-cols-3">
+  <div class="md:col-span-2">
+    <app-team-selector
+      [multi]="true"
+      [selectedTeams]="editableFavoriteTeams"
+      [dropdownLimit]="4"
+      (teamsSelected)="onFavoriteTeamsChanged($event)"
+    ></app-team-selector>
+  </div>
+  <div class="md:col-span-1 md:self-center">
+    <div class="space-y-3">
+      <h3 class="text-lg font-semibold text-grey-400 mb-2">Verification</h3>
+
+      @if (isUserVerified) {
+        <label class="inline-flex items-center space-x-2">
+          <input type="checkbox" class="rounded text-sky-500" [checked]="true" disabled />
+          <span class="text-slate-200">This account is verified</span>
+        </label>
+      } @else if (hasAppliedForVerification) {
+        <p class="text-slate-300">
+          You have already applied for verification. We’ll notify you when it’s reviewed.
+        </p>
+      } @else {
+        <button
+          type="button"
+          (click)="openVerificationModal()"
+          class="bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+        >
+          Apply for Verification
+        </button>
+      }
+    </div>
+
+    <app-popup-modal
+      [(open)]="showVerificationModal"
+      [isLoading]="isLoading"
+      title="Apply for Verification"
+      size="lg"
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block mb-2 text-sm font-medium text-white">
+            Why do you want to be verified?
+          </label>
+          <textarea
+            name="verificationReason"
+            [(ngModel)]="verificationForm.reasoning"
+            rows="4"
+            class="w-full bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 p-2.5 resize-none"
+            placeholder="Briefly explain your reason for verification..."
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block mb-2 text-sm font-medium text-white">Teams you represent</label>
+          <app-team-selector
+            [multi]="true"
+            [dropdownLimit]="2"
+            [fromVerification]="true"
+            (teamsSelected)="onVerificationTeamsChanged($event)"
+          ></app-team-selector>
+        </div>
+      </div>
+
+      <div modal-footer class="flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="closeVerificationModal()"
+          class="bg-slate-700 hover:bg-slate-600 text-slate-100 font-medium py-2 px-4 rounded-lg transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="submitVerificationApplication()"
+          [disabled]="!verificationForm.reasoning || verificationForm.representedTeams.length === 0"
+          class="bg-sky-500 hover:bg-sky-600 disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+        >
+          Submit Application
+        </button>
+      </div>
+    </app-popup-modal>
+  </div>
+</div>
+<div class="grid gap-6 md:grid-cols-2 gap-y-0">
+  <div class="md:col-span-1">
+    <h3 class="text-lg font-semibold text-grey-400 mb-2">Notifications</h3>
+    <div class="space-y-4">
+      <label class="flex items-start gap-4 cursor-pointer">
+        <div class="grow">
+          <span class="block text-sm font-medium text-white">New nearby events</span>
+          <span class="block text-xs text-slate-400">
+            Get notified when fan meetups or tailgates are happening near you.
+          </span>
+        </div>
+        <div class="ml-auto flex items-center">
+          <input
+            type="checkbox"
+            class="sr-only peer"
+            [(ngModel)]="editableAccountSettings.enableNearbyEventNotifications"
+            name="notifyNearbyEvents"
+            (ngModelChange)="checkIfChanged()"
+          />
+          <div
+            class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
+          ></div>
+        </div>
+      </label>
+
+      <label class="flex items-start gap-4 cursor-pointer">
+        <div class="grow">
+          <span class="block text-sm font-medium text-white">Favorite team away games</span>
+          <span class="block text-xs text-slate-400">
+            Receive alerts when your favorite team plays an away game.
+          </span>
+        </div>
+        <div class="ml-auto flex items-center">
+          <input
+            type="checkbox"
+            class="sr-only peer"
+            [(ngModel)]="editableAccountSettings.enableFavoriteTeamNotifications"
+            name="notifyFavoriteTeamAwayGames"
+            (ngModelChange)="checkIfChanged()"
+          />
+          <div
+            class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
+          ></div>
+        </div>
+      </label>
+
+      <label class="flex items-start gap-4 cursor-pointer">
+        <div class="grow">
+          <span class="block text-sm font-medium text-white">Safety alerts for saved events</span>
+          <span class="block text-xs text-slate-400">
+            Email me if new safety reports appear near my saved events.
+          </span>
+        </div>
+        <div class="ml-auto flex items-center">
+          <input
+            type="checkbox"
+            class="sr-only peer"
+            [(ngModel)]="editableAccountSettings.enableSafetyAlertNotifications"
+            name="notifySafetyAlertEmails"
+            (ngModelChange)="checkIfChanged()"
+          />
+          <div
+            class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
+          ></div>
+        </div>
+      </label>
+    </div>
+  </div>
+  <div class="md:col-span-1">
+    <h3 class="text-lg font-semibold text-grey-400 mb-2">Delete Account</h3>
+    <div class="p-4">
+      <p class="text-sm text-slate-300 mb-4">
+        Deleting your account is permanent and cannot be undone. This will remove your profile,
+        saved events, favorite teams, and any personal data from Away Game.
+      </p>
+      <button
+        type="button"
+        (click)="openDeleteModal()"
+        class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+      >
+        Delete Account
+      </button>
+    </div>
+  </div>
+
+  <app-popup-modal [(open)]="showDeleteModal" title="Delete Account" size="lg">
+    <p class="text-sm text-slate-300 mb-4">
+      This action is permanent. To confirm, type DELETE below and click Confirm delete.
+    </p>
+
+    <input
+      name="deleteConfirmText"
+      [(ngModel)]="deleteConfirmText"
+      type="text"
+      placeholder="Type DELETE to confirm"
+      class="w-full mb-6 bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 p-2"
+    />
+
+    <div modal-footer class="flex justify-end gap-3">
+      <button
+        type="button"
+        (click)="closeDeleteModal()"
+        class="bg-slate-700 hover:bg-slate-600 text-slate-100 font-medium py-2 px-4 rounded-lg transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="confirmDeleteAccount()"
+        [disabled]="deleteConfirmText !== 'DELETE'"
+        class="bg-red-500 hover:bg-red-600 disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+      >
+        Confirm delete
+      </button>
+    </div>
+  </app-popup-modal>
+</div>
