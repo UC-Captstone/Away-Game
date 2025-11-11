@@ -1,13 +1,41 @@
 <div
   class="h-screen flex items-center justify-center text-center bg-gradient-to-b from-slate-800 to-slate-900 overflow-auto"
 >
-  <div class="bg-transparent h-11/12 w-full px-6 flex flex-col overflow-hidden">
+  @if (isLoading) {
+    <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/50 rounded-lg">
+      <div class="flex flex-col items-center gap-2">
+        <svg
+          class="animate-spin h-10 w-10 text-sky-400"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          ></path>
+        </svg>
+        <span class="text-sm text-slate-200">Loading…</span>
+      </div>
+    </div>
+  }
+  <div class="bg-transparent h-[calc(100%-2rem)] w-full px-6 flex flex-col overflow-hidden">
     <app-back-button routerLink="/" label="Back"></app-back-button>
     <app-user-profile-header [profileHeaderInfo]="userProfile.headerInfo"></app-user-profile-header>
 
     <div class="md:flex mt-5 flex-1">
       <div
-        class="w-full bg-transparent border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden md:flex"
+        class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden md:flex"
       >
         <div class="tabs-panel bg-transparent w-64 p-4 border-r border-slate-800">
           <ul
@@ -59,30 +87,28 @@
         </div>
 
         <div
-          class="content-panel p-6 text-slate-300 w-full h-full overflow-auto flex-1 bg-transparent"
+          class="content-panel p-4 text-slate-300 w-full h-full overflow-auto flex-1 bg-transparent"
         >
           @switch (selectedTab) {
             @case ('AccountSettings') {
-              <div>
-                <h3 class="text-2xl font-semibold text-sky-400 mb-2">Account Settings</h3>
-                <p class="mb-2 text-slate-400 text-sm">**Account Settings content** goes here.</p>
-              </div>
+              <app-user-account-settings
+                [accountSettings]="userProfile.accountSettings"
+                [favoriteTeams]="userProfile.headerInfo.favoriteTeams"
+                [verificationStatus]="userProfile.headerInfo.isVerified"
+                (settingsUpdated)="refreshProfile()"
+                (verificationSubmitted)="refreshProfile()"
+              ></app-user-account-settings>
             }
             @case ('SavedEvents') {
               <div>
                 <h3 class="text-2xl font-semibold text-sky-400 mb-2">Saved Events</h3>
-                <p class="mb-2 text-slate-400 text-sm">
-                  **Saved Events content** goes here. Replace with Saved Events components or
-                  markup.
-                </p>
+                <p class="mb-2 text-slate-400 text-sm">**Saved Events content**</p>
               </div>
             }
             @case ('MyPosts') {
               <div>
                 <h3 class="text-2xl font-semibold text-sky-400 mb-2">My Posts</h3>
-                <p class="mb-2 text-slate-400 text-sm">
-                  **My Posts content** goes here. Replace with My Posts components or markup.
-                </p>
+                <p class="mb-2 text-slate-400 text-sm">**My Posts content**</p>
               </div>
             }
             @default {
