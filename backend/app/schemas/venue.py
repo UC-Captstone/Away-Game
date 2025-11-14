@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Optional
-from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -16,7 +15,6 @@ class VenueBase(BaseModel):
     longitude: Optional[float] = None
     capacity: Optional[int] = None
     is_indoor: Optional[bool] = None
-    espn_venue_id: Optional[int] = None
 
 
 class VenueCreate(VenueBase):
@@ -34,11 +32,10 @@ class VenueUpdate(BaseModel):
     longitude: Optional[float] = None
     capacity: Optional[int] = None
     is_indoor: Optional[bool] = None
-    espn_venue_id: Optional[int] = None
 
 
 class VenueRead(VenueBase):
-    venue_id: UUID
+    venue_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
 

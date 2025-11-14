@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey, Index, func, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.app.db.base import Base
+from app.db.base import Base
 
 
 class SafetyAlert(Base):

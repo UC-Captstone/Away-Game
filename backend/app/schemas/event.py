@@ -10,9 +10,9 @@ from .game import GameRead
 
 class EventBase(BaseModel):
     creator_user_id: UUID
-    event_type_id: UUID
-    game_id: Optional[UUID] = None
-    venue_id: Optional[UUID] = None
+    event_type_id: str
+    game_id: Optional[int] = None
+    venue_id: Optional[int] = None
     title: str
     description: Optional[str] = None
     game_date: Optional[datetime] = None
@@ -25,9 +25,9 @@ class EventCreate(EventBase):
 
 
 class EventUpdate(BaseModel):
-    event_type_id: Optional[UUID] = None
-    game_id: Optional[UUID] = None
-    venue_id: Optional[UUID] = None
+    event_type_id: Optional[str] = None
+    game_id: Optional[int] = None
+    venue_id: Optional[int] = None
     title: Optional[str] = None
     description: Optional[str] = None
     game_date: Optional[datetime] = None

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class UserFavoriteTeamsBase(BaseModel):
     user_id: UUID
-    team_id: UUID
+    team_id: int
 
 class UserFavoriteTeamsCreate(UserFavoriteTeamsBase):
     pass
