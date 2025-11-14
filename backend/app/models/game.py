@@ -28,6 +28,7 @@ class Game(Base):
     date_time: Mapped[datetime]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
+    league = relationship("League", back_populates="games")
     home_team = relationship("Team", foreign_keys=[home_team_id])
     away_team = relationship("Team", foreign_keys=[away_team_id])
     venue = relationship("Venue", back_populates="games")

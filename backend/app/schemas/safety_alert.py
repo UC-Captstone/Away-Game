@@ -9,9 +9,9 @@ from .game import GameRead
 
 class SafetyAlertBase(BaseModel):
     reporter_user_id: UUID
-    alert_type_id: UUID
-    game_id: Optional[UUID] = None
-    venue_id: Optional[UUID] = None
+    alert_type_id: str
+    game_id: Optional[int] = None
+    venue_id: Optional[int] = None
     description: Optional[str] = None
     game_date: Optional[datetime] = None
     latitude: Optional[float] = None
@@ -23,9 +23,9 @@ class SafetyAlertCreate(SafetyAlertBase):
 
 
 class SafetyAlertUpdate(BaseModel):
-    alert_type_id: Optional[UUID] = None
-    game_id: Optional[UUID] = None
-    venue_id: Optional[UUID] = None
+    alert_type_id: Optional[str] = None
+    game_id: Optional[int] = None
+    venue_id: Optional[int] = None
     description: Optional[str] = None
     game_date: Optional[datetime] = None
     latitude: Optional[float] = None

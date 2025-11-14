@@ -8,7 +8,7 @@ from pydantic import BaseModel
 class FavoriteBase(BaseModel):
     user_id: UUID
     event_id: Optional[UUID] = None
-    game_id: Optional[UUID] = None
+    game_id: Optional[int] = None
 
 class FavoriteCreate(FavoriteBase):
     pass

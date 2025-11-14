@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_session
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/sync", status_code=204)
 async def sync_user(request: Request, db: AsyncSession = Depends(get_session)):

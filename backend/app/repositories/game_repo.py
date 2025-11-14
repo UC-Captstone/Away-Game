@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Optional, Sequence
-from uuid import UUID
 from datetime import datetime
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,16 +10,16 @@ class GameRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get(self, game_id: UUID) -> Optional[Game]:
+    async def get(self, game_id: int) -> Optional[Game]:
         res = await self.db.execute(select(Game).where(Game.game_id == game_id))
         return res.scalar_one_or_none()
 
     async def get_by_identity(
         self,
         *,
-        league_id: UUID,
-        home_team_id: UUID,
-        away_team_id: UUID,
+        league_id: str,
+        home_team_id: int,
+        away_team_id: int,
         date_time: datetime,
     ) -> Optional[Game]:
         res = await self.db.execute(
@@ -33,7 +32,7 @@ class GameRepository:
         )
         return res.scalar_one_or_none()
 
-    async def list(self, *, league_id: Optional[UUID] = None, limit: int = 100, offset: int = 0) -> Sequence[Game]:
+    async def list(self, *, league_id: Optional[str] = None, limit: int = 100, offset: int = 0) -> Sequence[Game]:
         stmt = select(Game).order_by(Game.date_time.desc()).limit(limit).offset(offset)
         if league_id is not None:
             stmt = stmt.where(Game.league_id == league_id)
@@ -47,12 +46,12 @@ class GameRepository:
 
     async def update_fields(
         self,
-        game_id: UUID,
+        game_id: int,
         *,
-        league_id: Optional[UUID] = None,
-        home_team_id: Optional[UUID] = None,
-        away_team_id: Optional[UUID] = None,
-        venue_id: Optional[UUID] = None,
+        league_id: Optional[str] = None,
+        home_team_id: Optional[int] = None,
+        away_team_id: Optional[int] = None,
+        venue_id: Optional[int] = None,
         date_time: Optional[datetime] = None,
     ) -> Optional[Game]:
         values = {k: v for k, v in {
@@ -67,6 +66,6 @@ class GameRepository:
         await self.db.execute(update(Game).where(Game.game_id == game_id).values(**values))
         return await self.get(game_id)
 
-    async def remove(self, game_id: UUID) -> int:
+    async def remove(self, game_id: int) -> int:
         res = await self.db.execute(delete(Game).where(Game.game_id == game_id))
         return res.rowcount or 0
