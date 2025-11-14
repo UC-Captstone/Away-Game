@@ -1,4 +1,4 @@
-import os
+from datetime import datetime, timedelta
 import jwt
 from jwt import PyJWKClient
 from dotenv import load_dotenv
@@ -66,7 +66,19 @@ async def verify_clerk_token(token: str) -> dict:
             detail=f"Token verification failed: {str(e)}"
         )
 
-async def sync_user_service(request: Request, db: AsyncSession) -> None:
+def _create_internal_jwt(user: User) -> str:
+    exp = datetime.utcnow() + timedelta(minutes=settings.jwt_exp_minutes)
+    payload = {
+        "sub": str(user.user_id),
+        "uid": str(user.user_id),
+        "username": user.username,
+        "email": user.email,
+        "exp": exp,
+    }
+    token = jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+    return token
+
+async def sync_user_service(request: Request, db: AsyncSession):
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(
@@ -95,3 +107,7 @@ async def sync_user_service(request: Request, db: AsyncSession) -> None:
     if created:
         await db.commit()
         await db.refresh(user)
+
+    internal_token = _create_internal_jwt(user)
+
+    return {"token": internal_token, "user": user}

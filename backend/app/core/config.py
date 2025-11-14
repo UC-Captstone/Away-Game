@@ -16,4 +16,8 @@ class Settings(BaseSettings):
     clerk_secret_key: str
     clerk_domain: str
 
+    jwt_secret_key: str = "dev-internal-jwt-secret"
+    jwt_algorithm: str = "HS256"
+    jwt_exp_minutes: int = 720
+
 settings = Settings()
