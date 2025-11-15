@@ -21,7 +21,7 @@ class UserFavoriteTeamsRepository:
         await self.db.flush()
         return fav
 
-    async def remove(self, user_id: UUID, team_id: UUID) -> int:
+    async def remove(self, user_id: UUID, team_id: int) -> int:
         res = await self.db.execute(
             delete(UserFavoriteTeams).where(
                 (UserFavoriteTeams.user_id == user_id) & (UserFavoriteTeams.team_id == team_id)
