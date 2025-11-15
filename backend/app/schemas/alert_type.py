@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 
 class AlertTypeBase(BaseModel):
+    code: str
     type_name: str
-    code: Optional[str] = None
 
 
 class AlertTypeCreate(AlertTypeBase):
@@ -15,11 +15,8 @@ class AlertTypeCreate(AlertTypeBase):
 
 class AlertTypeUpdate(BaseModel):
     type_name: Optional[str] = None
-    code: Optional[str] = None
 
 
 class AlertTypeRead(AlertTypeBase):
-    alert_type_id: UUID
-
     class Config:
         from_attributes = True
