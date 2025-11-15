@@ -1,8 +1,13 @@
 from fastapi import FastAPI
 from app.db.session import init_db
+from app.routes.api import api_router
+from app.core.middleware import setup_cors
+
 from app.routes import games, users, teams, user_favorite_teams, favorites
 
 app = FastAPI(title="Away-Game API")
+
+setup_cors(app)
 
 app.include_router(games.router)
 app.include_router(users.router)

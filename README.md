@@ -30,13 +30,21 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN an
 
 4. **Configure environment variables**
 
-   Create a `.env` file in the `backend` directory:
+   We use Clerk for identity and issue our own internal JWT after sync. Configure the following env vars.
+
+   Where to put `.env` (pick one):
+   - Recommended: keep `.env` at the repo root and load it via the helper script: `cd backend && . ./load_env.sh ../.env`
+   - Or: place a `.env` inside `backend/` so FastAPI auto-loads it.
+
+   Example `.env` contents:
    ```env
-   DATABASE_URL=postgresql://username:password@localhost:5432/awaygame
-   DATABASE_URL_ASYNC=postgresql+asyncpg://username:password@localhost:5432/awaygame
+   # Project
    PROJECT_NAME=Away-Game
    APP_ENV=dev
-   SECRET_KEY=your_secret_key_here
+
+   # Database
+   DATABASE_URL=postgresql://username:password@localhost:5432/awaygame
+   DATABASE_URL_ASYNC=postgresql+asyncpg://username:password@localhost:5432/awaygame
    ```
 
    I wrote a script to load env vars for local testing. It can be ran by using
@@ -59,8 +67,18 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN an
    - **API Documentation (Swagger)**: http://localhost:8000/docs
    - **OpenAPI Schema**: http://localhost:8000/openapi.json
 
+9. **Start the Front End**
 
-9. ** Start the Front End**
+## Auth Flow
+
+- Users sign in/up via Clerk UI (Angular).
+- Frontend calls `POST /auth/sync` with the Clerk session token.
+- Backend verifies Clerk JWT, syncs user (create/update), then issues an internal JWT (HS256) and returns `{ token, user }`.
+- Frontend stores the internal JWT in `localStorage` and automatically sends `Authorization: Bearer <token>` on subsequent API calls via an HTTP interceptor.
+
+Notes:
+- Local dev works without extra setup (a dev default exists) but you should set `JWT_SECRET_KEY` in `.env`.
+- In Azure, store secrets in Key Vault or App Settings and map to the env names above.
 
 ##  Database
 

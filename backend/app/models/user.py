@@ -20,6 +20,9 @@ class User(Base):
     first_name: Mapped[str | None]
     last_name: Mapped[str | None]
 
+    first_name: Mapped[str | None]
+    last_name: Mapped[str | None]
+
     profile_picture_url: Mapped[str | None]
     is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
     pending_verification: Mapped[bool] = mapped_column(default=False, nullable=False)
