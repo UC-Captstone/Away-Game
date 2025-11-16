@@ -3,13 +3,13 @@ import { IUserProfile } from '../models/user-profile';
 import { IHeaderInfo } from '../models/header';
 import { IPost } from '../../community/models/post';
 import { LeagueEnum } from '../../../shared/models/league-enum';
-import { IEventTile } from '../../events/models/event-tile';
 import { IVerificationForm } from '../models/verification-form';
 import { catchError, delay, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { handleError } from '../../../shared/helpers/error-handler';
 import { IAccountSettings } from '../models/account-settings';
 import { EventTypeEnum } from '../../../shared/models/event-type-enum';
+import { IEvent } from '../../events/models/event';
 
 @Injectable({
   providedIn: 'root',
@@ -67,7 +67,7 @@ export class UserProfileService {
       enableFavoriteTeamNotifications: true,
       enableSafetyAlertNotifications: false,
     };
-    const savedEvents: IEventTile[] = [
+    const savedEvents: IEvent[] = [
       {
         eventID: 'event-uuid-1',
         eventType: EventTypeEnum.Game,
@@ -81,6 +81,7 @@ export class UserProfileService {
         },
         league: LeagueEnum.NBA,
         isUserCreated: false,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-2',
@@ -95,6 +96,7 @@ export class UserProfileService {
         },
         league: LeagueEnum.NFL,
         isUserCreated: false,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-3',
@@ -103,6 +105,7 @@ export class UserProfileService {
         dateTime: '2024-12-25T15:00:00Z',
         location: 'Chase Center, San Francisco, CA',
         isUserCreated: true,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-4',
@@ -117,6 +120,7 @@ export class UserProfileService {
         },
         league: LeagueEnum.NBA,
         isUserCreated: false,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-5',
@@ -125,6 +129,7 @@ export class UserProfileService {
         dateTime: '2024-12-25T15:00:00Z',
         location: 'Chase Center, San Francisco, CA',
         isUserCreated: true,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-6',
@@ -139,6 +144,7 @@ export class UserProfileService {
         },
         league: LeagueEnum.NBA,
         isUserCreated: false,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-7',
@@ -147,6 +153,7 @@ export class UserProfileService {
         dateTime: '2025-02-02T18:00:00Z',
         location: 'Downtown Sports Bar, New York, NY',
         isUserCreated: true,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-8',
@@ -161,6 +168,7 @@ export class UserProfileService {
         },
         league: LeagueEnum.NFL,
         isUserCreated: false,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-9',
@@ -169,6 +177,7 @@ export class UserProfileService {
         dateTime: '2024-11-05T14:00:00Z',
         location: 'Toronto Sports Cafe, Toronto, ON',
         isUserCreated: true,
+        isSaved: true,
       },
       {
         eventID: 'event-uuid-10',
@@ -183,6 +192,7 @@ export class UserProfileService {
         },
         league: LeagueEnum.NHL,
         isUserCreated: false,
+        isSaved: true,
       },
     ];
     const myPosts: IPost[] = [];
@@ -232,6 +242,15 @@ export class UserProfileService {
 
     return this.http
       .put<null>(`${this.apiUrl}/user/account-info`, updatedInfo)
+      .pipe(catchError(handleError));
+  }
+
+  deleteSavedEvent(eventID: string): Observable<IEvent[]> {
+    console.log('Deleting saved event:', eventID);
+    // Nathan: Logic to delete saved event via backend API can be added here
+
+    return this.http
+      .delete<IEvent[]>(`${this.apiUrl}/user/saved-events/${eventID}`)
       .pipe(catchError(handleError));
   }
 }
