@@ -7,7 +7,7 @@ from app.schemas.safety_alert import SafetyAlertCreate, SafetyAlertUpdate, Safet
 from app.schemas.team_chat import TeamChatCreate, TeamChatUpdate, TeamChatRead
 from app.schemas.user_favorite_team import UserFavoriteTeamsCreate, UserFavoriteTeamsRead
 from app.schemas.favorite import FavoriteCreate, FavoriteRead
-from app.schemas.user import UserCreate, UserUpdate, UserRead
+from app.schemas.user import UserUpdate, UserRead
 from app.schemas.event_type import EventTypeCreate, EventTypeUpdate, EventTypeRead
 from app.schemas.alert_type import AlertTypeCreate, AlertTypeUpdate, AlertTypeRead
 
@@ -22,7 +22,7 @@ __all__ = [
     "TeamChatCreate", "TeamChatUpdate", "TeamChatRead",
     "UserFavoriteTeamsCreate", "UserFavoriteTeamsRead",
     "FavoriteCreate", "FavoriteRead",
-    "UserCreate", "UserUpdate", "UserRead",
+    "UserUpdate", "UserRead",
     "EventTypeCreate", "EventTypeUpdate", "EventTypeRead",
     "AlertTypeCreate", "AlertTypeUpdate", "AlertTypeRead",
 ]
