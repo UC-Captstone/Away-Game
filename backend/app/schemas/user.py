@@ -6,20 +6,26 @@ from pydantic import BaseModel
 
 
 class UserBase(BaseModel):
-    clerk_id: Optional[str] = None
     username: str
+    first_name: str
+    last_name: str
     email: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     profile_picture_url: Optional[str] = None
     is_verified: bool = False
-
-class UserCreate(UserBase):
-    pass
+    pending_verification: bool = False
 
 class UserUpdate(BaseModel):
     username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     profile_picture_url: Optional[str] = None
     is_verified: Optional[bool] = None
+    pending_verification: Optional[bool] = None
 
 class UserRead(UserBase):
     user_id: UUID

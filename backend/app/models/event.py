@@ -9,7 +9,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
 class Event(Base):
     __tablename__ = "events"
 
@@ -18,15 +17,15 @@ class Event(Base):
     creator_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False
     )
-    event_type_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("event_types.event_type_id"), nullable=False
+    event_type_id: Mapped[str] = mapped_column(
+        ForeignKey("event_types.code"), nullable=False
     )
 
-    game_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("games.game_id", ondelete="SET NULL")
+    game_id: Mapped[int | None] = mapped_column(
+        ForeignKey("games.game_id", ondelete="SET NULL")
     )
-    venue_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("venues.venue_id")
+    venue_id: Mapped[int | None] = mapped_column(
+        ForeignKey("venues.venue_id")
     )
     title: Mapped[str]
     description: Mapped[Optional[str]]

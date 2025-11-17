@@ -1,21 +1,18 @@
 from __future__ import annotations
-import uuid
 from datetime import datetime
 
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import ForeignKey, UniqueConstraint, func, CheckConstraint
+from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-
 class Team(Base):
     __tablename__ = "teams"
 
-    team_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    team_id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    league_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("leagues.league_id"), nullable=False
+    league_id: Mapped[str] = mapped_column(
+        String(10), ForeignKey("leagues.league_code"), nullable=False
     )
 
     sport_league: Mapped[str]
@@ -26,10 +23,9 @@ class Team(Base):
     team_name: Mapped[str]
     display_name: Mapped[str]
 
-    home_venue_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("venues.venue_id")
+    home_venue_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("venues.venue_id")
     )
-    espn_team_id: Mapped[int | None] = mapped_column(unique=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=func.now())
 
