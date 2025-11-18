@@ -1,0 +1,142 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+# More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
+
+name: Build and deploy Python project to Azure Function App - awaygamefunctionapp-dev
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+env:
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
+  PYTHON_VERSION: '3.13' # set this to the python version to use (supports 3.6, 3.7, 3.8)
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Optional: Add step to run tests here
+
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: |
+            release.zip
+            !venv/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
+
+      - name: Unzip artifact for deployment
+        run: |
+          unzip release.zip
+          rm release.zip
+        
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_931D9481B5ED4B419293B5D46330A25C }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5F0E869079924C4C89DD8CF9ADDB615A }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8CDC8D9B392D49058F7457CD7B1E09F9 }}
+
+      - name: Get secrets from Azure Key Vault
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            POSTGRES_DB=$(az keyvault secret show --name postgres-db --vault-name away-game-kv --query value -o tsv)
+            POSTGRES_USER=$(az keyvault secret show --name postgres-user --vault-name away-game-kv --query value -o tsv)
+            POSTGRES_PASSWORD=$(az keyvault secret show --name postgres-password --vault-name away-game-kv --query value -o tsv)
+            POSTGRES_HOST=$(az keyvault secret show --name postgres-host --vault-name away-game-kv --query value -o tsv)
+            POSTGRES_PORT=$(az keyvault secret show --name postgres-port --vault-name away-game-kv --query value -o tsv)
+            DATABASE_URL=$(az keyvault secret show --name database-url --vault-name away-game-kv --query value -o tsv)
+            SYNC_DATABASE_URL=$(az keyvault secret show --name sync-database-url --vault-name away-game-kv --query value -o tsv)
+            ASYNC_DATABASE_URL=$(az keyvault secret show --name async-database-url --vault-name away-game-kv --query value -o tsv)
+            DATABASE_URL_ASYNC=$(az keyvault secret show --name database-url-async --vault-name away-game-kv --query value -o tsv)
+
+            echo "::add-mask::$POSTGRES_DB"
+            echo "::add-mask::$POSTGRES_USER"
+            echo "::add-mask::$POSTGRES_PASSWORD"
+            echo "::add-mask::$POSTGRES_HOST"
+            echo "::add-mask::$POSTGRES_PORT"
+            echo "::add-mask::$DATABASE_URL"
+            echo "::add-mask::$SYNC_DATABASE_URL"
+            echo "::add-mask::$ASYNC_DATABASE_URL"
+            echo "::add-mask::$DATABASE_URL_ASYNC"
+
+            echo "POSTGRES_DB=$POSTGRES_DB" >> $GITHUB_ENV
+            echo "POSTGRES_USER=$POSTGRES_USER" >> $GITHUB_ENV
+            echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> $GITHUB_ENV
+            echo "POSTGRES_HOST=$POSTGRES_HOST" >> $GITHUB_ENV
+            echo "POSTGRES_PORT=$POSTGRES_PORT" >> $GITHUB_ENV
+            echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
+            echo "SYNC_DATABASE_URL=$SYNC_DATABASE_URL" >> $GITHUB_ENV
+            echo "ASYNC_DATABASE_URL=$ASYNC_DATABASE_URL" >> $GITHUB_ENV
+            echo "DATABASE_URL_ASYNC=$DATABASE_URL_ASYNC" >> $GITHUB_ENV
+
+      - name: Configure Function App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'awaygamefunctionapp-dev'
+          app-settings-json: |
+            [
+              {
+                "name": "DATABASE_URL",
+                "value": "${{ env.DB_CONNECTION_STRING }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DB_ADMIN_USERNAME",
+                "value": "${{ env.DB_ADMIN_USERNAME }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DB_ADMIN_PASSWORD",
+                "value": "${{ env.DB_ADMIN_PASSWORD }}",
+                "slotSetting": false
+              }
+            ]
+
+      - name: 'Deploy to Azure Functions'
+        uses: Azure/functions-action@v1
+        id: deploy-to-function
+        with:
+          app-name: 'awaygamefunctionapp-dev'
+          slot-name: 'Production'
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          

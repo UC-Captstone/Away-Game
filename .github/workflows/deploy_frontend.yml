@@ -60,6 +60,27 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_48DA3DB4295D48E79001DD5B29486335 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A48DE33DBA5E4459996CA7BDE9F9BA96 }}
 
+      - name: Get Clerk API token from Key Vault (dev)
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            CLERK_API_TOKEN=$(az keyvault secret show --name clerk-api-token --vault-name away-game-kv --query value -o tsv)
+            echo "::add-mask::$CLERK_API_TOKEN"
+            echo "CLERK_API_TOKEN=$CLERK_API_TOKEN" >> $GITHUB_ENV
+
+      - name: Configure Web App Settings (dev)
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'away-game-dev'
+          app-settings-json: |
+            [
+              {
+                "name": "CLERK_API_TOKEN",
+                "value": "${{ env.CLERK_API_TOKEN }}",
+                "slotSetting": false
+              }
+            ]
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -109,6 +130,35 @@ jobs:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0829FA511F8A4F608660E0619D1C03D3 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_80330D2569C2431483E7529FAC500EE9 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8D771EA586034E0ABB6E3AC0ED2E8521 }}
+
+      - name: Get Clerk API token from Key Vault (prd)
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            CLERK_SECRET_KEY=$(az keyvault secret show --name clerk-api-token --vault-name away-game-kv --query value -o tsv)
+            CLERK_DOMAIN=$(az keyvault secret show --name clerk-domain --vault-name away-game-kv --query value -o tsv)
+            JWT_SECRET_KEY=$(az keyvault secret show --name jwt-secret-key --vault-name away-game-kv --query value -o tsv)
+            
+            echo "::add-mask::$CLERK_SECRET_KEY"
+            echo "::add-mask::$CLERK_DOMAIN"
+            echo "::add-mask::$JWT_SECRET_KEY"
+
+            echo "CLERK_SECRET_KEY=$CLERK_SECRET_KEY" >> $GITHUB_ENV
+            echo "CLERK_DOMAIN=$CLERK_DOMAIN" >> $GITHUB_ENV
+            echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> $GITHUB_ENV
+
+      - name: Configure Web App Settings (prd)
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'away-game-prd'
+          app-settings-json: |
+            [
+              {
+                "name": "CLERK_API_TOKEN",
+                "value": "${{ env.CLERK_API_TOKEN }}",
+                "slotSetting": false
+              }
+            ]
 
       - name: Deploy to Azure Web App (prd)
         id: deploy-to-webapp-prd
