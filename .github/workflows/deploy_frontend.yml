@@ -135,10 +135,10 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            CLERK_SECRET_KEY=$(az keyvault secret show --name clerk-api-token --vault-name away-game-kv --query value -o tsv)
+            CLERK_SECRET_KEY=$(az keyvault secret show --name clerk-secret-key --vault-name away-game-kv --query value -o tsv)
             CLERK_DOMAIN=$(az keyvault secret show --name clerk-domain --vault-name away-game-kv --query value -o tsv)
             JWT_SECRET_KEY=$(az keyvault secret show --name jwt-secret-key --vault-name away-game-kv --query value -o tsv)
-            
+
             echo "::add-mask::$CLERK_SECRET_KEY"
             echo "::add-mask::$CLERK_DOMAIN"
             echo "::add-mask::$JWT_SECRET_KEY"
