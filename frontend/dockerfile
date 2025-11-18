@@ -1,6 +1,6 @@
 FROM node:20 AS frontend-build
-WORKDIR /app/frontend
-COPY package.json package-lock.json ./
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
-COPY . .
+COPY frontend/ ./
 CMD ["npm", "run", "start"]
