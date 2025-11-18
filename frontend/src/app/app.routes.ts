@@ -12,4 +12,11 @@ export const routes: Routes = [
       import('./features/auth/components/signup/signup.component').then((m) => m.Signup),
   },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
+  {
+    path: 'profile',
+    loadComponent: () =>
+      import('./features/user-profile/views/user-profile.component').then(
+        (m) => m.UserProfileComponent,
+      ),
+  },
 ];
