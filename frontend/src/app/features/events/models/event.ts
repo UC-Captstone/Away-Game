@@ -5,7 +5,7 @@ export interface IEvent {
   eventID: string; // UUID
   eventType: EventTypeEnum;
   eventName: string;
-  dateTime: string; // ISO 8601 format
+  dateTime: Date;
   location: string;
   imageUrl?: string; // optional URL to an image representing the event
   teamLogos?: {

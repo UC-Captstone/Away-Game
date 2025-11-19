@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IUserProfile } from '../models/user-profile';
 import { IHeaderInfo } from '../models/header';
-import { IPost } from '../../community/models/post';
+import { IChatMessage } from '../../community/models/chat-message';
 import { LeagueEnum } from '../../../shared/models/league-enum';
 import { IVerificationForm } from '../models/verification-form';
 import { catchError, delay, Observable, of } from 'rxjs';
@@ -72,7 +72,7 @@ export class UserProfileService {
         eventID: 'event-uuid-1',
         eventType: EventTypeEnum.Game,
         eventName: 'Lakers vs. Celtics',
-        dateTime: '2024-10-15T19:00:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'Staples Center, Los Angeles, CA',
         imageUrl: 'assets/events/lakers-celtics.jpg',
         teamLogos: {
@@ -87,7 +87,7 @@ export class UserProfileService {
         eventID: 'event-uuid-2',
         eventType: EventTypeEnum.Game,
         eventName: 'Cowboys vs. Giants',
-        dateTime: '2024-11-20T18:30:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'AT&T Stadium, Arlington, TX',
         imageUrl: 'assets/events/cowboys-giants.jpg',
         teamLogos: {
@@ -102,7 +102,7 @@ export class UserProfileService {
         eventID: 'event-uuid-3',
         eventType: EventTypeEnum.Meetup,
         eventName: 'Warriors Meetup',
-        dateTime: '2024-12-25T15:00:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'Chase Center, San Francisco, CA',
         isUserCreated: true,
         isSaved: true,
@@ -111,7 +111,7 @@ export class UserProfileService {
         eventID: 'event-uuid-4',
         eventType: EventTypeEnum.Game,
         eventName: 'Warriors vs. Nets',
-        dateTime: '2024-12-25T15:00:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'Chase Center, San Francisco, CA',
         imageUrl: 'assets/events/warriors-nets.jpg',
         teamLogos: {
@@ -126,7 +126,7 @@ export class UserProfileService {
         eventID: 'event-uuid-5',
         eventType: EventTypeEnum.Tailgate,
         eventName: 'Giants Tailgate Party',
-        dateTime: '2024-12-25T15:00:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'Chase Center, San Francisco, CA',
         isUserCreated: true,
         isSaved: true,
@@ -135,7 +135,7 @@ export class UserProfileService {
         eventID: 'event-uuid-6',
         eventType: EventTypeEnum.Game,
         eventName: 'Bulls vs. Heat',
-        dateTime: '2024-12-31T20:00:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'United Center, Chicago, IL',
         imageUrl: 'assets/events/bulls-heat.jpg',
         teamLogos: {
@@ -150,7 +150,7 @@ export class UserProfileService {
         eventID: 'event-uuid-7',
         eventType: EventTypeEnum.WatchParty,
         eventName: 'Super Bowl Watch Party',
-        dateTime: '2025-02-02T18:00:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'Downtown Sports Bar, New York, NY',
         isUserCreated: true,
         isSaved: true,
@@ -159,7 +159,7 @@ export class UserProfileService {
         eventID: 'event-uuid-8',
         eventType: EventTypeEnum.Game,
         eventName: 'Packers vs. Bears',
-        dateTime: '2024-10-10T16:00:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'Lambeau Field, Green Bay, WI',
         imageUrl: 'assets/events/packers-bears.jpg',
         teamLogos: {
@@ -174,7 +174,7 @@ export class UserProfileService {
         eventID: 'event-uuid-9',
         eventType: EventTypeEnum.Meetup,
         eventName: 'Raptors Fans Meetup',
-        dateTime: '2024-11-05T14:00:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'Toronto Sports Cafe, Toronto, ON',
         isUserCreated: true,
         isSaved: true,
@@ -183,7 +183,7 @@ export class UserProfileService {
         eventID: 'event-uuid-10',
         eventType: EventTypeEnum.Game,
         eventName: 'Maple Leafs vs. Canadiens',
-        dateTime: '2024-11-15T19:30:00Z',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
         location: 'Scotiabank Arena, Toronto, ON',
         imageUrl: 'assets/events/leafs-canadiens.jpg',
         teamLogos: {
@@ -195,13 +195,123 @@ export class UserProfileService {
         isSaved: true,
       },
     ];
-    const myPosts: IPost[] = [];
+    const myEvents: IEvent[] = [
+      {
+        eventID: 'event-uuid-1',
+        eventType: EventTypeEnum.Game,
+        eventName: 'Lakers vs. Celtics',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
+        location: 'Staples Center, Los Angeles, CA',
+        imageUrl: 'assets/events/lakers-celtics.jpg',
+        teamLogos: {
+          home: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
+          away: 'https://a.espncdn.com/i/teamlogos/nba/500/bos.png',
+        },
+        league: LeagueEnum.NBA,
+        isUserCreated: false,
+        isSaved: true,
+      },
+      {
+        eventID: 'event-uuid-2',
+        eventType: EventTypeEnum.Game,
+        eventName: 'Cowboys vs. Giants',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
+        location: 'AT&T Stadium, Arlington, TX',
+        imageUrl: 'assets/events/cowboys-giants.jpg',
+        teamLogos: {
+          home: 'https://a.espncdn.com/i/teamlogos/nfl/500/dal.png',
+          away: 'https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png',
+        },
+        league: LeagueEnum.NFL,
+        isUserCreated: false,
+        isSaved: true,
+      },
+      {
+        eventID: 'event-uuid-3',
+        eventType: EventTypeEnum.Meetup,
+        eventName: 'Warriors Meetup',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
+        location: 'Chase Center, San Francisco, CA',
+        isUserCreated: true,
+        isSaved: true,
+      },
+      {
+        eventID: 'event-uuid-4',
+        eventType: EventTypeEnum.Game,
+        eventName: 'Warriors vs. Nets',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
+        location: 'Chase Center, San Francisco, CA',
+        imageUrl: 'assets/events/warriors-nets.jpg',
+        teamLogos: {
+          home: 'https://a.espncdn.com/i/teamlogos/nba/500/gsw.png',
+          away: 'https://a.espncdn.com/i/teamlogos/nba/500/bkn.png',
+        },
+        league: LeagueEnum.NBA,
+        isUserCreated: false,
+        isSaved: true,
+      },
+      {
+        eventID: 'event-uuid-5',
+        eventType: EventTypeEnum.Tailgate,
+        eventName: 'Giants Tailgate Party',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
+        location: 'Chase Center, San Francisco, CA',
+        isUserCreated: true,
+        isSaved: true,
+      },
+      {
+        eventID: 'event-uuid-6',
+        eventType: EventTypeEnum.Game,
+        eventName: 'Bulls vs. Heat',
+        dateTime: new Date('2024-10-15T19:00:00Z'),
+        location: 'United Center, Chicago, IL',
+        imageUrl: 'assets/events/bulls-heat.jpg',
+        teamLogos: {
+          home: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
+          away: 'https://a.espncdn.com/i/teamlogos/nba/500/mia.png',
+        },
+        league: LeagueEnum.NBA,
+        isUserCreated: false,
+        isSaved: true,
+      },
+    ];
+    const myChats: IChatMessage[] = [
+      {
+        chatID: 'chat-uuid-1',
+        teamID: '1',
+        teamLogoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
+        userID: 'user-uuid-2',
+        userName: 'SportsFan99',
+        messageContent: "Can't wait for the Lakers game this weekend!",
+        timestamp: new Date('2024-10-10T12:00:00Z'),
+      },
+      {
+        chatID: 'chat-uuid-2',
+        teamID: '2',
+        teamLogoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/bos.png',
+        userID: 'user-uuid-2',
+        userName: 'SportsFan99',
+        messageContent: 'Anyone going to the Celtics game next week?',
+        timestamp: new Date('2024-10-11T15:30:00Z'),
+      },
+      {
+        chatID: 'chat-uuid-3',
+        teamID: '3',
+        teamLogoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/dal.png',
+        userID: 'user-uuid-2',
+        userName: 'SportsFan99',
+        messageContent:
+          'The Cowboys are looking strong this season! The Cowboys are looking strong this season! The Cowboys are looking strong this season! The Cowboys are looking strong this season! The Cowboys are looking strong this season! The Cowboys are looking strong this season! The Cowboys are looking strong this season!',
+        timestamp: new Date('2024-10-12T09:45:00Z'),
+      },
+    ];
 
     const userProfile: IUserProfile = {
       headerInfo,
-      savedEvents,
-      myPosts,
       accountSettings,
+      savedEvents,
+      myEvents,
+      myChats,
     };
 
     //return this.http.get<IUserProfile>(`${this.apiUrl}/user/profile`).pipe(catchError(handleError));
