@@ -67,39 +67,41 @@
       @if (eventTile.isUserCreated) {
         <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">Your event</span>
       }
-      <button
-        type="button"
-        (click)="toggleSaved($event)"
-        class="ml-auto inline-flex items-center gap-2 px-2 py-1 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700"
-        [attr.aria-pressed]="eventTile.isSaved"
-        [title]="eventTile.isSaved ? 'Saved - click to unsave' : 'Save event'"
-      >
-        @if (eventTile.isSaved) {
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-sky-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v12l-7-3-7 3V5z" />
-          </svg>
-        } @else {
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-slate-300"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 5v14l7-3 7 3V5a2 2 0 00-2-2H7a2 2 0 00-2 2z"
-            />
-          </svg>
-        }
-      </button>
+      @if (showSavedIcon) {
+        <button
+          type="button"
+          (click)="toggleSaved($event)"
+          class="ml-auto inline-flex items-center gap-2 px-2 py-1 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700"
+          [attr.aria-pressed]="eventTile.isSaved"
+          [title]="eventTile.isSaved ? 'Saved - click to unsave' : 'Save event'"
+        >
+          @if (eventTile.isSaved) {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 text-sky-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v12l-7-3-7 3V5z" />
+            </svg>
+          } @else {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 text-slate-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 5v14l7-3 7 3V5a2 2 0 00-2-2H7a2 2 0 00-2 2z"
+              />
+            </svg>
+          }
+        </button>
+      }
     </div>
   </div>
 </article>

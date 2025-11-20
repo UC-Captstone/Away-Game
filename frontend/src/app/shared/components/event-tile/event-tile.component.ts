@@ -10,6 +10,7 @@ import { IEvent } from '../../../features/events/models/event';
 })
 export class EventTileComponent {
   @Input() eventTile!: IEvent;
+  @Input() showSavedIcon: boolean = true;
   @Output() savedToggled: EventEmitter<{ eventID: string; status: boolean }> = new EventEmitter<{
     eventID: string;
     status: boolean;
