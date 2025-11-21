@@ -17,7 +17,7 @@
     <label class="block mb-2 text-sm font-medium text-white">First Name</label>
     <input
       name="firstName"
-      [(ngModel)]="editableAccountSettings.firstName"
+      [(ngModel)]="editableAccountSettings().firstName"
       (ngModelChange)="checkIfChanged()"
       type="text"
       class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
@@ -29,7 +29,7 @@
     <label class="block mb-2 text-sm font-medium text-white">Last Name</label>
     <input
       name="lastName"
-      [(ngModel)]="editableAccountSettings.lastName"
+      [(ngModel)]="editableAccountSettings().lastName"
       (ngModelChange)="checkIfChanged()"
       type="text"
       class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
@@ -41,7 +41,7 @@
     <label class="block mb-2 text-sm font-medium text-white">Email Address</label>
     <input
       name="email"
-      [(ngModel)]="editableAccountSettings.email"
+      [(ngModel)]="editableAccountSettings().email"
       (ngModelChange)="checkIfChanged()"
       type="email"
       class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full p-2"
@@ -90,7 +90,7 @@
   <div class="flex items-end">
     <button
       (click)="onUpdatePassword()"
-      [disabled]="!passwordValid"
+      [disabled]="!passwordValid()"
       type="button"
       class="w-full bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
     >
@@ -103,7 +103,7 @@
   <div class="md:col-span-2">
     <app-team-selector
       [multi]="true"
-      [selectedTeams]="editableFavoriteTeams"
+      [selectedTeams]="editableFavoriteTeams()"
       [dropdownLimit]="4"
       (teamsSelected)="onFavoriteTeamsChanged($event)"
     ></app-team-selector>
@@ -134,7 +134,7 @@
 
     <app-popup-modal
       [(open)]="showVerificationModal"
-      [isLoading]="isLoading"
+      [isLoading]="isLoading()"
       title="Apply for Verification"
       size="lg"
     >
@@ -145,7 +145,7 @@
           </label>
           <textarea
             name="verificationReason"
-            [(ngModel)]="verificationForm.reasoning"
+            [(ngModel)]="verificationForm().reasoning"
             rows="4"
             class="w-full bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 p-2.5 resize-none"
             placeholder="Briefly explain your reason for verification..."
@@ -174,7 +174,9 @@
         <button
           type="button"
           (click)="submitVerificationApplication()"
-          [disabled]="!verificationForm.reasoning || verificationForm.representedTeams.length === 0"
+          [disabled]="
+            !verificationForm().reasoning || verificationForm().representedTeams.length === 0
+          "
           class="bg-sky-500 hover:bg-sky-600 disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
         >
           Submit Application
@@ -198,7 +200,7 @@
           <input
             type="checkbox"
             class="sr-only peer"
-            [(ngModel)]="editableAccountSettings.enableNearbyEventNotifications"
+            [(ngModel)]="editableAccountSettings().enableNearbyEventNotifications"
             name="notifyNearbyEvents"
             (ngModelChange)="checkIfChanged()"
           />
@@ -219,7 +221,7 @@
           <input
             type="checkbox"
             class="sr-only peer"
-            [(ngModel)]="editableAccountSettings.enableFavoriteTeamNotifications"
+            [(ngModel)]="editableAccountSettings().enableFavoriteTeamNotifications"
             name="notifyFavoriteTeamAwayGames"
             (ngModelChange)="checkIfChanged()"
           />
@@ -240,7 +242,7 @@
           <input
             type="checkbox"
             class="sr-only peer"
-            [(ngModel)]="editableAccountSettings.enableSafetyAlertNotifications"
+            [(ngModel)]="editableAccountSettings().enableSafetyAlertNotifications"
             name="notifySafetyAlertEmails"
             (ngModelChange)="checkIfChanged()"
           />
@@ -292,7 +294,7 @@
       <button
         type="button"
         (click)="confirmDeleteAccount()"
-        [disabled]="deleteConfirmText !== 'DELETE'"
+        [disabled]="deleteConfirmText() !== 'DELETE'"
         class="bg-red-500 hover:bg-red-600 disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
       >
         Confirm delete
