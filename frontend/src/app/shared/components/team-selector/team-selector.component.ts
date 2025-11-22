@@ -9,6 +9,8 @@ import {
   Output,
   EventEmitter,
   Input,
+  WritableSignal,
+  signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LeagueEnum, LeagueIdMap } from '../../models/league-enum';
@@ -47,17 +49,17 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   private readonly league$ = new BehaviorSubject<LeagueEnum | null>(null);
   private readonly search$ = new BehaviorSubject<string>('');
 
-  selectedLeague: LeagueEnum | null = null;
-  selectedTeamId = '';
-  searchTerm = '';
-  teams: ITeam[] = [];
-  loading = false;
-  noTeams = false;
-  activeIndex = -1;
-  isOpen = false;
+  selectedLeague: WritableSignal<LeagueEnum | null> = signal(null);
+  selectedTeamId: WritableSignal<string> = signal('');
+  searchTerm: WritableSignal<string> = signal('');
+  teams: WritableSignal<ITeam[]> = signal([]);
+  loading: WritableSignal<boolean> = signal(false);
+  noTeams: WritableSignal<boolean> = signal(false);
+  activeIndex: WritableSignal<number> = signal(-1);
+  isOpen: WritableSignal<boolean> = signal(false);
 
   get selectedTeam(): ITeam | undefined {
-    return this.teams.find((t) => t.teamID === this.selectedTeamId);
+    return this.teams().find((t) => t.teamID === this.selectedTeamId());
   }
 
   constructor(
@@ -72,8 +74,8 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
     ])
       .pipe(
         tap(() => {
-          this.loading = true;
-          this.noTeams = false;
+          this.loading.set(true);
+          this.noTeams.set(false);
         }),
         switchMap(([league, term]) => {
           const leagueId = LeagueIdMap[league];
@@ -84,10 +86,10 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe((teams) => {
-        this.teams = teams;
-        this.loading = false;
-        this.noTeams = teams.length === 0;
-        this.activeIndex = teams.length ? 0 : -1;
+        this.teams.set(teams);
+        this.loading.set(false);
+        this.noTeams.set(teams.length === 0);
+        this.activeIndex.set(teams.length ? 0 : -1);
       });
   }
 
@@ -97,25 +99,25 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   }
 
   onLeagueChange(): void {
-    this.selectedTeamId = '';
-    this.searchTerm = '';
-    this.activeIndex = -1;
-    this.isOpen = false;
-    this.league$.next(this.selectedLeague ?? null);
+    this.selectedTeamId.set('');
+    this.searchTerm.set('');
+    this.activeIndex.set(-1);
+    this.isOpen.set(false);
+    this.league$.next(this.selectedLeague() ?? null);
     this.search$.next('');
   }
 
   toggleDropdown(): void {
-    if (!this.selectedLeague) return;
-    this.isOpen = !this.isOpen;
-    if (this.isOpen) {
+    if (!this.selectedLeague()) return;
+    this.isOpen.set(!this.isOpen());
+    if (this.isOpen()) {
       queueMicrotask(() => this.searchInput?.nativeElement.focus());
-      if (this.teams.length) this.activeIndex = Math.max(0, this.activeIndex);
+      if (this.teams().length) this.activeIndex.set(Math.max(0, this.activeIndex()));
     }
   }
 
   onSearchChange(): void {
-    this.search$.next(this.searchTerm.trim());
+    this.search$.next(this.searchTerm().trim());
   }
 
   onSearchKeydown(event: KeyboardEvent): void {
@@ -126,8 +128,8 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
     }
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      if (this.teams.length) {
-        this.activeIndex = this.activeIndex < 0 ? 0 : this.activeIndex;
+      if (this.teams().length) {
+        this.activeIndex.set(this.activeIndex() < 0 ? 0 : this.activeIndex());
         this.teamListbox?.nativeElement.focus();
       }
     }
@@ -138,8 +140,8 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
       this.toggleTeamSelection(team);
       return;
     }
-    this.selectedTeamId = team.teamID;
-    this.activeIndex = this.teams.findIndex((t) => t.teamID === team.teamID);
+    this.selectedTeamId.set(team.teamID);
+    this.activeIndex.set(this.teams().findIndex((t) => t.teamID === team.teamID));
     this.teamSelected.emit(team);
     this.closeDropdown();
   }
@@ -163,29 +165,29 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        this.activeIndex = this.activeIndex < 0 ? 0 : Math.min(this.activeIndex + 1, max);
+        this.activeIndex.set(this.activeIndex() < 0 ? 0 : Math.min(this.activeIndex() + 1, max));
         this.scrollActiveIntoView();
         break;
       case 'ArrowUp':
         event.preventDefault();
-        this.activeIndex = this.activeIndex <= 0 ? 0 : this.activeIndex - 1;
+        this.activeIndex.set(this.activeIndex() <= 0 ? 0 : this.activeIndex() - 1);
         this.scrollActiveIntoView();
         break;
       case 'Home':
         event.preventDefault();
-        this.activeIndex = 0;
+        this.activeIndex.set(0);
         this.scrollActiveIntoView();
         break;
       case 'End':
         event.preventDefault();
-        this.activeIndex = max;
+        this.activeIndex.set(max);
         this.scrollActiveIntoView();
         break;
       case 'Enter':
       case ' ':
         event.preventDefault();
-        if (this.activeIndex >= 0) {
-          const team = this.teams[this.activeIndex];
+        if (this.activeIndex() >= 0) {
+          const team = this.teams()[this.activeIndex()];
           this.multi ? this.toggleTeamSelection(team) : this.onSelectTeam(team);
         }
         break;
@@ -203,13 +205,13 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   }
 
   private closeDropdown(): void {
-    this.isOpen = false;
+    this.isOpen.set(false);
   }
 
   private scrollActiveIntoView(): void {
     const host = this.teamListbox?.nativeElement;
-    if (!host || this.activeIndex < 0) return;
-    const el = host.querySelector<HTMLElement>(`#team-option-${this.activeIndex}`);
+    if (!host || this.activeIndex() < 0) return;
+    const el = host.querySelector<HTMLElement>(`#team-option-${this.activeIndex()}`);
     el?.scrollIntoView({ block: 'nearest' });
   }
 }
