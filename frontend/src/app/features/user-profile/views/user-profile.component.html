@@ -1,7 +1,7 @@
 <div
   class="h-screen flex items-center justify-center text-center bg-gradient-to-b from-slate-800 to-slate-900 overflow-auto"
 >
-  @if (isLoading) {
+  @if (isLoading()) {
     <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/50 rounded-lg">
       <div class="flex flex-col items-center gap-2">
         <svg
@@ -35,9 +35,9 @@
 
     <div class="md:flex mt-5 flex-1">
       <div
-        class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden md:flex"
+        class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden md:flex h-[78vh]"
       >
-        <div class="tabs-panel bg-transparent w-64 p-4 border-r border-slate-800">
+        <div class="tabs-panel bg-transparent w-64 p-3 border-r border-slate-800">
           <ul
             class="flex-column space-y space-y-4 text-sm font-medium text-slate-300 mb-0 h-full flex flex-col justify-start"
           >
@@ -46,11 +46,11 @@
                 (click)="selectTab('AccountSettings'); $event.preventDefault()"
                 class="inline-flex items-center px-3 py-3 rounded-lg w-full"
                 [ngClass]="
-                  selectedTab === 'AccountSettings'
+                  selectedTab() === 'AccountSettings'
                     ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
                     : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
                 "
-                [attr.aria-current]="selectedTab === 'AccountSettings' ? 'page' : null"
+                [attr.aria-current]="selectedTab() === 'AccountSettings' ? 'page' : null"
               >
                 Account Settings
               </a>
@@ -60,36 +60,51 @@
                 (click)="selectTab('SavedEvents'); $event.preventDefault()"
                 class="inline-flex items-center px-3 py-3 rounded-lg w-full"
                 [ngClass]="
-                  selectedTab === 'SavedEvents'
+                  selectedTab() === 'SavedEvents'
                     ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
                     : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
                 "
-                [attr.aria-current]="selectedTab === 'SavedEvents' ? 'page' : null"
+                [attr.aria-current]="selectedTab() === 'SavedEvents' ? 'page' : null"
               >
                 Saved Events
               </a>
             </li>
             <li>
               <a
-                (click)="selectTab('MyPosts'); $event.preventDefault()"
+                (click)="selectTab('UserCreatedEvents'); $event.preventDefault()"
                 class="inline-flex items-center px-3 py-3 rounded-lg w-full"
                 [ngClass]="
-                  selectedTab === 'MyPosts'
+                  selectedTab() === 'UserCreatedEvents'
                     ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
                     : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
                 "
-                [attr.aria-current]="selectedTab === 'MyPosts' ? 'page' : null"
+                [attr.aria-current]="selectedTab() === 'UserCreatedEvents' ? 'page' : null"
               >
-                My Posts
+                Your Events
+              </a>
+            </li>
+            <li>
+              <a
+                (click)="selectTab('RecentChats'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                [ngClass]="
+                  selectedTab() === 'RecentChats'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+                [attr.aria-current]="selectedTab() === 'RecentChats' ? 'page' : null"
+              >
+                Recent Chats
               </a>
             </li>
           </ul>
         </div>
 
         <div
-          class="content-panel p-4 text-slate-300 w-full h-full overflow-auto flex-1 bg-transparent"
+          class="content-panel p-3 text-slate-300 w-full h-full overflow-auto flex-1 bg-transparent"
+          style="min-height: 0"
         >
-          @switch (selectedTab) {
+          @switch (selectedTab()) {
             @case ('AccountSettings') {
               <app-user-account-settings
                 [accountSettings]="userProfile.accountSettings"
@@ -100,15 +115,49 @@
               ></app-user-account-settings>
             }
             @case ('SavedEvents') {
-              <div>
-                <h3 class="text-2xl font-semibold text-sky-400 mb-2">Saved Events</h3>
-                <p class="mb-2 text-slate-400 text-sm">**Saved Events content**</p>
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
+              >
+                @for (event of userProfile.savedEvents; track event) {
+                  <app-event-tile
+                    [eventTile]="event"
+                    [showSavedIcon]="true"
+                    (savedToggled)="handleSavedToggle($event)"
+                  ></app-event-tile>
+                } @empty {
+                  <div>
+                    <h3 class="text-2xl font-semibold text-sky-400 mb-2">No Saved Events</h3>
+                    <p class="mb-2 text-slate-400 text-sm">You have no saved events.</p>
+                  </div>
+                }
               </div>
             }
-            @case ('MyPosts') {
-              <div>
-                <h3 class="text-2xl font-semibold text-sky-400 mb-2">My Posts</h3>
-                <p class="mb-2 text-slate-400 text-sm">**My Posts content**</p>
+            @case ('UserCreatedEvents') {
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
+              >
+                @for (event of userProfile.myEvents; track event) {
+                  <app-event-tile [eventTile]="event" [showSavedIcon]="false"></app-event-tile>
+                } @empty {
+                  <div>
+                    <h3 class="text-2xl font-semibold text-sky-400 mb-2">No Created Events</h3>
+                    <p class="mb-2 text-slate-400 text-sm">You have no created events.</p>
+                  </div>
+                }
+              </div>
+            }
+            @case ('RecentChats') {
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
+              >
+                @for (chat of userProfile.myChats; track chat) {
+                  <app-chat-tile [chat]="chat"></app-chat-tile>
+                } @empty {
+                  <div>
+                    <h3 class="text-2xl font-semibold text-sky-400 mb-2">No User Chats</h3>
+                    <p class="mb-2 text-slate-400 text-sm">You have no user chats.</p>
+                  </div>
+                }
               </div>
             }
             @default {
