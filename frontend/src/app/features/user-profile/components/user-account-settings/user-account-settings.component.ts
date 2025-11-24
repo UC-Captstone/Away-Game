@@ -1,12 +1,4 @@
-import {
-  Component,
-  Input,
-  SimpleChanges,
-  Output,
-  EventEmitter,
-  WritableSignal,
-  signal,
-} from '@angular/core';
+import { Component, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { IAccountSettings } from '../../models/account-settings';
 import { ITeam } from '../../../../shared/models/team';
 import { FormsModule } from '@angular/forms';
@@ -29,83 +21,77 @@ export class UserAccountSettingsComponent {
   @Input() favoriteTeams!: ITeam[];
   @Input() verificationStatus!: boolean;
 
-  originalAccountSettings: WritableSignal<IAccountSettings | null> = signal(null);
-  editableAccountSettings: WritableSignal<IAccountSettings> = signal({} as IAccountSettings);
-  originalFavoriteTeams: WritableSignal<ITeam[]> = signal([]);
-  editableFavoriteTeams: WritableSignal<ITeam[]> = signal([]);
-  currentPassword: WritableSignal<string> = signal('');
-  newPassword: WritableSignal<string> = signal('');
-  confirmPassword: WritableSignal<string> = signal('');
-  passwordValid: WritableSignal<boolean> = signal(false);
-  showVerificationModal: WritableSignal<boolean> = signal(false);
-  verificationForm: WritableSignal<IVerificationForm> = signal({
+  originalAccountSettings: IAccountSettings | null = null;
+  editableAccountSettings: IAccountSettings = {} as IAccountSettings;
+  originalFavoriteTeams: ITeam[] = [];
+  editableFavoriteTeams: ITeam[] = [];
+  currentPassword: string = '';
+  newPassword: string = '';
+  confirmPassword: string = '';
+  passwordValid: boolean = false;
+  showVerificationModal: boolean = false;
+  verificationForm: IVerificationForm = {
     reasoning: '',
     representedTeams: [],
-  });
-  infoChanged: WritableSignal<boolean> = signal(false);
-  favoriteTeamsChanged: WritableSignal<boolean> = signal(false);
-  showDeleteModal: WritableSignal<boolean> = signal(false);
-  deleteConfirmText: WritableSignal<string> = signal('');
-  isLoading: WritableSignal<boolean> = signal(false);
+  };
+  infoChanged: boolean = false;
+  favoriteTeamsChanged: boolean = false;
+  showDeleteModal: boolean = false;
+  deleteConfirmText: string = '';
+  isLoading: boolean = false;
 
-  get hasAppliedForVerification(): boolean {
+  /* get hasAppliedForVerification(): boolean {
     return !!this.accountSettings?.appliedForVerification;
   }
 
   get isUserVerified(): boolean {
     return !!this.verificationStatus;
-  }
+  } */
 
   constructor(private userProfileService: UserProfileService) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['accountSettings'] && this.accountSettings) {
-      this.originalAccountSettings.set(this.deepClone(this.accountSettings));
-      this.editableAccountSettings.set(this.deepClone(this.accountSettings));
-      this.infoChanged.set(false);
+      this.originalAccountSettings = this.deepClone(this.accountSettings);
+      this.editableAccountSettings = this.deepClone(this.accountSettings);
+      this.infoChanged = false;
     }
 
     if (changes['favoriteTeams'] && this.favoriteTeams) {
-      this.originalFavoriteTeams.set(this.deepClone(this.favoriteTeams || []));
-      this.editableFavoriteTeams.set(this.deepClone(this.favoriteTeams || []));
-      this.favoriteTeamsChanged.set(false);
+      this.originalFavoriteTeams = this.deepClone(this.favoriteTeams || []);
+      this.editableFavoriteTeams = this.deepClone(this.favoriteTeams || []);
+      this.favoriteTeamsChanged = false;
     }
   }
 
   checkIfChanged() {
-    this.infoChanged.set(
+    this.infoChanged =
       !!this.originalAccountSettings &&
-        JSON.stringify(this.originalAccountSettings) !==
-          JSON.stringify(this.editableAccountSettings),
-    );
+      JSON.stringify(this.originalAccountSettings) !== JSON.stringify(this.editableAccountSettings);
 
-    const origIds = (this.originalFavoriteTeams() || [])
-      .map((t) => String((t as any).teamID))
-      .sort();
-    const editIds = (this.editableFavoriteTeams() || [])
-      .map((t) => String((t as any).teamID))
-      .sort();
-    this.favoriteTeamsChanged.set(JSON.stringify(origIds) !== JSON.stringify(editIds));
+    const origIds = (this.originalFavoriteTeams || []).map((t) => String((t as any).teamID)).sort();
+    const editIds = (this.editableFavoriteTeams || []).map((t) => String((t as any).teamID)).sort();
+    this.favoriteTeamsChanged = JSON.stringify(origIds) !== JSON.stringify(editIds);
   }
 
   onInfoUpdate() {
     console.log('Updated Account Info:', this.editableAccountSettings);
 
-    this.isLoading.set(true);
+    this.isLoading = true;
 
     const requests = [];
 
-    if (this.infoChanged()) {
-      requests.push(this.userProfileService.updateAccountInfo(this.editableAccountSettings()));
+    if (this.infoChanged) {
+      requests.push(this.userProfileService.updateAccountInfo(this.editableAccountSettings));
     }
 
-    if (this.favoriteTeamsChanged()) {
-      const teamIDs = this.editableFavoriteTeams().map((team) => team.teamID);
+    if (this.favoriteTeamsChanged) {
+      const teamIDs = this.editableFavoriteTeams.map((team) => team.teamID);
       requests.push(this.userProfileService.updateFavoriteTeams(teamIDs));
     }
 
     if (requests.length === 0) {
-      this.isLoading.set(false);
+      this.isLoading = false;
       return;
     }
 
@@ -115,26 +101,25 @@ export class UserAccountSettingsComponent {
 
         this.settingsUpdated.emit();
 
-        if (this.infoChanged()) {
-          this.originalAccountSettings.set(this.deepClone(this.editableAccountSettings()));
-          this.infoChanged.set(false);
+        if (this.infoChanged) {
+          this.originalAccountSettings = this.deepClone(this.editableAccountSettings);
+          this.infoChanged = false;
         }
-        if (this.favoriteTeamsChanged()) {
-          this.originalFavoriteTeams.set(this.deepClone(this.editableFavoriteTeams()));
-          this.favoriteTeamsChanged.set(false);
+        if (this.favoriteTeamsChanged) {
+          this.originalFavoriteTeams = this.deepClone(this.editableFavoriteTeams);
+          this.favoriteTeamsChanged = false;
         }
-        this.isLoading.set(false);
+        this.isLoading = false;
       },
       error: (error) => {
-        //Nathan: implement error handling UI in helper function
         console.error('Failed to update account info or favorite teams', error);
-        this.isLoading.set(false);
+        this.isLoading = false;
       },
     });
   }
 
   onFavoriteTeamsChanged(teams: ITeam[]) {
-    this.editableFavoriteTeams.set(teams || []);
+    this.editableFavoriteTeams = teams || [];
     this.checkIfChanged();
 
     console.log('Favorite teams changed:', teams);
@@ -143,66 +128,65 @@ export class UserAccountSettingsComponent {
   onPasswordChange() {
     const passwordPattern = /^(?=.{8,})/;
 
-    this.passwordValid.set(
-      passwordPattern.test(this.currentPassword()) &&
-        passwordPattern.test(this.newPassword()) &&
-        this.newPassword() === this.confirmPassword() &&
-        this.currentPassword() !== this.newPassword(),
-    );
+    this.passwordValid =
+      passwordPattern.test(this.currentPassword) &&
+      passwordPattern.test(this.newPassword) &&
+      this.newPassword === this.confirmPassword &&
+      this.currentPassword !== this.newPassword;
   }
 
   onUpdatePassword() {
-    console.log('Password updated:', this.newPassword());
+    console.log('Password updated:', this.newPassword);
 
-    this.userProfileService.updateUserPassword(this.newPassword());
+    this.userProfileService.updateUserPassword(this.newPassword);
 
-    this.currentPassword.set('');
-    this.newPassword.set('');
-    this.confirmPassword.set('');
-    this.passwordValid.set(false);
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.passwordValid = false;
   }
 
   openVerificationModal(): void {
-    this.showVerificationModal.set(true);
+    this.showVerificationModal = true;
   }
 
   closeVerificationModal(): void {
-    this.showVerificationModal.set(false);
+    this.showVerificationModal = false;
   }
 
   onVerificationTeamsChanged(teams: ITeam[]): void {
-    const current = this.verificationForm();
-    this.verificationForm.set({ ...current, representedTeams: teams || [] });
+    this.verificationForm.representedTeams = teams || [];
   }
 
   submitVerificationApplication(): void {
-    this.isLoading.set(true);
-    this.userProfileService.submitVerificationApplications(this.verificationForm()).subscribe({
+    this.isLoading = true;
+    this.userProfileService.submitVerificationApplication(this.verificationForm).subscribe({
       next: () => {
         console.log('Verification application submitted:', this.verificationForm);
         this.verificationSubmitted.emit();
         this.closeVerificationModal();
-        this.isLoading.set(false);
+        this.accountSettings.appliedForVerification = true;
+        this.isLoading = false;
       },
       error: (error) => {
         //Nathan: implement error handling UI in helper function
         console.error('Failed to submit verification application', error);
-        this.isLoading.set(false);
+        this.isLoading = false;
       },
     });
   }
 
   openDeleteModal() {
-    this.deleteConfirmText.set('');
-    this.showDeleteModal.set(true);
+    this.deleteConfirmText = '';
+    this.showDeleteModal = true;
   }
 
   closeDeleteModal() {
-    this.showDeleteModal.set(false);
+    this.showDeleteModal = false;
   }
 
   confirmDeleteAccount() {
-    if (this.deleteConfirmText() !== 'DELETE') return;
+    if (this.deleteConfirmText !== 'DELETE') return;
     this.userProfileService.deleteUserAccount().subscribe({
       next: () => {
         console.log('User account deleted');
