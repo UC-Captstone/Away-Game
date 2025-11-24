@@ -111,7 +111,6 @@
                 [favoriteTeams]="userProfile.headerInfo.favoriteTeams"
                 [verificationStatus]="userProfile.headerInfo.isVerified"
                 (settingsUpdated)="refreshProfile()"
-                (verificationSubmitted)="refreshProfile()"
               ></app-user-account-settings>
             }
             @case ('SavedEvents') {
