@@ -141,5 +141,5 @@ jobs:
         with:
           app-name: 'awaygamefunctionapp-dev'
           slot-name: 'Production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          package: '.'
           
