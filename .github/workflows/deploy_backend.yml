@@ -119,19 +119,40 @@ jobs:
           app-settings-json: |
             [
               {
+                "name": "POSTGRES_DB",
+                "value": "${{ env.POSTGRES_DB }}"
+              },
+              {
+                "name": "POSTGRES_USER",
+                "value": "${{ env.POSTGRES_USER }}"
+              },
+              {
+                "name": "POSTGRES_PASSWORD",
+                "value": "${{ env.POSTGRES_PASSWORD }}"
+              },
+              {
+                "name": "POSTGRES_HOST",
+                "value": "${{ env.POSTGRES_HOST }}"
+              },
+              {
+                "name": "POSTGRES_PORT",
+                "value": "${{ env.POSTGRES_PORT }}"
+              },
+              {
                 "name": "DATABASE_URL",
-                "value": "${{ env.DB_CONNECTION_STRING }}",
-                "slotSetting": false
+                "value": "${{ env.DATABASE_URL }}"
               },
               {
-                "name": "DB_ADMIN_USERNAME",
-                "value": "${{ env.DB_ADMIN_USERNAME }}",
-                "slotSetting": false
+                "name": "SYNC_DATABASE_URL",
+                "value": "${{ env.SYNC_DATABASE_URL }}"
               },
               {
-                "name": "DB_ADMIN_PASSWORD",
-                "value": "${{ env.DB_ADMIN_PASSWORD }}",
-                "slotSetting": false
+                "name": "ASYNC_DATABASE_URL",
+                "value": "${{ env.ASYNC_DATABASE_URL }}"
+              },
+              {
+                "name": "DATABASE_URL_ASYNC",
+                "value": "${{ env.DATABASE_URL_ASYNC }}"
               }
             ]
 
