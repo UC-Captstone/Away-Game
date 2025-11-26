@@ -11,14 +11,14 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  PYTHON_VERSION: '3.13' # set this to the python version to use (supports 3.6, 3.7, 3.8)
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'backend' # Changed from '.' to 'backend'
+  PYTHON_VERSION: '3.13'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -30,16 +30,19 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Create and start virtual environment
+        working-directory: ./backend # Add this line
         run: |
           python -m venv venv
           source venv/bin/activate
 
       - name: Install dependencies
+        working-directory: ./backend # Add this line
         run: pip install -r requirements.txt
 
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
+        working-directory: ./backend # Add this line
         run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
@@ -47,8 +50,8 @@ jobs:
         with:
           name: python-app
           path: |
-            release.zip
-            !venv/
+            backend/release.zip
+            !backend/venv/
 
   deploy:
     runs-on: ubuntu-latest
