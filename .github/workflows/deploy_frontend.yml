@@ -56,8 +56,8 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B5A8B183A5AC42CB8285B1DC09E9EAEA }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_48DA3DB4295D48E79001DD5B29486335 }}
+          client-id: ${{ secrets.AZURE_DEV_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A48DE33DBA5E4459996CA7BDE9F9BA96 }}
 
       - name: Get Clerk API token from Key Vault (dev)
