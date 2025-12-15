@@ -128,9 +128,9 @@ jobs:
       - name: Log in to container registry (prd)
         uses: docker/login-action@v2
         with:
-          registry: mcr.microsoft.com
-          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_CD960F3877CE431E99B7AF05F1E52B13 }}
-          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_00063E441ED04588BA81E6A8C950262A }}
+          registry: ghcr.io
+          username: ${{ github.actor}}
+          password: ${{ secrets.CR_PAT}}
 
       - name: Build and push container image to registry (prd)
         uses: docker/build-push-action@v3
