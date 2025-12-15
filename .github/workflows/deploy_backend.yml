@@ -74,9 +74,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_931D9481B5ED4B419293B5D46330A25C }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5F0E869079924C4C89DD8CF9ADDB615A }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8CDC8D9B392D49058F7457CD7B1E09F9 }}
+          client-id: ${{ secrets.AZURE_DEV_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUB_ID }}
 
       - name: Get secrets from Azure Key Vault
         uses: azure/CLI@v1

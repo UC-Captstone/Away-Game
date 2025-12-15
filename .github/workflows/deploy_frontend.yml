@@ -58,7 +58,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_DEV_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A48DE33DBA5E4459996CA7BDE9F9BA96 }}
+          subscription-id: ${{ secrets.AZURE_SUB_ID }}
 
       - name: Get Clerk API token from Key Vault (dev)
         uses: azure/CLI@v1
@@ -145,9 +145,9 @@ jobs:
       - name: Login to Azure (prd)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0829FA511F8A4F608660E0619D1C03D3 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_80330D2569C2431483E7529FAC500EE9 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8D771EA586034E0ABB6E3AC0ED2E8521 }}
+          client-id: ${{ secrets.AZURE_PRD_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_PRD_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUB_ID }}
 
       - name: Get Clerk API token from Key Vault (prd)
         uses: azure/CLI@v1
