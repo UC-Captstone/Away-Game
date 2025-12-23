@@ -14,5 +14,4 @@ async def get_user_profile(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
-    result = await get_user_profile_service(current_user, db)
-    return result
+    return await get_user_profile_service(current_user, db)

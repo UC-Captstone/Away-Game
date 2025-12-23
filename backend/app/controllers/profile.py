@@ -6,6 +6,7 @@ from app.models.user import User
 from app.models.event import Event
 from app.models.favorite import Favorite
 from app.models.team import Team
+from app.models.game import Game
 from app.models.user_favorite_team import UserFavoriteTeams
 from app.schemas.user import UserProfile, HeaderInfo, AccountSettings
 from app.schemas.event import EventRead
@@ -28,7 +29,9 @@ async def get_user_profile_service(current_user: User, db: AsyncSession) -> User
         .where(Favorite.user_id == current_user.user_id)
         .where(Favorite.event_id.isnot(None))
         .options(
-            selectinload(Event.game),
+            selectinload(Event.game).selectinload(Game.home_team),
+            selectinload(Event.game).selectinload(Game.away_team),
+            selectinload(Event.game).selectinload(Game.league),
             selectinload(Event.venue)
         )
         .order_by(Favorite.date_time.desc())
@@ -41,7 +44,9 @@ async def get_user_profile_service(current_user: User, db: AsyncSession) -> User
         select(Event)
         .where(Event.creator_user_id == current_user.user_id)
         .options(
-            selectinload(Event.game),
+            selectinload(Event.game).selectinload(Game.home_team),
+            selectinload(Event.game).selectinload(Game.away_team),
+            selectinload(Event.game).selectinload(Game.league),
             selectinload(Event.venue)
         )
         .order_by(Event.created_at.desc())
