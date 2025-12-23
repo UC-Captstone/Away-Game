@@ -2,7 +2,11 @@ from __future__ import annotations
 from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel
+from app.schemas.event import EventRead
+from app.schemas.team import TeamRead
+from app.schemas.team_chat import TeamChatRead
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
 class UserBase(BaseModel):
@@ -42,17 +46,18 @@ class UserRead(UserBase):
 
 
 class HeaderInfo(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     profile_picture_url: Optional[str] = None
     username: str
     display_name: str
     is_verified: bool
     favorite_teams: List['TeamRead'] = []
 
-    class Config:
-        from_attributes = True
-
 
 class AccountSettings(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email: str
@@ -61,16 +66,12 @@ class AccountSettings(BaseModel):
     enable_favorite_team_notifications: bool = False
     enable_safety_alert_notifications: bool = False
 
-    class Config:
-        from_attributes = True
-
 
 class UserProfile(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     header_info: HeaderInfo
     account_settings: AccountSettings
     saved_events: List['EventRead'] = []
     my_events: List['EventRead'] = []
     my_chats: List['TeamChatRead'] = []
-
-    class Config:
-        from_attributes = True
