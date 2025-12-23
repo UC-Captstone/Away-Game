@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'backend' # Changed from '.' to 'backend'
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'backend/app'
   PYTHON_VERSION: '3.13'
 
 jobs:
@@ -30,19 +30,19 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Create and start virtual environment
-        working-directory: ./backend # Add this line
+        working-directory: ./backend/app
         run: |
           python -m venv venv
           source venv/bin/activate
 
       - name: Install dependencies
-        working-directory: ./backend # Add this line
+        working-directory: ./backend/app
         run: pip install -r requirements.txt
 
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
-        working-directory: ./backend # Add this line
+        working-directory: ./backend/app
         run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
@@ -50,8 +50,8 @@ jobs:
         with:
           name: python-app
           path: |
-            backend/release.zip
-            !backend/venv/
+            backend/app/release.zip
+            !backend/app/venv/
 
   deploy:
     runs-on: ubuntu-latest

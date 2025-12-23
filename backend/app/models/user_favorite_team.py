@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base
+from db.base import Base
 
 class UserFavoriteTeams(Base):
     __tablename__ = "user_favorite_teams"
