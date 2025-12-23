@@ -10,18 +10,17 @@ import { handleError } from '../../../shared/helpers/error-handler';
 import { IAccountSettings } from '../models/account-settings';
 import { EventTypeEnum } from '../../../shared/models/event-type-enum';
 import { IEvent } from '../../events/models/event';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserProfileService {
-  //Nathan: wait for merge
-  //private apiUrl = environment.apiUrl;
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.apiUrl;
 
   headerInfo: IHeaderInfo = {
     //profilePictureUrl: 'assets/default-avatar.jpg',
-    userName: 'NathanBurns3',
+    username: 'NathanBurns3',
     displayName: 'Nathan Burns',
     isVerified: false,
     favoriteTeams: [
@@ -214,7 +213,7 @@ export class UserProfileService {
       teamID: '1',
       teamLogoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
       userID: 'user-uuid-2',
-      userName: 'SportsFan99',
+      username: 'SportsFan99',
       messageContent: "Can't wait for the Lakers game this weekend!",
       timestamp: new Date('2024-10-10T12:00:00Z'),
     },
@@ -223,7 +222,7 @@ export class UserProfileService {
       teamID: '2',
       teamLogoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/bos.png',
       userID: 'user-uuid-2',
-      userName: 'SportsFan99',
+      username: 'SportsFan99',
       messageContent: 'Anyone going to the Celtics game next week?',
       timestamp: new Date('2024-10-11T15:30:00Z'),
     },
@@ -232,7 +231,7 @@ export class UserProfileService {
       teamID: '3',
       teamLogoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/dal.png',
       userID: 'user-uuid-2',
-      userName: 'SportsFan99',
+      username: 'SportsFan99',
       messageContent:
         "The Cowboys are looking strong this season! Who else is excited? I'm planning to attend the home opener. Let me know if anyone wants to join! Go Cowboys! #CowboysNation #NFL #DallasPride #Football #GameDay #SportsFan #AwayGame",
       timestamp: new Date('2024-10-12T09:45:00Z'),
@@ -244,18 +243,9 @@ export class UserProfileService {
   // hardcoded user profile data for development purposes
   // fix later to fetch from backend API
   getUserProfile(): Observable<IUserProfile> {
-    console.log('Fetching user profile data...');
-
-    const userProfile: IUserProfile = {
-      headerInfo: this.headerInfo,
-      accountSettings: this.accountSettings,
-      savedEvents: this.savedEvents,
-      myEvents: this.myEvents,
-      myChats: this.myChats,
-    };
-
-    //return this.http.get<IUserProfile>(`${this.apiUrl}/user/profile`).pipe(catchError(handleError));
-    return of(userProfile).pipe(delay(1000));
+    return this.http
+      .get<IUserProfile>(`${this.apiUrl}/users/me/profile`, { withCredentials: true })
+      .pipe(catchError(handleError));
   }
 
   submitVerificationApplication(form: IVerificationForm): Observable<null> {
