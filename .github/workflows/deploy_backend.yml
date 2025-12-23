@@ -91,6 +91,8 @@ jobs:
             SYNC_DATABASE_URL=$(az keyvault secret show --name sync-database-url --vault-name away-game-kv --query value -o tsv)
             ASYNC_DATABASE_URL=$(az keyvault secret show --name async-database-url --vault-name away-game-kv --query value -o tsv)
             DATABASE_URL_ASYNC=$(az keyvault secret show --name database-url-async --vault-name away-game-kv --query value -o tsv)
+            CLERK_SECRET_KEY=$(az keyvault secret show --name clerk-secret-key --vault-name away-game-kv --query value -o tsv)
+            CLERK_DOMAIN=$(az keyvault secret show --name clerk-domain --vault-name away-game-kv --query value -o tsv)
 
             echo "::add-mask::$POSTGRES_DB"
             echo "::add-mask::$POSTGRES_USER"
@@ -101,6 +103,8 @@ jobs:
             echo "::add-mask::$SYNC_DATABASE_URL"
             echo "::add-mask::$ASYNC_DATABASE_URL"
             echo "::add-mask::$DATABASE_URL_ASYNC"
+            echo "::add-mask::$CLERK_SECRET_KEY"
+            echo "::add-mask::$CLERK_DOMAIN"
 
             echo "POSTGRES_DB=$POSTGRES_DB" >> $GITHUB_ENV
             echo "POSTGRES_USER=$POSTGRES_USER" >> $GITHUB_ENV
@@ -111,6 +115,8 @@ jobs:
             echo "SYNC_DATABASE_URL=$SYNC_DATABASE_URL" >> $GITHUB_ENV
             echo "ASYNC_DATABASE_URL=$ASYNC_DATABASE_URL" >> $GITHUB_ENV
             echo "DATABASE_URL_ASYNC=$DATABASE_URL_ASYNC" >> $GITHUB_ENV
+            echo "CLERK_SECRET_KEY=$CLERK_SECRET_KEY" >> $GITHUB_ENV
+            echo "CLERK_DOMAIN=$CLERK_DOMAIN" >> $GITHUB_ENV
 
       - name: Configure Function App Settings
         uses: azure/appservice-settings@v1
@@ -153,6 +159,14 @@ jobs:
               {
                 "name": "DATABASE_URL_ASYNC",
                 "value": "${{ env.DATABASE_URL_ASYNC }}"
+              },
+              {
+                "name": "CLERK_SECRET_KEY",
+                "value": "${{ env.CLERK_SECRET_KEY }}"
+              },
+              {
+                "name": "CLERK_DOMAIN",
+                "value": "${{ env.CLERK_DOMAIN }}"
               }
             ]
 
