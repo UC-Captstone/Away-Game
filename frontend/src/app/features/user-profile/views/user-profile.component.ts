@@ -23,7 +23,7 @@ import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
   ],
 })
 export class UserProfileComponent implements OnInit {
-  userProfile!: IUserProfile;
+  userProfile: IUserProfile | null = null;
   selectedTab: WritableSignal<string> = signal('profile');
   isLoading: WritableSignal<boolean> = signal(false);
 
@@ -46,7 +46,12 @@ export class UserProfileComponent implements OnInit {
     this.userProfileService.deleteSavedEvent(event.eventID).subscribe({
       next: (newEvents: IEvent[]) => {
         console.log('Saved event deleted successfully:', event.eventID);
-        this.userProfile.savedEvents = newEvents;
+        const profile = this.userProfile;
+        if (!profile) {
+          this.isLoading.set(false);
+          return;
+        }
+        profile.savedEvents = newEvents;
         this.isLoading.set(false);
       },
       error: (error) => {
@@ -61,6 +66,7 @@ export class UserProfileComponent implements OnInit {
     this.isLoading.set(true);
     this.userProfileService.getUserProfile().subscribe({
       next: (profile) => {
+        console.log("profile", profile)
         this.userProfile = profile;
         this.isLoading.set(false);
       },
