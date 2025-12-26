@@ -167,6 +167,10 @@ jobs:
               {
                 "name": "CLERK_DOMAIN",
                 "value": "${{ env.CLERK_DOMAIN }}"
+              },
+              {
+                "name": "JWT_SECRET_KEY",
+                "value": "${{ env.JWT_SECRET_KEY }}"
               }
             ]
 
