@@ -4,10 +4,10 @@ from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 from typing import List, Optional
 
-from app.db.session import get_session
-from app.models.team import Team
-from app.repositories.team_repo import TeamRepository
-from app.schemas.team import TeamCreate, TeamRead, TeamUpdate
+from db.session import get_session
+from models.team import Team
+from repositories.team_repo import TeamRepository
+from schemas.team import TeamCreate, TeamRead, TeamUpdate
 
 router = APIRouter(prefix="/teams", tags=["teams"])
 

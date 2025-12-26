@@ -62,3 +62,8 @@ coverage*.json
 .DS_Store
 Thumbs.db
 *.swp
+
+# Azure Functions
+/backend/app/__pycache__
+/backend/app/.venv
+/backend/app/local.settings.json

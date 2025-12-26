@@ -5,12 +5,12 @@ from sqlalchemy.orm import selectinload
 from typing import List
 from uuid import UUID
 
-from app.db.session import get_session
-from app.models.favorite import Favorite
-from app.models.user import User
-from app.models.event import Event
-from app.repositories.favorite_repo import FavoriteRepository
-from app.schemas.event import EventRead
+from db.session import get_session
+from models.favorite import Favorite
+from models.user import User
+from models.event import Event
+from repositories.favorite_repo import FavoriteRepository
+from schemas.event import EventRead
 
 router = APIRouter(prefix="/users/{user_id}/favorites", tags=["favorites"])
 

@@ -3,16 +3,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.db.session import get_session
-from app.auth import get_current_user
-from app.models.user import User
-from app.models.event import Event
-from app.models.favorite import Favorite
-from app.models.team import Team
-from app.models.user_favorite_team import UserFavoriteTeams
-from app.schemas.user import UserProfile, HeaderInfo, AccountSettings
-from app.schemas.event import EventRead
-from app.schemas.team import TeamRead
+from db.session import get_session
+from auth import get_current_user
+from models.user import User
+from models.event import Event
+from models.favorite import Favorite
+from models.team import Team
+from models.user_favorite_team import UserFavoriteTeams
+from schemas.user import UserProfile, HeaderInfo, AccountSettings
+from schemas.event import EventRead
+from schemas.team import TeamRead
 
 router = APIRouter(prefix="/users/me", tags=["profile"])
 

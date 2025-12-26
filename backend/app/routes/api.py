@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.routes import auth, games, users
+from routes import auth, games, users
 
 
 api_router = APIRouter()
