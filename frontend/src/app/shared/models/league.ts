@@ -1,6 +1,6 @@
 import { LeagueEnum } from './league-enum';
 
 export interface ILeague {
-  leagueID: string; // UUID
+  leagueID: number; // espn id
   leagueName: LeagueEnum;
 }

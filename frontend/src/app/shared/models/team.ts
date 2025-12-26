@@ -1,7 +1,7 @@
 import { ILeague } from './league';
 
 export interface ITeam {
-  teamID: string; // UUID;
+  teamId: number; // espn id
   league: ILeague;
   sportConference?: string;
   sportDivision?: string;
