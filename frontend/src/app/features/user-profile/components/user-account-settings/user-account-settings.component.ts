@@ -73,10 +73,10 @@ export class UserAccountSettingsComponent implements OnChanges {
     );
 
     const origIds = (this.originalFavoriteTeams() || [])
-      .map((t) => String((t as any).teamID))
+      .map((t) => String((t as any).teamId))
       .sort();
     const editIds = (this.editableFavoriteTeams() || [])
-      .map((t) => String((t as any).teamID))
+      .map((t) => String((t as any).teamId))
       .sort();
 
     this.favoriteTeamsChanged.set(JSON.stringify(origIds) !== JSON.stringify(editIds));
@@ -94,8 +94,8 @@ export class UserAccountSettingsComponent implements OnChanges {
     }
 
     if (this.favoriteTeamsChanged()) {
-      const teamIDs = this.editableFavoriteTeams().map((team) => team.teamID);
-      requests.push(this.userProfileService.updateFavoriteTeams(teamIDs));
+      const teamIds = this.editableFavoriteTeams().map((team) => team.teamId);
+      requests.push(this.userProfileService.updateFavoriteTeams(teamIds));
     }
 
     if (requests.length === 0) {
