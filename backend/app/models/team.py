@@ -22,6 +22,7 @@ class Team(Base):
     home_location: Mapped[str]
     team_name: Mapped[str]
     display_name: Mapped[str]
+    logo_url: Mapped[str | None]
 
     home_venue_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("venues.venue_id")
