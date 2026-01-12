@@ -6,7 +6,8 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () =>
       import('./features/auth/components/login/login.component').then((m) => m.Login),
-    canActivate: [AuthGuard]
+    // Nathan: set up later
+    //canActivate: [AuthGuard]
   },
   {
     path: 'signup',

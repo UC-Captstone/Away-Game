@@ -9,7 +9,8 @@ export class AuthGuard implements CanActivate {
 
         if (token) {
             // if the User is authenticated, redirect to home
-            this.router.navigate(['/home']);
+            // Nathan: update to home after page is built out
+            this.router.navigate(['/profile']);
             return false;
         }
 
