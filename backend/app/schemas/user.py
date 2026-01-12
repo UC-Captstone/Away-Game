@@ -36,6 +36,7 @@ class UserUpdate(BaseModel):
     is_verified: Optional[bool] = None
     pending_verification: Optional[bool] = None
 
+
 class UserRead(UserBase):
     user_id: UUID
     created_at: datetime
@@ -50,16 +51,16 @@ class HeaderInfo(BaseModel):
 
     profile_picture_url: Optional[str] = None
     username: str
-    display_name: str
+    display_name: str  # Combined first_name + last_name
     is_verified: bool
-    favorite_teams: List['TeamRead'] = []
+    favorite_teams: List[TeamRead] = []
 
 
 class AccountSettings(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
 
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    first_name: str
+    last_name: str
     email: str
     applied_for_verification: bool
     enable_nearby_event_notifications: bool = False
@@ -72,6 +73,6 @@ class UserProfile(BaseModel):
 
     header_info: HeaderInfo
     account_settings: AccountSettings
-    saved_events: List['EventRead'] = []
-    my_events: List['EventRead'] = []
-    my_chats: List['TeamChatRead'] = []
+    saved_events: List[EventRead] = []
+    my_events: List[EventRead] = []
+    my_chats: List[TeamChatRead] = []

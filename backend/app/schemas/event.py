@@ -3,9 +3,12 @@ from __future__ import annotations
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 from .venue import VenueRead
 from .game import GameRead
+from .types import EventTypeEnum
+from .league import LeagueEnum
 
 
 class EventBase(BaseModel):
@@ -15,6 +18,7 @@ class EventBase(BaseModel):
     venue_id: Optional[int] = None
     title: str
     description: Optional[str] = None
+    picture_url: Optional[str] = None
     game_date: Optional[datetime] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
@@ -30,17 +34,32 @@ class EventUpdate(BaseModel):
     venue_id: Optional[int] = None
     title: Optional[str] = None
     description: Optional[str] = None
+    picture_url: Optional[str] = None
     game_date: Optional[datetime] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
 
-class EventRead(EventBase):
-    event_id: UUID
-    created_at: datetime
-    updated_at: Optional[datetime] = None
-    game: Optional[GameRead] = None
-    venue: Optional[VenueRead] = None
+class TeamLogos(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    
+    home: Optional[str] = None
+    away: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+
+class EventRead(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+    
+    event_id: UUID
+    event_type: EventTypeEnum
+    event_name: str
+    date_time: datetime
+    location: str
+    image_url: Optional[str] = None
+    team_logos: Optional[TeamLogos] = None
+    league: Optional[LeagueEnum] = None
+    is_user_created: Optional[bool] = None
+    is_saved: bool = False
+    
+    game: Optional[GameRead] = Field(None, exclude=True)
+    venue: Optional[VenueRead] = Field(None, exclude=True)
