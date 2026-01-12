@@ -6,7 +6,8 @@ from sqlalchemy.orm import selectinload
 
 from app.models.team import Team
 from app.repositories.team_repo import TeamRepository
-from app.schemas.team import TeamCreate, TeamUpdate
+from app.schemas.team import TeamCreate, TeamUpdate, TeamRead
+from app.schemas.converters import convert_team_to_read
 
 
 async def get_teams_service(
@@ -15,9 +16,10 @@ async def get_teams_service(
     limit: int,
     offset: int,
     db: AsyncSession
-) -> List[Team]:
+) -> List[TeamRead]:
     """
     Get a list of teams with optional filtering by league and search term.
+    Returns converted TeamRead schemas ready for API response.
     """
     stmt = (
         select(Team)
@@ -29,6 +31,8 @@ async def get_teams_service(
 
     if league_id:
         stmt = stmt.where(Team.league_id == league_id)
+
+    print("league_id", league_id)
 
     if search:
         search_pattern = f"%{search}%"
@@ -43,12 +47,13 @@ async def get_teams_service(
     result = await db.execute(stmt)
     teams = result.scalars().all()
 
-    return teams
+    return [convert_team_to_read(team) for team in teams]
 
 
-async def get_team_service(team_id: int, db: AsyncSession) -> Team:
+async def get_team_service(team_id: int, db: AsyncSession) -> TeamRead:
     """
     Get a single team by ID.
+    Returns converted TeamRead schema ready for API response.
     """
     stmt = (
         select(Team)
@@ -65,12 +70,13 @@ async def get_team_service(team_id: int, db: AsyncSession) -> Team:
             detail=f"Team with id {team_id} not found"
         )
 
-    return team
+    return convert_team_to_read(team)
 
 
-async def create_team_service(team_data: TeamCreate, db: AsyncSession) -> Team:
+async def create_team_service(team_data: TeamCreate, db: AsyncSession) -> TeamRead:
     """
     Create a new team.
+    Returns converted TeamRead schema.
     """
     repo = TeamRepository(db)
 
@@ -90,16 +96,19 @@ async def create_team_service(team_data: TeamCreate, db: AsyncSession) -> Team:
     await db.commit()
     await db.refresh(created_team)
 
-    return created_team
+    await db.refresh(created_team, ["league"])
+
+    return convert_team_to_read(created_team)
 
 
 async def update_team_service(
     team_id: int,
     team_data: TeamUpdate,
     db: AsyncSession
-) -> Team:
+) -> TeamRead:
     """
     Update an existing team.
+    Returns converted TeamRead schema.
     """
     repo = TeamRepository(db)
 
@@ -117,7 +126,9 @@ async def update_team_service(
     await db.commit()
     await db.refresh(existing_team)
 
-    return existing_team
+    await db.refresh(existing_team, ["league"])
+
+    return convert_team_to_read(existing_team)
 
 
 async def delete_team_service(team_id: int, db: AsyncSession) -> None:
