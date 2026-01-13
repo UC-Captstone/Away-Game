@@ -14,6 +14,6 @@ export class ChatTileComponent {
   navigateToChat(event: Event) {
     event.preventDefault();
     // Nathan: Wire up router navigation when the chat route is ready
-    console.log('Navigating to chat for team:', this.chat.teamID, 'chat:', this.chat.chatID);
+    console.log('Navigating to chat for team:', this.chat.teamId, 'chat:', this.chat.chatID);
   }
 }

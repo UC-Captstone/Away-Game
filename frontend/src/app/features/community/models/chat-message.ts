@@ -1,6 +1,6 @@
 export interface IChatMessage {
   chatID: string; // UUID
-  teamID: string; // UUID of the team associated with the chat
+  teamId: number;
   teamLogoUrl?: string; // optional URL to the team's logo
   userID: string; // UUID of the user who sent the message
   username: string; // Name of the user who sent the message
