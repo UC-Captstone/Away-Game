@@ -41,11 +41,11 @@ export class UserProfileComponent implements OnInit {
     this.selectedTab.set(tab);
   }
 
-  handleSavedToggle(event: { eventID: string; status: boolean }) {
+  handleSavedToggle(event: { eventId: string; status: boolean }) {
     this.isLoading.set(true);
-    this.userProfileService.deleteSavedEvent(event.eventID).subscribe({
+    this.userProfileService.deleteSavedEvent(event.eventId).subscribe({
       next: (newEvents: IEvent[]) => {
-        console.log('Saved event deleted successfully:', event.eventID);
+        console.log('Saved event deleted successfully:', event.eventId);
         const profile = this.userProfile;
         if (!profile) {
           this.isLoading.set(false);

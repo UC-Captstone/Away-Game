@@ -11,8 +11,8 @@ import { IEvent } from '../../../features/events/models/event';
 export class EventTileComponent {
   @Input() eventTile!: IEvent;
   @Input() showSavedIcon: boolean = true;
-  @Output() savedToggled: EventEmitter<{ eventID: string; status: boolean }> = new EventEmitter<{
-    eventID: string;
+  @Output() savedToggled: EventEmitter<{ eventId: string; status: boolean }> = new EventEmitter<{
+    eventId: string;
     status: boolean;
   }>();
 
@@ -28,6 +28,6 @@ export class EventTileComponent {
       event.preventDefault();
     }
     this.eventTile.isSaved = !this.eventTile.isSaved;
-    this.savedToggled.emit({ eventID: this.eventTile.eventID, status: this.eventTile.isSaved });
+    this.savedToggled.emit({ eventId: this.eventTile.eventId, status: this.eventTile.isSaved });
   }
 }

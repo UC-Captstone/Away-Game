@@ -19,9 +19,7 @@ export class UserProfileService {
   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
-  // Nathan
-  // hardcoded user profile data for development purposes
-  // fix later to fetch from backend API
+
   getUserProfile(): Observable<IUserProfile> {
     return this.http
       .get<IUserProfile>(`${this.apiUrl}/users/me/profile`, { withCredentials: true })
@@ -47,10 +45,7 @@ export class UserProfileService {
     // Nathan: Logic to update user password via clerk
   }
 
-  updateFavoriteTeams(teamIds: number[]): Observable<null> {
-    // Convert string IDs to numbers for backend
-    //const teamIds = teamIds.map(id => parseInt(id, 10));
-    
+  updateFavoriteTeams(teamIds: number[]): Observable<null> {    
     return this.http
       .put<null>(`${this.apiUrl}/users/me/favorite-teams`, { teamIds })
       .pipe(catchError(handleError));
@@ -62,9 +57,9 @@ export class UserProfileService {
       .pipe(catchError(handleError));
   }
 
-  deleteSavedEvent(eventID: string): Observable<IEvent[]> {
+  deleteSavedEvent(eventId: string): Observable<IEvent[]> {
     return this.http
-      .delete<IEvent[]>(`${this.apiUrl}/users/me/saved-events/${eventID}`)
+      .delete<IEvent[]>(`${this.apiUrl}/users/me/saved-events/${eventId}`)
       .pipe(catchError(handleError));
   }
 }
