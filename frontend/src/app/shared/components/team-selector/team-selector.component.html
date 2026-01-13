@@ -56,7 +56,7 @@
           @if (selectedTeams.length) {
             <span class="flex items-center gap-2 min-w-0">
               <span class="flex -space-x-1">
-                @for (t of selectedTeams | slice: 0 : 3; track t.teamID) {
+                @for (t of selectedTeams | slice: 0 : 3; track t.teamId) {
                   <img
                     [src]="t.logoUrl"
                     [alt]="t.displayName"
@@ -145,19 +145,19 @@
               activeIndex() >= 0 ? 'team-option-' + activeIndex() : null
             "
           >
-            @for (team of teams(); track team.teamID; let i = $index) {
+            @for (team of teams(); track team.teamId; let i = $index) {
               <li
                 [id]="'team-option-' + i"
                 role="option"
                 [attr.aria-selected]="
-                  multi ? isTeamSelected(team) : selectedTeamId() === team.teamID
+                  multi ? isTeamSelected(team) : selectedTeamId() === team.teamId
                 "
                 (click)="multi ? toggleTeamSelection(team) : onSelectTeam(team)"
                 class="flex items-center gap-2 px-3 py-1.5 mx-2 mb-1 cursor-pointer hover:bg-slate-800/70 text-slate-200 text-sm transition-colors rounded-xl"
                 [ngClass]="{
                   'bg-sky-500/10 text-sky-300': multi
                     ? isTeamSelected(team)
-                    : selectedTeamId() === team.teamID,
+                    : selectedTeamId() === team.teamId,
                   'ring-1 ring-sky-500/40 ring-inset': activeIndex() === i,
                 }"
               >
@@ -178,7 +178,7 @@
                     aria-label="Select {{ team.displayName }}"
                     tabindex="-1"
                   />
-                } @else if (selectedTeamId() === team.teamID) {
+                } @else if (selectedTeamId() === team.teamId) {
                   <svg
                     class="w-4 h-4 text-sky-300 shrink-0"
                     viewBox="0 0 24 24"

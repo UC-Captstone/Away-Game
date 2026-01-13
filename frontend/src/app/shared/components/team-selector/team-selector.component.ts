@@ -50,7 +50,7 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   private readonly search$ = new BehaviorSubject<string>('');
 
   selectedLeague: WritableSignal<LeagueEnum | null> = signal(null);
-  selectedTeamId: WritableSignal<string> = signal('');
+  selectedTeamId: WritableSignal<number> = signal(0);
   searchTerm: WritableSignal<string> = signal('');
   teams: WritableSignal<ITeam[]> = signal([]);
   loading: WritableSignal<boolean> = signal(false);
@@ -59,7 +59,7 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   isOpen: WritableSignal<boolean> = signal(false);
 
   get selectedTeam(): ITeam | undefined {
-    return this.teams().find((t) => t.teamID === this.selectedTeamId());
+    return this.teams().find((t) => t.teamId === this.selectedTeamId());
   }
 
   constructor(
@@ -78,9 +78,8 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
           this.noTeams.set(false);
         }),
         switchMap(([league, term]) => {
-          const leagueId = LeagueIdMap[league];
           return this.teamService
-            .getTeamsByLeague(leagueId, term, this.dropdownLimit)
+            .getTeamsByLeague(league, term, this.dropdownLimit)
             .pipe(catchError(() => of([] as ITeam[])));
         }),
         takeUntil(this.destroy$),
@@ -99,7 +98,7 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   }
 
   onLeagueChange(): void {
-    this.selectedTeamId.set('');
+    this.selectedTeamId.set(0);
     this.searchTerm.set('');
     this.activeIndex.set(-1);
     this.isOpen.set(false);
@@ -140,20 +139,20 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
       this.toggleTeamSelection(team);
       return;
     }
-    this.selectedTeamId.set(team.teamID);
-    this.activeIndex.set(this.teams().findIndex((t) => t.teamID === team.teamID));
+    this.selectedTeamId.set(team.teamId);
+    this.activeIndex.set(this.teams().findIndex((t) => t.teamId === team.teamId));
     this.teamSelected.emit(team);
     this.closeDropdown();
   }
 
   isTeamSelected(team: ITeam): boolean {
-    return this.selectedTeams.some((t) => t.teamID === team.teamID);
+    return this.selectedTeams.some((t) => t.teamId === team.teamId);
   }
 
   toggleTeamSelection(team: ITeam): void {
     const exists = this.isTeamSelected(team);
     this.selectedTeams = exists
-      ? this.selectedTeams.filter((t) => t.teamID !== team.teamID)
+      ? this.selectedTeams.filter((t) => t.teamId !== team.teamId)
       : [...this.selectedTeams, team];
     this.teamsSelected.emit(this.selectedTeams);
   }

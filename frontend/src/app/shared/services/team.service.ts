@@ -1,95 +1,35 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { ITeam } from '../models/team';
-import { delay, Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { LeagueEnum } from '../models/league-enum';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TeamService {
-  //Nathan: remove once api is ready
-  private mockTeams: ITeam[] = [
-    {
-      teamID: '1',
-      league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      homeLocation: 'Los Angeles',
-      teamName: 'Lakers',
-      displayName: 'Los Angeles Lakers',
-      logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
-    },
-    {
-      teamID: '2',
-      league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      homeLocation: 'Boston',
-      teamName: 'Celtics',
-      displayName: 'Boston Celtics',
-      logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/bos.png',
-    },
+  private apiUrl = `${environment.apiUrl}/teams`;
 
-    {
-      teamID: '4',
-      league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      homeLocation: 'Miami',
-      teamName: 'Heat',
-      displayName: 'Miami Heat',
-      logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/mia.png',
-    },
-    {
-      teamID: '5',
-      league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      homeLocation: 'Cleveland',
-      teamName: 'Cavaliers',
-      displayName: 'Cleveland Cavaliers',
-      logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/cle.png',
-    },
-    {
-      teamID: '6',
-      league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      homeLocation: 'Charlotte',
-      teamName: 'Hornets',
-      displayName: 'Charlotte Hornets',
-      logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/cha.png',
-    },
-    {
-      teamID: '7',
-      league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      homeLocation: 'Chicago',
-      teamName: 'Bulls',
-      displayName: 'Chicago Bulls',
-      logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
-    },
-    {
-      teamID: '8',
-      league: { leagueID: 'nba-uuid', leagueName: LeagueEnum.NBA },
-      homeLocation: 'Atlanta',
-      teamName: 'Hawks',
-      displayName: 'Atlanta Hawks',
-      logoUrl: 'https://a.espncdn.com/i/teamlogos/nba/500/atl.png',
-    },
-
-    {
-      teamID: '3',
-      league: { leagueID: 'nfl-uuid', leagueName: LeagueEnum.NFL },
-      homeLocation: 'Dallas',
-      teamName: 'Cowboys',
-      displayName: 'Dallas Cowboys',
-      logoUrl: 'https://a.espncdn.com/i/teamlogos/nfl/500/dal.png',
-    },
-  ];
+  constructor(private http: HttpClient) {}
 
   getTeamsByLeague(
-    leagueId: string,
+    leagueEnum: LeagueEnum,
     searchTerm: string = '',
     limit: number = 4,
   ): Observable<ITeam[]> {
-    //Nathan: replace with real api call
-    const teams = this.mockTeams.filter(
-      (t) =>
-        t.league.leagueID === leagueId &&
-        t.displayName.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
+    let params = new HttpParams()
+      .set('league_id', leagueEnum)
+      .set('limit', limit.toString());
 
-    // Simulate network delay
-    return of(teams.slice(0, limit)).pipe(delay(500));
+    if (searchTerm && searchTerm.length >= 3) {
+      params = params.set('search', searchTerm);
+    }
+
+    return this.http.get<ITeam[]>(this.apiUrl, { params });
+  }
+
+  getTeamById(teamId: number): Observable<ITeam> {
+    return this.http.get<ITeam>(`${this.apiUrl}/${teamId}`);
   }
 }
