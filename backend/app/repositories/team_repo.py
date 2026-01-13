@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional, Sequence
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.team import Team
+from models.team import Team
 
 
 class TeamRepository:

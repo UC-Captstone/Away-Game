@@ -1,7 +1,7 @@
 from __future__ import annotations
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.db.base import Base
+from db.base import Base
 
 class League(Base):
     __tablename__ = "leagues"

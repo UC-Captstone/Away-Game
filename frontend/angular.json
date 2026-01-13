@@ -56,6 +56,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [".azurewebsites.net"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"

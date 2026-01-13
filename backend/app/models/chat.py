@@ -6,7 +6,7 @@ from sqlalchemy import Index, func, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base
+from db.base import Base
 
 
 class TeamChat(Base):
