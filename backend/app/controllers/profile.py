@@ -123,8 +123,9 @@ async def update_account_settings_service(
     db: AsyncSession,
     account_settings: AccountSettings,
 ) -> None:
-    # Only allow first_name, last_name, email to be updated
     updated = False
+    
+    # Update profile fields
     if account_settings.first_name is not None:
         current_user.first_name = account_settings.first_name
         updated = True
@@ -133,6 +134,22 @@ async def update_account_settings_service(
         updated = True
     if account_settings.email and account_settings.email != current_user.email:
         current_user.email = account_settings.email
+        updated = True
+    
+    # Update notification settings
+    if account_settings.enable_nearby_event_notifications is not None:
+        current_user.enable_nearby_event_notifications = account_settings.enable_nearby_event_notifications
+        updated = True
+    if account_settings.enable_favorite_team_notifications is not None:
+        current_user.enable_favorite_team_notifications = account_settings.enable_favorite_team_notifications
+        updated = True
+    if account_settings.enable_safety_alert_notifications is not None:
+        current_user.enable_safety_alert_notifications = account_settings.enable_safety_alert_notifications
+        updated = True
+    
+    # Update verification status
+    if account_settings.applied_for_verification is not None:
+        current_user.pending_verification = account_settings.applied_for_verification
         updated = True
 
     if not updated:
