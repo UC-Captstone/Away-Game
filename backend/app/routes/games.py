@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
-from app.db.session import get_session
-from app.schemas.game import GameRead
-from app.controllers.games import (
+from ..db.session import get_session
+from ..schemas.game import GameRead
+from ..controllers.games import (
     get_games_by_team_service,
     get_game_service,
     list_games_service,

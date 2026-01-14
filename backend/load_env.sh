@@ -1,8 +1,6 @@
 # To run: . ./load_env.sh
-set -e
 
-
-ENV_FILE="${1:-.env}"
+ENV_FILE="${1:-local-vars.env}"
 
 if [ ! -f "$ENV_FILE" ]; then
   echo ".env file not found at $ENV_FILE"

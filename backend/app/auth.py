@@ -4,9 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import jwt
 
-from app.db.session import get_session
-from app.models.user import User
-from app.core.config import settings
+from .db.session import get_session
+from .models.user import User
+from .core.config import settings
 
 security = HTTPBearer()
 

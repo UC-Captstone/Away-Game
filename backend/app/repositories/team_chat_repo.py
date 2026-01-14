@@ -3,7 +3,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.team_chat import TeamChat
+from ..models.team_chat import TeamChat
 
 
 class TeamChatRepository:

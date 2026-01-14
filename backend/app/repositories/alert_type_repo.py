@@ -3,7 +3,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.alert_type import AlertType
+from ..models.alert_type import AlertType
 
 
 class AlertTypeRepository:

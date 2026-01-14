@@ -5,10 +5,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 
-from app.models.favorite import Favorite
-from app.models.user import User
-from app.models.event import Event
-from app.repositories.favorite_repo import FavoriteRepository
+from ..models.favorite import Favorite
+from ..models.user import User
+from ..models.event import Event
+from ..repositories.favorite_repo import FavoriteRepository
 
 
 async def get_saved_events_service(

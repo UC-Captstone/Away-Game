@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from app.db.session import get_session
-from app.schemas.event import EventRead
-from app.controllers.favorites import (
+from ..db.session import get_session
+from ..schemas.event import EventRead
+from ..controllers.favorites import (
     get_saved_events_service,
     delete_saved_event_service,
     add_saved_event_service,

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from app.db.session import init_db
-from app.routes.api import api_router
-from app.core.middleware import setup_cors
+from .db.session import init_db
+from .routes.api import api_router
+from .core.middleware import setup_cors
 
 app = FastAPI(title="Away-Game API")
 

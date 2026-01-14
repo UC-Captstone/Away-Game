@@ -3,22 +3,22 @@ from sqlalchemy import select
 import sqlalchemy as sa
 from sqlalchemy.orm import selectinload
 
-from app.models.user import User
-from app.models.event import Event
-from app.models.favorite import Favorite
-from app.models.team import Team
-from app.models.game import Game
-from app.models.user_favorite_team import UserFavoriteTeams
-from app.models.team_chat import TeamChat
-from app.schemas.user import UserProfile, HeaderInfo, AccountSettings
-from app.repositories.user_favorite_team_repo import UserFavoriteTeamsRepository
-from app.repositories.favorite_repo import FavoriteRepository
+from ..models.user import User
+from ..models.event import Event
+from ..models.favorite import Favorite
+from ..models.team import Team
+from ..models.game import Game
+from ..models.user_favorite_team import UserFavoriteTeams
+from ..models.team_chat import TeamChat
+from ..schemas.user import UserProfile, HeaderInfo, AccountSettings
+from ..repositories.user_favorite_team_repo import UserFavoriteTeamsRepository
+from ..repositories.favorite_repo import FavoriteRepository
 from uuid import UUID
 from typing import List
 from fastapi import HTTPException, status
-from app.schemas.event import EventRead
-from app.schemas.team import TeamRead
-from app.schemas.converters import convert_team_to_read, convert_event_to_read, convert_team_chat_to_read
+from ..schemas.event import EventRead
+from ..schemas.team import TeamRead
+from ..schemas.converters import convert_team_to_read, convert_event_to_read, convert_team_chat_to_read
 
 
 async def get_user_profile_service(current_user: User, db: AsyncSession) -> UserProfile:

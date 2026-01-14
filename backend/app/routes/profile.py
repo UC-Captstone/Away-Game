@@ -3,19 +3,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from app.controllers.profile import (
+from ..controllers.profile import (
     get_user_profile_service,
     update_account_settings_service,
     update_favorite_teams_service,
     delete_account_service,
     delete_saved_event_service,
 )
-from app.db.session import get_session
-from app.auth import get_current_user
-from app.models.user import User
-from app.schemas.user import UserProfile, AccountSettings
-from app.schemas.user_favorite_team import FavoriteTeamsUpdate
-from app.schemas.event import EventRead
+from ..db.session import get_session
+from ..auth import get_current_user
+from ..models.user import User
+from ..schemas.user import UserProfile, AccountSettings
+from ..schemas.user_favorite_team import FavoriteTeamsUpdate
+from ..schemas.event import EventRead
 
 router = APIRouter(prefix="/users/me", tags=["profile"])
 

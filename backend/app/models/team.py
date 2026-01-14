@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base
+from ..db.base import Base
 
 class Team(Base):
     __tablename__ = "teams"

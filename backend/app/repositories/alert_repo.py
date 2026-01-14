@@ -6,8 +6,8 @@ from datetime import datetime
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.alert import SafetyAlert
-from app.schemas.common import LocationPoint
+from ..models.alert import SafetyAlert
+from schemas.common import LocationPoint
 
 
 class AlertRepository:

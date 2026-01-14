@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.safety_alert import SafetyAlert
+from ..models.safety_alert import SafetyAlert
 
 
 class SafetyAlertRepository:

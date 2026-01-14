@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import ForeignKey, Index, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base
+from ..db.base import Base
 
 class Event(Base):
     __tablename__ = "events"

@@ -5,10 +5,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from uuid import UUID
 
-from app.models.user_favorite_team import UserFavoriteTeams
-from app.models.user import User
-from app.models.team import Team
-from app.repositories.user_favorite_team_repo import UserFavoriteTeamsRepository
+from ..models.user_favorite_team import UserFavoriteTeams
+from ..models.user import User
+from ..models.team import Team
+from ..repositories.user_favorite_team_repo import UserFavoriteTeamsRepository
 
 
 async def get_user_favorite_teams_service(
