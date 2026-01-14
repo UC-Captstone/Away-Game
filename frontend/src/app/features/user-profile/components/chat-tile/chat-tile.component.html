@@ -1,0 +1,42 @@
+<article
+  class="group relative bg-gradient-to-b from-slate-900 to-slate-900/80 border-4 border-slate-700 rounded-xl overflow-hidden shadow-lg text-slate-300 w-64 h-64 flex flex-col transform transition-all duration-200 ease-out hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:border-sky-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-600 will-change-transform"
+  (click)="navigateToChat($event)"
+  [attr.aria-label]="'Open chat ' + chat.chatID"
+>
+  <div class="absolute top-2 right-2 z-10 pointer-events-none">
+    @if (chat.teamLogoUrl) {
+      <img
+        [src]="chat.teamLogoUrl"
+        alt="team logo"
+        class="w-6 h-6 rounded-full ring-2 ring-slate-700 ring-offset-2 ring-offset-slate-900 shadow-md object-cover transition-all duration-200 group-hover:ring-sky-500/60 group-hover:shadow-sky-900/30"
+      />
+    } @else {
+      <div
+        class="w-6 h-6 rounded-full bg-slate-700 ring-2 ring-slate-600 ring-offset-2 ring-offset-slate-900 flex items-center justify-center text-slate-300 text-xs transition-all duration-200 group-hover:ring-sky-500/60"
+      >
+        T
+      </div>
+    }
+  </div>
+
+  <div class="p-4 flex-1 flex flex-col items-center justify-center text-center gap-3 pt-12">
+    <p
+      class="text-slate-200 text-sm leading-snug whitespace-normal break-words overflow-hidden"
+      title="{{ chat.messageContent }}"
+      style="
+        display: -webkit-box;
+        -webkit-line-clamp: 8;
+        -webkit-box-orient: vertical;
+        line-clamp: 8;
+      "
+    >
+      {{ chat.messageContent }}
+    </p>
+
+    <div class="text-xs">
+      <span class="px-2 py-0.5 rounded-full bg-slate-800/70 border border-slate-700 text-slate-400">
+        {{ chat.timestamp | date: 'short' }}
+      </span>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,49 @@
+.button {
+  display: inline-block;
+  border-radius: 4px;
+  border: none;
+  text-align: center;
+  font-size: 12px;
+  padding: 5px;
+  width: 70px;
+  transition: all 0.5s;
+  cursor: pointer;
+}
+
+.button span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.button span:before {
+  content: '\00ab';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  left: -20px;
+  transition: 0.5s;
+}
+
+.button:hover span {
+  padding-left: 25px;
+}
+
+.button:hover span:before {
+  opacity: 1;
+  left: 0;
+}
+
+.no-animation {
+  transition: none !important;
+}
+
+.no-animation:hover span {
+  padding-left: 0 !important;
+}
+
+.no-animation:hover span:before {
+  opacity: 0 !important;
+  left: -20px !important;
+}

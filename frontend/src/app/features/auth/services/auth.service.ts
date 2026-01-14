@@ -5,7 +5,6 @@ import { from, Observable, switchMap, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { UserAuthResponse } from '../models/authResponse';
 
-//Nathan: fill out later / reference .env
 const API_URL = environment.apiUrl + '/auth';
 
 const INTERNAL_JWT_STORAGE_KEY = 'ag_token';
