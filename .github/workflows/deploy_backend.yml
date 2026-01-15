@@ -121,7 +121,11 @@ jobs:
               {"name": "DATABASE_URL_ASYNC", "value": "${{ env.DATABASE_URL_ASYNC }}"},
               {"name": "CLERK_SECRET_KEY", "value": "${{ env.CLERK_SECRET_KEY }}"},
               {"name": "CLERK_DOMAIN", "value": "${{ env.CLERK_DOMAIN }}"},
-              {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}"}
+              {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}"},
+              {"name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "true"},
+              {"name": "ENABLE_ORYX_BUILD", "value": "true"},
+              {"name": "BUILD_FLAGS", "value": "UseExpressBuild"},
+              {"name": "XDG_CACHE_HOME", "value": "/tmp/.cache"}
             ]
 
       - name: Deploy to Azure Functions
@@ -131,4 +135,5 @@ jobs:
           package: '.'
           scm-do-build-during-deployment: true
           enable-oryx-build: true
+          respect-funcignore: true
           
