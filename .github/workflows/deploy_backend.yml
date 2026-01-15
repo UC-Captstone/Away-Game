@@ -1,52 +1,68 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
-
-name: Build and deploy Python project to Azure Function App - awaygamefunctionapp-dev
+name: Build and Deploy Backend
 
 on:
   push:
-    branches:
-      - dev
-      - main
+    branches: [dev, main]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (dev | prd)'
+        required: false
+        default: ''
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'backend/app'
   PYTHON_VERSION: '3.13'
 
 jobs:
+  setup:
+    name: Determine environment
+    runs-on: ubuntu-latest
+    outputs:
+      env: ${{ steps.set-env.outputs.env }}
+      should_run: ${{ steps.set-env.outputs.should_run }}
+    steps:
+      - id: set-env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENV="${{ github.event.inputs.environment }}"
+            SHOULD_RUN=$( [[ -n "$ENV" ]] && echo "true" || echo "false" )
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            ENV="dev"
+            SHOULD_RUN="true"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ENV="prd"
+            SHOULD_RUN="true"
+          else
+            SHOULD_RUN="false"
+          fi
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+
   build:
+    name: Build Python package
+    needs: setup
+    if: needs.setup.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python version
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Create and start virtual environment
+      - name: Build package
         working-directory: ./backend/app
         run: |
           python -m venv venv
           source venv/bin/activate
+          pip install -r requirements.txt
+          zip release.zip ./* -r
 
-      - name: Install dependencies
-        working-directory: ./backend/app
-        run: pip install -r requirements.txt
-
-      # Optional: Add step to run tests here
-
-      - name: Zip artifact for deployment
-        working-directory: ./backend/app
-        run: zip release.zip ./* -r
-
-      - name: Upload artifact for deployment job
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: python-app
@@ -55,23 +71,21 @@ jobs:
             !backend/app/venv/
 
   deploy:
+    name: Deploy to ${{ needs.setup.outputs.env }}
+    needs: [setup, build]
     runs-on: ubuntu-latest
-    needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: python-app
 
-      - name: Unzip artifact for deployment
-        run: |
-          unzip release.zip
-          rm release.zip
-        
+      - name: Unzip artifact
+        run: unzip release.zip && rm release.zip
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -79,106 +93,43 @@ jobs:
           tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUB_ID }}
 
-      - name: Get secrets from Azure Key Vault
+      - name: Retrieve Secrets from Key Vault
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            POSTGRES_DB=$(az keyvault secret show --name postgres-db --vault-name away-game-kv --query value -o tsv)
-            POSTGRES_USER=$(az keyvault secret show --name postgres-user --vault-name away-game-kv --query value -o tsv)
-            POSTGRES_PASSWORD=$(az keyvault secret show --name postgres-password --vault-name away-game-kv --query value -o tsv)
-            POSTGRES_HOST=$(az keyvault secret show --name postgres-host --vault-name away-game-kv --query value -o tsv)
-            POSTGRES_PORT=$(az keyvault secret show --name postgres-port --vault-name away-game-kv --query value -o tsv)
-            DATABASE_URL=$(az keyvault secret show --name database-url --vault-name away-game-kv --query value -o tsv)
-            SYNC_DATABASE_URL=$(az keyvault secret show --name sync-database-url --vault-name away-game-kv --query value -o tsv)
-            ASYNC_DATABASE_URL=$(az keyvault secret show --name async-database-url --vault-name away-game-kv --query value -o tsv)
-            DATABASE_URL_ASYNC=$(az keyvault secret show --name database-url-async --vault-name away-game-kv --query value -o tsv)
-            CLERK_SECRET_KEY=$(az keyvault secret show --name clerk-secret-key --vault-name away-game-kv --query value -o tsv)
-            CLERK_DOMAIN=$(az keyvault secret show --name clerk-domain --vault-name away-game-kv --query value -o tsv)
-
-            echo "::add-mask::$POSTGRES_DB"
-            echo "::add-mask::$POSTGRES_USER"
-            echo "::add-mask::$POSTGRES_PASSWORD"
-            echo "::add-mask::$POSTGRES_HOST"
-            echo "::add-mask::$POSTGRES_PORT"
-            echo "::add-mask::$DATABASE_URL"
-            echo "::add-mask::$SYNC_DATABASE_URL"
-            echo "::add-mask::$ASYNC_DATABASE_URL"
-            echo "::add-mask::$DATABASE_URL_ASYNC"
-            echo "::add-mask::$CLERK_SECRET_KEY"
-            echo "::add-mask::$CLERK_DOMAIN"
-
-            echo "POSTGRES_DB=$POSTGRES_DB" >> $GITHUB_ENV
-            echo "POSTGRES_USER=$POSTGRES_USER" >> $GITHUB_ENV
-            echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> $GITHUB_ENV
-            echo "POSTGRES_HOST=$POSTGRES_HOST" >> $GITHUB_ENV
-            echo "POSTGRES_PORT=$POSTGRES_PORT" >> $GITHUB_ENV
-            echo "DATABASE_URL=$DATABASE_URL" >> $GITHUB_ENV
-            echo "SYNC_DATABASE_URL=$SYNC_DATABASE_URL" >> $GITHUB_ENV
-            echo "ASYNC_DATABASE_URL=$ASYNC_DATABASE_URL" >> $GITHUB_ENV
-            echo "DATABASE_URL_ASYNC=$DATABASE_URL_ASYNC" >> $GITHUB_ENV
-            echo "CLERK_SECRET_KEY=$CLERK_SECRET_KEY" >> $GITHUB_ENV
-            echo "CLERK_DOMAIN=$CLERK_DOMAIN" >> $GITHUB_ENV
+            secrets=(postgres-db postgres-user postgres-password postgres-host postgres-port 
+                    database-url sync-database-url async-database-url database-url-async 
+                    clerk-secret-key clerk-domain jwt-secret-key)
+            for secret in "${secrets[@]}"; do
+              value=$(az keyvault secret show --name $secret --vault-name away-game-kv --query value -o tsv)
+              echo "::add-mask::$value"
+              var_name=$(echo "$secret" | tr '[:lower:]-' '[:upper:]_')
+              echo "$var_name=$value" >> $GITHUB_ENV
+            done
 
       - name: Configure Function App Settings
         uses: azure/appservice-settings@v1
         with:
-          app-name: 'awaygamefunctionapp-dev'
+          app-name: awaygamefunctionapp-${{ needs.setup.outputs.env }}
           app-settings-json: |
             [
-              {
-                "name": "POSTGRES_DB",
-                "value": "${{ env.POSTGRES_DB }}"
-              },
-              {
-                "name": "POSTGRES_USER",
-                "value": "${{ env.POSTGRES_USER }}"
-              },
-              {
-                "name": "POSTGRES_PASSWORD",
-                "value": "${{ env.POSTGRES_PASSWORD }}"
-              },
-              {
-                "name": "POSTGRES_HOST",
-                "value": "${{ env.POSTGRES_HOST }}"
-              },
-              {
-                "name": "POSTGRES_PORT",
-                "value": "${{ env.POSTGRES_PORT }}"
-              },
-              {
-                "name": "DATABASE_URL",
-                "value": "${{ env.DATABASE_URL }}"
-              },
-              {
-                "name": "SYNC_DATABASE_URL",
-                "value": "${{ env.SYNC_DATABASE_URL }}"
-              },
-              {
-                "name": "ASYNC_DATABASE_URL",
-                "value": "${{ env.ASYNC_DATABASE_URL }}"
-              },
-              {
-                "name": "DATABASE_URL_ASYNC",
-                "value": "${{ env.DATABASE_URL_ASYNC }}"
-              },
-              {
-                "name": "CLERK_SECRET_KEY",
-                "value": "${{ env.CLERK_SECRET_KEY }}"
-              },
-              {
-                "name": "CLERK_DOMAIN",
-                "value": "${{ env.CLERK_DOMAIN }}"
-              },
-              {
-                "name": "JWT_SECRET_KEY",
-                "value": "${{ env.JWT_SECRET_KEY }}"
-              }
+              {"name": "POSTGRES_DB", "value": "${{ env.POSTGRES_DB }}"},
+              {"name": "POSTGRES_USER", "value": "${{ env.POSTGRES_USER }}"},
+              {"name": "POSTGRES_PASSWORD", "value": "${{ env.POSTGRES_PASSWORD }}"},
+              {"name": "POSTGRES_HOST", "value": "${{ env.POSTGRES_HOST }}"},
+              {"name": "POSTGRES_PORT", "value": "${{ env.POSTGRES_PORT }}"},
+              {"name": "DATABASE_URL", "value": "${{ env.DATABASE_URL }}"},
+              {"name": "SYNC_DATABASE_URL", "value": "${{ env.SYNC_DATABASE_URL }}"},
+              {"name": "ASYNC_DATABASE_URL", "value": "${{ env.ASYNC_DATABASE_URL }}"},
+              {"name": "DATABASE_URL_ASYNC", "value": "${{ env.DATABASE_URL_ASYNC }}"},
+              {"name": "CLERK_SECRET_KEY", "value": "${{ env.CLERK_SECRET_KEY }}"},
+              {"name": "CLERK_DOMAIN", "value": "${{ env.CLERK_DOMAIN }}"},
+              {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}"}
             ]
 
-      - name: 'Deploy to Azure Functions'
+      - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
-        id: deploy-to-function
         with:
-          app-name: 'awaygamefunctionapp-dev'
+          app-name: awaygamefunctionapp-${{ needs.setup.outputs.env }}
           package: '.'
           
