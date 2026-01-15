@@ -145,8 +145,8 @@ jobs:
       - name: Login to Azure (prd)
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_PRD_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_PRD_TENANT_ID }}
+          client-id: ${{ secrets.AZURE_DEV_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUB_ID }}
 
       - name: Get Clerk API token from Key Vault (prd)
