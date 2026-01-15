@@ -57,10 +57,7 @@ jobs:
       - name: Build package
         working-directory: ./backend/app
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-          zip release.zip ./* -r
+          zip -r release.zip . -x "venv/*" -x "__pycache__/*" -x "*.pyc" -x "*.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -132,4 +129,6 @@ jobs:
         with:
           app-name: awaygamefunctionapp-${{ needs.setup.outputs.env }}
           package: '.'
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true
           
