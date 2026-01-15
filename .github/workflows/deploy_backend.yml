@@ -124,7 +124,6 @@ jobs:
               {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}"},
               {"name": "SCM_DO_BUILD_DURING_DEPLOYMENT", "value": "true"},
               {"name": "ENABLE_ORYX_BUILD", "value": "true"},
-              {"name": "BUILD_FLAGS", "value": "UseExpressBuild"},
               {"name": "XDG_CACHE_HOME", "value": "/tmp/.cache"}
             ]
 
@@ -133,7 +132,5 @@ jobs:
         with:
           app-name: awaygamefunctionapp-${{ needs.setup.outputs.env }}
           package: '.'
-          scm-do-build-during-deployment: true
-          enable-oryx-build: true
           respect-funcignore: true
           
