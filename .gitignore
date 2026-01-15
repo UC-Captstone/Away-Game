@@ -45,6 +45,7 @@ yarn-error.log
 .env
 .env.local
 .env.*.local
+.python-version
 
 # Logs and coverage
 logs/
