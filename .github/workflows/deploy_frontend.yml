@@ -1,57 +1,69 @@
-# Combined build & deploy workflow for dev (dev branch) and prd (main branch)
-# Triggers on push to dev or main, and supports manual workflow_dispatch with an 'environment' input.
-name: Build and deploy container app to Azure Web App - away-game (dev & prd)
+name: Build and Deploy Frontend
 
 on:
   push:
-    branches:
-      - dev
-      - main
+    branches: [dev, main]
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Optional: run for dev or prd (dev | prd). Leave empty to run nothing automatically.'
+        description: 'Target environment (dev | prd)'
         required: false
         default: ''
 
 jobs:
-  build-and-deploy-dev:
-    name: Build, push and deploy to away-game-dev
+  setup:
+    name: Determine environment
     runs-on: ubuntu-latest
-    # Only run for pushes to the dev branch, or when manually dispatched with environment=dev
-    if: >
-      github.ref == 'refs/heads/dev'
-      || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    outputs:
+      env: ${{ steps.set-env.outputs.env }}
+      should_run: ${{ steps.set-env.outputs.should_run }}
+    steps:
+      - id: set-env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENV="${{ github.event.inputs.environment }}"
+            SHOULD_RUN=$( [[ -n "$ENV" ]] && echo "true" || echo "false" )
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            ENV="dev"
+            SHOULD_RUN="true"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ENV="prd"
+            SHOULD_RUN="true"
+          else
+            SHOULD_RUN="false"
+          fi
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: Build and deploy to ${{ needs.setup.outputs.env }}
+    needs: setup
+    if: needs.setup.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
 
     steps:
-      - name: Debug environment variables
-        run: env
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v2
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Log in to container registry (dev)
+      - name: Login to Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor}}
-          password: ${{ secrets.CR_PAT}}
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
 
-      - name: Build and push container image to registry (dev)
+      - name: Build and Push Image
         uses: docker/build-push-action@v4
         with:
           context: ./frontend
+          file: ./frontend/dockerfile
           push: true
           tags: |
-            ghcr.io/uc-captstone/away-game:dev-latest
-            ghcr.io/uc-captstone/away-game:dev-${{ github.sha }}
-          file: ./frontend/dockerfile
+            ghcr.io/uc-captstone/away-game:${{ needs.setup.outputs.env }}-latest
+            ghcr.io/uc-captstone/away-game:${{ needs.setup.outputs.env }}-${{ github.sha }}
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -60,138 +72,31 @@ jobs:
           tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUB_ID }}
 
-      - name: Get Clerk API token from Key Vault (dev)
+      - name: Retrieve Secrets from Key Vault
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            CLERK_SECRET_KEY=$(az keyvault secret show --name clerk-secret-key --vault-name away-game-kv --query value -o tsv)
-            echo "::add-mask::$CLERK_SECRET_KEY"
-            echo "CLERK_SECRET_KEY=$CLERK_SECRET_KEY" >> $GITHUB_ENV
+            for secret in clerk-secret-key clerk-domain jwt-secret-key; do
+              value=$(az keyvault secret show --name $secret --vault-name away-game-kv --query value -o tsv)
+              echo "::add-mask::$value"
+              var_name=$(echo "$secret" | tr '[:lower:]-' '[:upper:]_')
+              echo "$var_name=$value" >> $GITHUB_ENV
+            done
 
-            CLERK_DOMAIN=$(az keyvault secret show --name clerk-domain --vault-name away-game-kv --query value -o tsv)
-            echo "::add-mask::$CLERK_DOMAIN"
-            echo "CLERK_DOMAIN=$CLERK_DOMAIN" >> $GITHUB_ENV
-
-            JWT_SECRET_KEY=$(az keyvault secret show --name jwt-secret-key --vault-name away-game-kv --query value -o tsv)
-            echo "::add-mask::$JWT_SECRET_KEY"
-            echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> $GITHUB_ENV
-
-      - name: Configure Web App Settings (dev)
+      - name: Configure App Settings
         uses: azure/appservice-settings@v1
         with:
-          app-name: 'away-game-dev'
+          app-name: away-game-${{ needs.setup.outputs.env }}
           app-settings-json: |
             [
-              {
-                "name": "CLERK_SECRET_KEY",
-                "value": "${{ env.CLERK_SECRET_KEY }}",
-                "slotSetting": false
-              },
-              {
-                "name": "CLERK_DOMAIN",
-                "value": "${{ env.CLERK_DOMAIN }}",
-                "slotSetting": false
-              },
-              {
-                "name": "JWT_SECRET_KEY",
-                "value": "${{ env.JWT_SECRET_KEY }}",
-                "slotSetting": false
-              }
+              {"name": "CLERK_SECRET_KEY", "value": "${{ env.CLERK_SECRET_KEY }}", "slotSetting": false},
+              {"name": "CLERK_DOMAIN", "value": "${{ env.CLERK_DOMAIN }}", "slotSetting": false},
+              {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}", "slotSetting": false}
             ]
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
+      - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'away-game-dev'
-          slot-name: 'Production'
-          images: 'ghcr.io/uc-captstone/away-game:dev-latest'
-
-  build-and-deploy-prd:
-    name: Build, push and deploy to away-game-prd
-    runs-on: ubuntu-latest
-    # Only run for pushes to the main branch, or when manually dispatched with environment=prd
-    if: >
-      github.ref == 'refs/heads/main'
-      || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prd')
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Log in to container registry (prd)
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor}}
-          password: ${{ secrets.CR_PAT}}
-
-      - name: Build and push container image to registry (prd)
-        uses: docker/build-push-action@v4
-        with:
-          context: ./frontend
-          push: true
-          tags: |
-            ghcr.io/uc-captstone/away-game:prd-latest
-            ghcr.io/uc-captstone/away-game:prd-${{ github.sha }}
-          file: ./frontend/dockerfile
-
-      - name: Login to Azure (prd)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_DEV_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_DEV_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUB_ID }}
-
-      - name: Get Clerk API token from Key Vault (prd)
-        uses: azure/CLI@v1
-        with:
-          inlineScript: |
-            CLERK_SECRET_KEY=$(az keyvault secret show --name clerk-secret-key --vault-name away-game-kv --query value -o tsv)
-            CLERK_DOMAIN=$(az keyvault secret show --name clerk-domain --vault-name away-game-kv --query value -o tsv)
-            JWT_SECRET_KEY=$(az keyvault secret show --name jwt-secret-key --vault-name away-game-kv --query value -o tsv)
-
-            echo "::add-mask::$CLERK_SECRET_KEY"
-            echo "::add-mask::$CLERK_DOMAIN"
-            echo "::add-mask::$JWT_SECRET_KEY"
-
-            echo "CLERK_SECRET_KEY=$CLERK_SECRET_KEY" >> $GITHUB_ENV
-            echo "CLERK_DOMAIN=$CLERK_DOMAIN" >> $GITHUB_ENV
-            echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> $GITHUB_ENV
-
-      - name: Configure Web App Settings (prd)
-        uses: azure/appservice-settings@v1
-        with:
-          app-name: 'away-game-prd'
-          app-settings-json: |
-            [
-              {
-                "name": "CLERK_SECRET_KEY",
-                "value": "${{ env.CLERK_SECRET_KEY }}",
-                "slotSetting": false
-              },
-              {
-                "name": "CLERK_DOMAIN",
-                "value": "${{ env.CLERK_DOMAIN }}",
-                "slotSetting": false
-              },
-              {
-                "name": "JWT_SECRET_KEY",
-                "value": "${{ env.JWT_SECRET_KEY }}",
-                "slotSetting": false
-              }
-            ]
-
-      - name: Deploy to Azure Web App (prd)
-        id: deploy-to-webapp-prd
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'away-game-prd'
-          slot-name: 'Production'
-          images: 'ghcr.io/uc-captstone/away-game:prd-${{ github.sha }}'
+          app-name: away-game-${{ needs.setup.outputs.env }}
+          slot-name: Production
+          images: ghcr.io/uc-captstone/away-game:${{ needs.setup.outputs.env }}-${{ needs.setup.outputs.env == 'prd' && github.sha || 'latest' }}
