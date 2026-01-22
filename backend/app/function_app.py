@@ -16,3 +16,15 @@ async def handle_request(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.exception("Error handling request or importing app")
         return func.HttpResponse(f"Internal Server Error: {str(e)}", status_code=500)
+
+@app.function_name(name="NightlyTaskTimer")
+@app.timer_trigger(schedule="0 0 5 * * *", arg_name="myTimer", run_on_startup=False, use_monitor=False)
+async def nightly_task_timer(myTimer: func.TimerRequest) -> None:
+    logging.info('Nightly task timer trigger function executed.')
+    
+    try:
+        from scheduled.nightly_tasks import run_nightly_task
+        await run_nightly_task()
+    except Exception as e:
+        logging.exception("Error running nightly task")
+        raise
