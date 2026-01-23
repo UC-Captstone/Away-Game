@@ -2,6 +2,14 @@ from __future__ import annotations
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel
+from enum import Enum
+
+
+class EventTypeEnum(str, Enum):
+    GAME = "Game"
+    TAILGATE = "Tailgate"
+    MEETUP = "Meetup"
+    WATCH_PARTY = "WatchParty"
 
 
 class EventTypeCreate(BaseModel):

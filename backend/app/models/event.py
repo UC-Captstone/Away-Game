@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import ForeignKey, Index, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base
+from db.base import Base
 
 class Event(Base):
     __tablename__ = "events"
@@ -29,6 +29,7 @@ class Event(Base):
     )
     title: Mapped[str]
     description: Mapped[Optional[str]]
+    picture_url: Mapped[Optional[str]]
     game_date: Mapped[Optional[datetime]]
     latitude: Mapped[float | None]
     longitude: Mapped[float | None]

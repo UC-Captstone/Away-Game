@@ -6,10 +6,11 @@ export enum LeagueEnum {
   MLS = 'MLS',
 }
 
-export const LeagueIdMap: Record<LeagueEnum, string> = {
-  [LeagueEnum.NBA]: 'nba-uuid',
-  [LeagueEnum.NFL]: 'nfl-uuid',
-  [LeagueEnum.MLB]: 'mlb-uuid',
-  [LeagueEnum.NHL]: 'nhl-uuid',
-  [LeagueEnum.MLS]: 'mls-uuid',
+export const LeagueIdMap: Record<LeagueEnum, number> = {
+  //Nathan: adjust later
+  [LeagueEnum.NBA]: 1,
+  [LeagueEnum.NFL]: 28,
+  [LeagueEnum.MLB]: 2,
+  [LeagueEnum.NHL]: 3,
+  [LeagueEnum.MLS]: 4,
 };

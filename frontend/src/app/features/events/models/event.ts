@@ -2,7 +2,7 @@ import { EventTypeEnum } from '../../../shared/models/event-type-enum';
 import { LeagueEnum } from '../../../shared/models/league-enum';
 
 export interface IEvent {
-  eventID: string; // UUID
+  eventId: string; // UUID
   eventType: EventTypeEnum;
   eventName: string;
   dateTime: Date;

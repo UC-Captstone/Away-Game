@@ -3,7 +3,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.favorite import Favorite
+from models.favorite import Favorite
 
 
 class FavoriteRepository:

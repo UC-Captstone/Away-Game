@@ -2,28 +2,53 @@ from datetime import datetime, timedelta
 import jwt
 from jwt import PyJWKClient
 from dotenv import load_dotenv
+from pathlib import Path
 from fastapi import Request, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from clerk_backend_api import Clerk
-from app.models.user import User
-from app.core.config import settings
-from app.repositories.user_repo import UserRepository
+from models.user import User
+from core.config import settings
+from repositories.user_repo import UserRepository
 
-load_dotenv()
+# load environment variables from both the backend/.env and project root .env
+env_loaded = False
+for candidate in [
+    Path(__file__).resolve().parents[3] / ".env",  # project root
+    Path(__file__).resolve().parents[1] / ".env"   # backend/.env
+]:
+    try:
+        if candidate.exists():
+            load_dotenv(dotenv_path=str(candidate), override=False)
+            env_loaded = True
+    except Exception:
+        pass
+if not env_loaded:
+    # Fallback to default search
+    load_dotenv()
 
 CLERK_SECRET_KEY = settings.clerk_secret_key
 clerk_client = Clerk(bearer_auth=CLERK_SECRET_KEY)
 
+def _build_jwks_url(domain: str) -> str:
+    if not domain:
+        raise ValueError("CLERK_DOMAIN is not set")
+    normalized = domain.strip()
+    if normalized.startswith("http://"):
+        normalized = normalized[len("http://"):]
+    if normalized.startswith("https://"):
+        normalized = normalized[len("https://"):]
+    return f"https://{normalized}/.well-known/jwks.json"
+
 try:
+    jwks_url = _build_jwks_url(settings.clerk_domain)
     jwks_client = PyJWKClient(
-        f"https://{settings.clerk_domain}/.well-known/jwks.json",
+        jwks_url,
         cache_keys=True,
-        max_cached_keys=16,
-        cache_timeout=3600
+        max_cached_keys=16
     )
 except Exception as e:
-    print(f"Warning: Could not initialize JWKS client: {e}")
+    print(f"Warning: Could not initialize JWKS client (domain='{settings.clerk_domain}'): {e}")
     jwks_client = None
 
 async def verify_clerk_token(token: str) -> dict:
@@ -34,6 +59,7 @@ async def verify_clerk_token(token: str) -> dict:
         )
 
     try:
+        print(f"DEBUG: Attempting to verify token (first 50 chars): {token[:50]}...")
         signing_key = jwks_client.get_signing_key_from_jwt(token)
         
         decoded = jwt.decode(
