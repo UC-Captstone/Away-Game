@@ -15,7 +15,7 @@ class Venue(Base):
     city: Mapped[str | None]
     state_region: Mapped[str | None]
     country: Mapped[str | None]
-    timezone: Mapped[str]
+    timezone: Mapped[str | None]
     latitude: Mapped[float | None]
     longitude: Mapped[float | None]
     capacity: Mapped[int | None]
