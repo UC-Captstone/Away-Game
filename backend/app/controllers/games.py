@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 
-from ..models.game import Game
-from ..models.team import Team
+from models.game import Game
+from models.team import Team
 
 
 async def get_games_by_team_service(team_id: int, limit: int, offset: int, db: AsyncSession) -> List[Game]:

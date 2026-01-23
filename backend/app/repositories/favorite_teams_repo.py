@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models.favorite import UserFavoriteTeams
+from models.favorite import UserFavoriteTeams
 
 
 class UserFavoriteTeamsRepository:

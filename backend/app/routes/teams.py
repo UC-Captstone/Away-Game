@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
-from ..db.session import get_session
-from ..schemas.team import TeamCreate, TeamRead, TeamUpdate
-from ..controllers.teams import (
+from db.session import get_session
+from schemas.team import TeamCreate, TeamRead, TeamUpdate
+from controllers.teams import (
     get_teams_service,
     get_team_service,
     create_team_service,

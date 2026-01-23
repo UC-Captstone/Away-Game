@@ -4,8 +4,8 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models.user import User
-from ..repositories.user_repo import UserRepository
+from models.user import User
+from repositories.user_repo import UserRepository
 
 
 async def create_user_service(user_data, db: AsyncSession) -> User:

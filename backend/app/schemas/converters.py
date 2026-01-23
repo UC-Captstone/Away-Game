@@ -1,13 +1,13 @@
 from typing import Optional
-from ..models.event import Event
-from ..models.team import Team
-from ..models.league import League
-from ..models.team_chat import TeamChat
-from ..schemas.event import EventRead, TeamLogos
-from ..schemas.team import TeamRead
-from ..schemas.league import LeagueRead, LeagueEnum
-from ..schemas.team_chat import TeamChatRead
-from ..schemas.types import EventTypeEnum
+from models.event import Event
+from models.team import Team
+from models.league import League
+from models.team_chat import TeamChat
+from schemas.event import EventRead, TeamLogos
+from schemas.team import TeamRead
+from schemas.league import LeagueRead, LeagueEnum
+from schemas.team_chat import TeamChatRead
+from schemas.types import EventTypeEnum
 
 
 def convert_league_to_read(league: League) -> LeagueRead:

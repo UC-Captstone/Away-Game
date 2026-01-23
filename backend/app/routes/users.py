@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from ..db.session import get_session
-from ..schemas.user import UserCreate, UserRead, UserUpdate
-from ..controllers.users import (
+from db.session import get_session
+from schemas.user import UserCreate, UserRead, UserUpdate
+from controllers.users import (
     create_user_service,
     list_users_service,
     get_user_service,

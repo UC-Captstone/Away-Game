@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..routes import auth, games, users, teams, user_favorite_teams, favorites, profile
+from routes import auth, games, users, teams, user_favorite_teams, favorites, profile
 
 
 api_router = APIRouter(prefix="/api")

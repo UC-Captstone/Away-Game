@@ -1,8 +1,8 @@
-from ..controllers.auth import sync_user_service
+from controllers.auth import sync_user_service
 from fastapi import APIRouter, Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..db.session import get_session
-from ..schemas.auth import UserAuthResponse
+from db.session import get_session
+from schemas.auth import UserAuthResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

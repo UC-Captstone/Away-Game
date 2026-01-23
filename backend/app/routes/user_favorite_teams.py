@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from ..db.session import get_session
-from ..schemas.team import TeamRead
-from ..controllers.user_favorite_teams import (
+from db.session import get_session
+from schemas.team import TeamRead
+from controllers.user_favorite_teams import (
     get_user_favorite_teams_service,
     add_favorite_team_service,
     replace_favorite_teams_service,

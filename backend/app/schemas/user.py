@@ -2,9 +2,9 @@ from __future__ import annotations
 from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
-from ..schemas.event import EventRead
-from ..schemas.team import TeamRead
-from ..schemas.team_chat import TeamChatRead
+from schemas.event import EventRead
+from schemas.team import TeamRead
+from schemas.team_chat import TeamChatRead
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 

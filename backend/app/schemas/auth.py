@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pydantic import BaseModel
-from ..schemas.user import UserRead
+from schemas.user import UserRead
 
 
 class UserAuthResponse(BaseModel):

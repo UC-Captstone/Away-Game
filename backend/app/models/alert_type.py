@@ -1,7 +1,7 @@
 from __future__ import annotations
 from sqlalchemy import String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from ..db.base import Base
+from db.base import Base
 
 
 class AlertType(Base):

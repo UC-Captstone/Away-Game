@@ -3,7 +3,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..models.venue import Venue
+from models.venue import Venue
 
 
 class VenueRepository:

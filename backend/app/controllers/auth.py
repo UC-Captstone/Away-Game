@@ -7,9 +7,9 @@ from fastapi import Request, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from clerk_backend_api import Clerk
-from ..models.user import User
-from ..core.config import settings
-from ..repositories.user_repo import UserRepository
+from models.user import User
+from core.config import settings
+from repositories.user_repo import UserRepository
 
 # load environment variables from both the backend/.env and project root .env
 env_loaded = False
