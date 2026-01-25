@@ -10,7 +10,7 @@ export class EventService {
   getFeaturedEvents(): Observable<IEvent[]> {
     const featuredEvents: IEvent[] = [
       {
-        eventID: '1',
+        eventId: '1',
         eventType: EventTypeEnum.Tailgate,
         eventName: 'Sample Tailgate Event',
         dateTime: new Date('2024-10-15T18:00:00Z'),
@@ -19,7 +19,7 @@ export class EventService {
         isSaved: false,
       },
       {
-        eventID: '2',
+        eventId: '2',
         eventType: EventTypeEnum.Game,
         eventName: 'Sample Game Event',
         dateTime: new Date('2024-11-20T20:00:00Z'),
@@ -31,7 +31,7 @@ export class EventService {
         isSaved: true,
       },
       {
-        eventID: '3',
+        eventId: '3',
         eventType: EventTypeEnum.Game,
         eventName: 'Another Game Event',
         dateTime: new Date('2024-12-05T19:30:00Z'),
@@ -43,7 +43,7 @@ export class EventService {
         isSaved: false,
       },
       {
-        eventID: '4',
+        eventId: '4',
         eventType: EventTypeEnum.Tailgate,
         eventName: 'Another Tailgate Event',
         dateTime: new Date('2024-09-10T17:00:00Z'),
