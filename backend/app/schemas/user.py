@@ -2,7 +2,11 @@ from __future__ import annotations
 from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel
+from schemas.event import EventRead
+from schemas.team import TeamRead
+from schemas.team_chat import TeamChatRead
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
 class UserBase(BaseModel):
@@ -32,6 +36,7 @@ class UserUpdate(BaseModel):
     is_verified: Optional[bool] = None
     pending_verification: Optional[bool] = None
 
+
 class UserRead(UserBase):
     user_id: UUID
     created_at: datetime
@@ -42,35 +47,32 @@ class UserRead(UserBase):
 
 
 class HeaderInfo(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     profile_picture_url: Optional[str] = None
     username: str
-    display_name: str
+    display_name: str  # Combined first_name + last_name
     is_verified: bool
-    favorite_teams: List['TeamRead'] = []
-
-    class Config:
-        from_attributes = True
+    favorite_teams: List[TeamRead] = []
 
 
 class AccountSettings(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+    first_name: str
+    last_name: str
     email: str
     applied_for_verification: bool
     enable_nearby_event_notifications: bool = False
     enable_favorite_team_notifications: bool = False
     enable_safety_alert_notifications: bool = False
 
-    class Config:
-        from_attributes = True
-
 
 class UserProfile(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     header_info: HeaderInfo
     account_settings: AccountSettings
-    saved_events: List['EventRead'] = []
-    my_events: List['EventRead'] = []
-    my_chats: List['TeamChatRead'] = []
-
-    class Config:
-        from_attributes = True
+    saved_events: List[EventRead] = []
+    my_events: List[EventRead] = []
+    my_chats: List[TeamChatRead] = []

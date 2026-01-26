@@ -29,6 +29,7 @@ class Event(Base):
     )
     title: Mapped[str]
     description: Mapped[Optional[str]]
+    picture_url: Mapped[Optional[str]]
     game_date: Mapped[Optional[datetime]]
     latitude: Mapped[float | None]
     longitude: Mapped[float | None]

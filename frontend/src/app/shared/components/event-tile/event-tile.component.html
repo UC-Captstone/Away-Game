@@ -1,0 +1,107 @@
+<article
+  class="group bg-slate-900 border-4 border-slate-700 rounded-lg overflow-hidden shadow-lg text-slate-300 w-64 h-64 flex flex-col transform transition-all duration-200 ease-out hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:border-sky-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-600 will-change-transform"
+  onclick="navigateToEventDetails($event)"
+>
+  <div class="flex-shrink-0 w-full h-1/2 bg-slate-800 relative overflow-hidden">
+    @if (eventTile.eventType === 'Game') {
+      <div class="w-full h-full flex items-center justify-center gap-2 p-2">
+        <div class="w-1/2 h-full flex items-center justify-center bg-slate-800 overflow-hidden">
+          @if (eventTile.teamLogos?.home) {
+            <img
+              [src]="eventTile.teamLogos?.home"
+              alt="home logo"
+              class="w-full h-full object-cover"
+            />
+          } @else {
+            <div
+              class="w-full h-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs"
+            >
+              Home
+            </div>
+          }
+        </div>
+        <div class="w-1/2 h-full flex items-center justify-center bg-slate-800 overflow-hidden">
+          @if (eventTile.teamLogos?.away) {
+            <img
+              [src]="eventTile.teamLogos?.away"
+              alt="away logo"
+              class="w-full h-full object-cover"
+            />
+          } @else {
+            <div
+              class="w-full h-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs"
+            >
+              Away
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      @if (eventTile.imageUrl) {
+        <img
+          [src]="eventTile.imageUrl"
+          alt="{{ eventTile.eventName }}"
+          class="w-full h-full object-cover"
+        />
+      } @else {
+        <img
+          [src]="'/assets/tailgate.png'"
+          alt="{{ eventTile.eventName }}"
+          class="w-full h-full object-cover"
+        />
+      }
+    }
+  </div>
+
+  <div class="p-2 flex-1 flex flex-col justify-between">
+    <div>
+      <h4 class="text-sky-400 text-lg font-semibold truncate">{{ eventTile.eventName }}</h4>
+      <p class="text-xs text-slate-400 mt-2 truncate">{{ eventTile.location }}</p>
+      <p class="text-xs text-slate-400 mt-2">{{ eventTile.dateTime | date: 'medium' }}</p>
+    </div>
+
+    <div class="flex items-center justify-center gap-2 mt-2">
+      <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">{{
+        eventTile.eventType
+      }}</span>
+      @if (eventTile.isUserCreated) {
+        <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">Your event</span>
+      }
+      @if (showSavedIcon) {
+        <button
+          type="button"
+          (click)="toggleSaved($event)"
+          class="ml-auto inline-flex items-center gap-2 px-2 py-1 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700"
+          [attr.aria-pressed]="eventTile.isSaved"
+          [title]="eventTile.isSaved ? 'Saved - click to unsave' : 'Save event'"
+        >
+          @if (eventTile.isSaved) {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 text-sky-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v12l-7-3-7 3V5z" />
+            </svg>
+          } @else {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 text-slate-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 5v14l7-3 7 3V5a2 2 0 00-2-2H7a2 2 0 00-2 2z"
+              />
+            </svg>
+          }
+        </button>
+      }
+    </div>
+  </div>
+</article>
