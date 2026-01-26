@@ -5,14 +5,14 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/auth/components/login/login.component').then((m) => m.Login),
+      import('./features/auth/components/login/login.component').then((m) => m.LoginComponent),
     // Nathan: set up later
     //canActivate: [AuthGuard]
   },
   {
     path: 'signup',
     loadComponent: () =>
-      import('./features/auth/components/signup/signup.component').then((m) => m.Signup),
+      import('./features/auth/components/signup/signup.component').then((m) => m.SignupComponent),
   },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
@@ -21,5 +21,10 @@ export const routes: Routes = [
       import('./features/user-profile/views/user-profile.component').then(
         (m) => m.UserProfileComponent,
       ),
+  },
+  {
+    path: 'home',
+    loadComponent: () =>
+      import('./features/home/views/home.component').then((m) => m.HomeComponent),
   },
 ];
