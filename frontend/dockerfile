@@ -5,4 +5,4 @@ COPY package.json package-lock.json ./
 RUN npm install --legacy-peer-deps
 COPY . ./
 EXPOSE 8080
-CMD ["npm", "run", "start", "--", "--configuration=${BUILD_CONFIG}", "--host=0.0.0.0", "--port=8080"]
+CMD npm run start -- --configuration=${BUILD_CONFIG} --host=0.0.0.0 --port=8080

@@ -58,6 +58,11 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "local": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -73,9 +78,12 @@
             },
             "development": {
               "buildTarget": "frontend:build:development"
+            },
+            "local":{
+              "buildTarget": "frontend:build:local"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "local"
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"
