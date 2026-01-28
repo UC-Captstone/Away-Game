@@ -9,7 +9,7 @@ from db.base import Base
 class Game(Base):
     __tablename__ = "games"
 
-    game_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    game_id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     league_id: Mapped[str] = mapped_column(
         String(10), ForeignKey("leagues.league_code"), nullable=False
