@@ -1,11 +1,11 @@
 import asyncio
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'app'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from espn_client import ESPNClient
+from scheduled.espn_client import ESPNClient
 from schemas.team import TeamCreate
 from schemas.venue import VenueCreate
 from schemas.game import GameCreate
@@ -57,16 +57,16 @@ async def test_get_teams():
         await client.close()
 
 
-async def test_get_scoreboard():
+async def test_get_schedule():
     print("\n")
-    print("Testing: get_nfl_scoreboard()")
+    print("Testing: get_nfl_schedule() with single date")
 
     date = "20251123"
     print(f"Fetching games for: {date}")
 
     client = ESPNClient()
     try:
-        data = await client.get_nfl_scoreboard(dates=date)
+        data = await client.get_nfl_schedule(dates=date)
 
         events = data.get('events', [])
         print(f"\nFound {len(events)} games")
@@ -139,22 +139,68 @@ async def test_get_scoreboard():
         await client.close()
 
 
+async def test_get_schedule_range():
+    print("\n")
+    print("Testing: get_nfl_schedule() with date range")
+
+    start = "20251123"
+    end = (datetime(2025, 11, 23) + timedelta(days=60)).strftime("%Y%m%d")
+    date_range = f"{start}-{end}"
+
+    print(f"Fetching games for date range: {date_range}")
+
+    client = ESPNClient()
+    try:
+        data = await client.get_nfl_schedule(dates=date_range)
+
+        events = data.get('events', [])
+        print(f"\nFound {len(events)} games in next 60 days")
+
+        if events:
+            print("\nFirst 3 games:")
+            for event in events[:3]:
+                game_date = datetime.fromisoformat(event['date'].replace('Z', '+00:00'))
+                competition = event['competitions'][0]
+                home_team = next((c for c in competition['competitors'] if c['homeAway'] == 'home'), None)
+                away_team = next((c for c in competition['competitors'] if c['homeAway'] == 'away'), None)
+
+                home_name = home_team['team']['displayName'] if home_team else 'TBD'
+                away_name = away_team['team']['displayName'] if away_team else 'TBD'
+
+                print(f"  {game_date.strftime('%Y-%m-%d')}: {away_name} @ {home_name}")
+        else:
+            print("\nNo games in next 60 days (might be offseason)")
+
+        return True
+
+    except Exception as e:
+        print(f"\nError: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+    finally:
+        await client.close()
+
+
 async def main():
     results = []
 
     results.append(await test_get_teams())
 
-    results.append(await test_get_scoreboard())
+    results.append(await test_get_schedule())
+
+    results.append(await test_get_schedule_range())
 
     passed = sum(results)
     total = len(results)
-    print(f"Passed: {passed}/{total}")
+    print(f"\nPassed: {passed}/{total}")
 
     if all(results):
-        print("\nAll tests passed!")
+        print("\n Passed")
         return 0
     else:
-        print("\nSome tests failed")
+        print("\nSome failed")
         return 1
 
 
