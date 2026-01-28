@@ -3,7 +3,7 @@ from models.event import Event
 from models.team import Team
 from models.league import League
 from models.team_chat import TeamChat
-from schemas.event import EventRead, TeamLogos
+from schemas.event import EventRead, Location, TeamLogos
 from schemas.team import TeamRead
 from schemas.league import LeagueRead, LeagueEnum
 from schemas.team_chat import TeamChatRead
@@ -60,12 +60,17 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
             except ValueError:
                 league = None
     
-    # Determine location
-    location = ""
+    # Determine venue name
+    venue_name = ""
     if event.venue:
-        location = f"{event.venue.city}, {event.venue.state_region}" if event.venue.city and event.venue.state_region else event.venue.name
-    elif event.latitude and event.longitude:
-        location = f"{event.latitude}, {event.longitude}"
+        venue_name = event.venue.display_name or event.venue.name
+    else:
+        venue_name = "Unknown Venue"
+    
+    # Create location object
+    lat = event.latitude or (event.venue.latitude if event.venue else 0.0)
+    lng = event.longitude or (event.venue.longitude if event.venue else 0.0)
+    location = Location(lat=lat, lng=lng)
     
     # Determine if user created
     is_user_created = event.game_id is None
@@ -76,6 +81,7 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
         event_name=event.title,
         date_time=event.game_date or event.created_at,
         location=location,
+        venue_name=venue_name,
         image_url=event.picture_url,
         team_logos=team_logos,
         league=league,

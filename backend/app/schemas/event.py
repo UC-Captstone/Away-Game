@@ -46,6 +46,11 @@ class TeamLogos(BaseModel):
     home: Optional[str] = None
     away: Optional[str] = None
 
+class Location(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    
+    lat: float
+    lng: float
 
 class EventRead(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
@@ -54,7 +59,8 @@ class EventRead(BaseModel):
     event_type: EventTypeEnum
     event_name: str
     date_time: datetime
-    location: str
+    location: Location
+    venue_name: str
     image_url: Optional[str] = None
     team_logos: Optional[TeamLogos] = None
     league: Optional[LeagueEnum] = None
