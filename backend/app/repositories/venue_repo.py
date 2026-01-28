@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Optional, Sequence
-from uuid import UUID
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.venue import Venue
@@ -10,7 +9,7 @@ class VenueRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get(self, venue_id: UUID) -> Optional[Venue]:
+    async def get(self, venue_id: int) -> Optional[Venue]:
         res = await self.db.execute(select(Venue).where(Venue.venue_id == venue_id))
         return res.scalar_one_or_none()
 
@@ -45,7 +44,7 @@ class VenueRepository:
 
     async def update_fields(
         self,
-        venue_id: UUID,
+        venue_id: int,
         *,
         name: Optional[str] = None,
         display_name: Optional[str] = None,
@@ -57,7 +56,6 @@ class VenueRepository:
         longitude: Optional[float] = None,
         capacity: Optional[int] = None,
         is_indoor: Optional[bool] = None,
-        espn_venue_id: Optional[int] = None,
     ) -> Optional[Venue]:
         values = {k: v for k, v in {
             "name": name,
@@ -70,13 +68,12 @@ class VenueRepository:
             "longitude": longitude,
             "capacity": capacity,
             "is_indoor": is_indoor,
-            "espn_venue_id": espn_venue_id, #TODO is this a thing??
         }.items() if v is not None}
         if not values:
             return await self.get(venue_id)
         await self.db.execute(update(Venue).where(Venue.venue_id == venue_id).values(**values))
         return await self.get(venue_id)
 
-    async def remove(self, venue_id: UUID) -> int:
+    async def remove(self, venue_id: int) -> int:
         res = await self.db.execute(delete(Venue).where(Venue.venue_id == venue_id))
         return res.rowcount or 0
