@@ -65,6 +65,36 @@ class TeamRepository:
         await self.db.execute(update(Team).where(Team.team_id == team_id).values(**values))
         return await self.get(team_id)
 
+    async def upsert(
+        self,
+        team_id: int,
+        league_id: str,
+        sport_league: str,
+        home_location: str,
+        team_name: str,
+        display_name: str,
+        sport_conference: Optional[str] = None,
+        sport_division: Optional[str] = None,
+        logo_url: Optional[str] = None,
+        home_venue_id: Optional[int] = None,
+    ) -> Team:
+        existing = await self.get(team_id)
+        if existing:
+            return existing
+        team = Team(
+            team_id=team_id,
+            league_id=league_id,
+            sport_league=sport_league,
+            sport_conference=sport_conference,
+            sport_division=sport_division,
+            home_location=home_location,
+            team_name=team_name,
+            display_name=display_name,
+            logo_url=logo_url,
+            home_venue_id=home_venue_id,
+        )
+        return await self.add(team)
+
     async def remove(self, team_id: int) -> int:
         res = await self.db.execute(delete(Team).where(Team.team_id == team_id))
         return res.rowcount or 0
