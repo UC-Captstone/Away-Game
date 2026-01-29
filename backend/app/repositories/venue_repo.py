@@ -74,6 +74,38 @@ class VenueRepository:
         await self.db.execute(update(Venue).where(Venue.venue_id == venue_id).values(**values))
         return await self.get(venue_id)
 
+    async def upsert(
+        self,
+        venue_id: int,
+        name: str,
+        display_name: str,
+        city: Optional[str] = None,
+        state_region: Optional[str] = None,
+        country: Optional[str] = None,
+        timezone: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        capacity: Optional[int] = None,
+        is_indoor: Optional[bool] = None,
+    ) -> Venue:
+        existing = await self.get(venue_id)
+        if existing:
+            return existing
+        venue = Venue(
+            venue_id=venue_id,
+            name=name,
+            display_name=display_name,
+            city=city,
+            state_region=state_region,
+            country=country,
+            timezone=timezone,
+            latitude=latitude,
+            longitude=longitude,
+            capacity=capacity,
+            is_indoor=is_indoor,
+        )
+        return await self.add(venue)
+
     async def remove(self, venue_id: int) -> int:
         res = await self.db.execute(delete(Venue).where(Venue.venue_id == venue_id))
         return res.rowcount or 0
