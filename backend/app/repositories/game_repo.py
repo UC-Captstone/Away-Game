@@ -66,6 +66,34 @@ class GameRepository:
         await self.db.execute(update(Game).where(Game.game_id == game_id).values(**values))
         return await self.get(game_id)
 
+    async def upsert(
+        self,
+        game_id: int,
+        league_id: str,
+        home_team_id: int,
+        away_team_id: int,
+        date_time: datetime,
+        venue_id: Optional[int] = None,
+    ) -> Game:
+        existing = await self.get(game_id)
+        if existing:
+            if existing.date_time == date_time and existing.venue_id == venue_id:
+                return existing
+            return await self.update_fields(
+                game_id,
+                venue_id=venue_id,
+                date_time=date_time,
+            )
+        game = Game(
+            game_id=game_id,
+            league_id=league_id,
+            home_team_id=home_team_id,
+            away_team_id=away_team_id,
+            venue_id=venue_id,
+            date_time=date_time,
+        )
+        return await self.add(game)
+
     async def remove(self, game_id: int) -> int:
         res = await self.db.execute(delete(Game).where(Game.game_id == game_id))
         return res.rowcount or 0

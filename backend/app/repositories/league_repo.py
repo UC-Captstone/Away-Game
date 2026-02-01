@@ -48,6 +48,24 @@ class LeagueRepository:
         await self.db.execute(update(League).where(League.league_code == league_code).values(**values))
         return await self.get(league_code)
 
+    async def upsert(
+        self,
+        league_code: str,
+        sport_code: str,
+        league_name: str,
+        espn_league_id: Optional[int] = None,
+    ) -> League:
+        existing = await self.get(league_code)
+        if existing:
+            return existing
+        league = League(
+            league_code=league_code,
+            sport_code=sport_code,
+            league_name=league_name,
+            espn_league_id=espn_league_id,
+        )
+        return await self.add(league)
+
     async def remove(self, league_code: str) -> int:
         res = await self.db.execute(delete(League).where(League.league_code == league_code))
         return res.rowcount or 0
