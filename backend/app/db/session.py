@@ -17,8 +17,11 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 async def init_db() -> None:
-    async with async_engine.begin() as conn:
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS citext"))
+    try:
+        async with async_engine.begin() as conn:
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS citext"))
+    except Exception as e:
+        print(f"Warning: Could not initialize database extensions: {e}")
 
 async def get_session() -> AsyncIterator[AsyncSession]:
     async with AsyncSessionLocal() as session:

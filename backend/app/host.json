@@ -11,5 +11,14 @@
   "extensionBundle": {
     "id": "Microsoft.Azure.Functions.ExtensionBundle",
     "version": "[4.*, 5.0.0)"
+  },
+  "cors": {
+    "allowedOrigins": [
+      "http://localhost:4200",
+      "http://localhost:8080",
+      "https://away-game-dev-d0fgf9bgfecff3hf.canadacentral-01.azurewebsites.net",
+      "https://away-game-prd-cycbgxangbh4dmeq.canadacentral-01.azurewebsites.net"
+    ],
+    "supportCredentials": true
   }
 }
