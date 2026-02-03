@@ -2,7 +2,7 @@ name: Build and Deploy Frontend
 
 on:
   push:
-    branches: [dev, main]
+    branches: [dev, dev-rudi, dev-aiden, dev-nathan, main]
   workflow_dispatch:
     inputs:
       environment:
@@ -23,7 +23,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             ENV="${{ github.event.inputs.environment }}"
             SHOULD_RUN=$( [[ -n "$ENV" ]] && echo "true" || echo "false" )
-          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+          elif [[ "${{ github.ref }}" =~ ^refs/heads/(dev|dev-rudi|dev-aiden|dev-nathan)$ ]]; then
             ENV="dev"
             SHOULD_RUN="true"
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
