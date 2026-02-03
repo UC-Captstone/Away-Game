@@ -93,7 +93,11 @@ jobs:
             [
               {"name": "CLERK_SECRET_KEY", "value": "${{ env.CLERK_SECRET_KEY }}", "slotSetting": false},
               {"name": "CLERK_DOMAIN", "value": "${{ env.CLERK_DOMAIN }}", "slotSetting": false},
-              {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}", "slotSetting": false}
+              {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}", "slotSetting": false},
+              {"name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE", "value": "false", "slotSetting": false},
+              {"name": "DOCKER_REGISTRY_SERVER_URL", "value": "ghcr.io", "slotSetting": false},
+              {"name": "DOCKER_REGISTRY_SERVER_USERNAME", "value": "21ahart", "slotSetting": false},
+              {"name": "DOCKER_REGISTRY_SERVER_PASSWORD", "value": "${{ secrets.CR_PAT }}", "slotSetting": false}
             ]
 
       - name: Deploy to Azure
