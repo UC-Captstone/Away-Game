@@ -7,8 +7,7 @@ import { INavBar } from '../models/navbar';
   providedIn: 'root',
 })
 export class UserService {
-  //Nathan: wait for merge
-  //private apiUrl = environment.apiUrl + '/user' ;
+  //private apiUrl = environment.apiUrl + '/users/me' ;
   private apiUrl = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) {}
@@ -17,7 +16,7 @@ export class UserService {
     const navbarInfo: INavBar = {
       //profilePictureUrl: '/assets/default-avatar.jpg',
       username: 'john_doe',
-      fullName: 'John Doe',
+      displayName: 'John Doe',
     };
     return of(navbarInfo).pipe(delay(1000));
     //return this.http.get<INavBar>(`${this.apiUrl}/navbar-info`);
