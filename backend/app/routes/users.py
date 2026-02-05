@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
@@ -73,6 +73,11 @@ async def update_user(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
+    if current_user.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to update this user"
+        )
     return await update_user_service(user_id=user_id, user_data=user_data, db=db)
 
 
@@ -82,5 +87,10 @@ async def delete_user(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
+    if current_user.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this user"
+        )
     await delete_user_service(user_id=user_id, db=db)
     return None

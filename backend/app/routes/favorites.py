@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
@@ -24,6 +24,11 @@ async def get_saved_events(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
+    if current_user.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this user's favorites"
+        )
     return await get_saved_events_service(user_id=user_id, limit=limit, offset=offset, db=db)
 
 
@@ -34,6 +39,11 @@ async def delete_saved_event(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
+    if current_user.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to modify this user's favorites"
+        )
     return await delete_saved_event_service(user_id=user_id, event_id=event_id, db=db)
 
 
@@ -44,4 +54,9 @@ async def add_saved_event(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
+    if current_user.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to modify this user's favorites"
+        )
     return await add_saved_event_service(user_id=user_id, event_id=event_id, db=db)
