@@ -10,7 +10,6 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class EventService {
-  // Nathan: wait for merge
   // private apiUrl = environment.apiUrl + '/events';
   private apiUrl = 'http://localhost:3000/api';
 
