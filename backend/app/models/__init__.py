@@ -5,6 +5,7 @@ from .game import Game
 from .event import Event
 from .safety_alert import SafetyAlert
 from .team_chat import TeamChat
+from .event_chat import EventChat
 from .user_favorite_team import UserFavoriteTeams
 from .favorite import Favorite
 from .user import User
@@ -19,6 +20,7 @@ __all__ = [
     "Event",
     "SafetyAlert",
     "TeamChat",
+    "EventChat",
     "UserFavoriteTeams",
     "Favorite",
     "User",
