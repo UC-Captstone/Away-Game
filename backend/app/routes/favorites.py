@@ -4,6 +4,8 @@ from typing import List
 from uuid import UUID
 
 from db.session import get_session
+from auth import get_current_user
+from models.user import User
 from schemas.event import EventRead
 from controllers.favorites import (
     get_saved_events_service,
@@ -19,6 +21,7 @@ async def get_saved_events(
     user_id: UUID,
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await get_saved_events_service(user_id=user_id, limit=limit, offset=offset, db=db)
@@ -28,6 +31,7 @@ async def get_saved_events(
 async def delete_saved_event(
     user_id: UUID,
     event_id: UUID,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await delete_saved_event_service(user_id=user_id, event_id=event_id, db=db)
@@ -37,6 +41,7 @@ async def delete_saved_event(
 async def add_saved_event(
     user_id: UUID,
     event_id: UUID,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await add_saved_event_service(user_id=user_id, event_id=event_id, db=db)

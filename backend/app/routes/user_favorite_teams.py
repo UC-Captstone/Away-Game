@@ -4,6 +4,8 @@ from typing import List
 from uuid import UUID
 
 from db.session import get_session
+from auth import get_current_user
+from models.user import User
 from schemas.team import TeamRead
 from controllers.user_favorite_teams import (
     get_user_favorite_teams_service,
@@ -18,6 +20,7 @@ router = APIRouter(prefix="/users/{user_id}/favorite-teams", tags=["user-favorit
 @router.get("/", response_model=List[TeamRead])
 async def get_user_favorite_teams(
     user_id: UUID,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await get_user_favorite_teams_service(user_id=user_id, db=db)
@@ -27,6 +30,7 @@ async def get_user_favorite_teams(
 async def add_favorite_team(
     user_id: UUID,
     team_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await add_favorite_team_service(user_id=user_id, team_id=team_id, db=db)
@@ -36,6 +40,7 @@ async def add_favorite_team(
 async def replace_favorite_teams(
     user_id: UUID,
     team_ids: List[int],
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await replace_favorite_teams_service(user_id=user_id, team_ids=team_ids, db=db)
@@ -45,6 +50,7 @@ async def replace_favorite_teams(
 async def remove_favorite_team(
     user_id: UUID,
     team_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     await remove_favorite_team_service(user_id=user_id, team_id=team_id, db=db)
