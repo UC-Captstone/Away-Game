@@ -22,9 +22,9 @@ async def main():
         print("\nUpsert existing league: NFL")
         league = await league_repo.upsert(
             league_code="NFL",
-            sport_code="football",
+            espn_sport="football",
+            espn_league="nfl",
             league_name="National Football League",
-            espn_league_id=28,
         )
         print(f"  Result: {league.league_code} - {league.league_name} ")
 

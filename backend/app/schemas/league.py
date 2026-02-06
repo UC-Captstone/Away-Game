@@ -13,21 +13,11 @@ class LeagueEnum(str, Enum):
     MLS = "MLS"
 
 
-# Map league enum to ESPN IDs
-LEAGUE_ESPN_ID_MAP = {
-    LeagueEnum.NBA: 1,
-    LeagueEnum.NFL: 28,
-    LeagueEnum.MLB: 2,
-    LeagueEnum.NHL: 3,
-    LeagueEnum.MLS: 4,
-}
-
-
 class LeagueBase(BaseModel):
     league_code: str
-    sport_code: str
+    espn_sport: str
+    espn_league: Optional[str] = None
     league_name: str
-    espn_league_id: Optional[int] = None
 
 
 class LeagueCreate(LeagueBase):
@@ -35,21 +25,21 @@ class LeagueCreate(LeagueBase):
 
 
 class LeagueUpdate(BaseModel):
-    sport_code: Optional[str] = None
+    espn_sport: Optional[str] = None
+    espn_league: Optional[str] = None
     league_code: Optional[str] = None
     league_name: Optional[str] = None
-    espn_league_id: Optional[int] = None
 
 
 class LeagueRead(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
-    
-    league_id: int = Field(alias="leagueId", serialization_alias="leagueId")  # ESPN league ID
-    league_name: str = Field(alias="leagueName", serialization_alias="leagueName")  # League enum value
-    
+
+    league_code: str = Field(alias="leagueCode", serialization_alias="leagueCode")
+    league_name: str = Field(alias="leagueName", serialization_alias="leagueName")
+
     @classmethod
     def from_db_model(cls, league) -> "LeagueRead":
         return cls(
-            league_id=league.espn_league_id or 0,
+            league_code=league.league_code,
             league_name=league.league_name
         )
