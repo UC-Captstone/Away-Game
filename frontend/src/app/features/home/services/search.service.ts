@@ -8,7 +8,6 @@ import { SearchTypeEnum } from '../models/search-type-enum';
   providedIn: 'root',
 })
 export class SearchService {
-  //Nathan: wait for merge
   //private apiUrl = environment.apiUrl + '/search' ;
   private apiUrl = 'http://localhost:3000/api';
 
