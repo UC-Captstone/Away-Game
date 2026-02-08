@@ -16,36 +16,36 @@ class ESPNClient:
             follow_redirects=True
         )
 
-    async def get_nfl_teams(self) -> dict:
+    async def get_teams(self, espn_sport: str, espn_league: str) -> dict:
 
-        url = f"{self.BASE_URL}/football/nfl/teams"
-        logger.info(f"Fetching NFL teams")
+        url = f"{self.BASE_URL}/{espn_sport}/{espn_league}/teams"
+        logger.info(f"Fetching {espn_league} teams from {url}")
 
         try:
             response = await self.client.get(url)
             response.raise_for_status()
             data = response.json()
-            logger.info(f"Successfully fetched NFL teams")
+            logger.info(f"Successfully fetched {espn_league} teams")
             return data
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error fetching teams: {e.response.status_code} - {e.response.text}")
+            logger.error(f"HTTP error fetching {espn_league} teams: {e.response.status_code} - {e.response.text}")
             raise
 
         except httpx.TimeoutException as e:
-            logger.error(f"Timeout fetching teams: {e}")
+            logger.error(f"Timeout fetching {espn_league} teams: {e}")
             raise
 
         except Exception as e:
-            logger.error(f"Unexpected error fetching teams: {e}")
+            logger.error(f"Unexpected error fetching {espn_league} teams: {e}")
             raise
 
-    async def get_nfl_schedule(self, dates: Optional[str] = None) -> dict:
+    async def get_schedule(self, espn_sport: str, espn_league: str, dates: Optional[str] = None) -> dict:
 
-        url = f"{self.BASE_URL}/football/nfl/scoreboard"
+        url = f"{self.BASE_URL}/{espn_sport}/{espn_league}/scoreboard"
         params = {"dates": dates} if dates else {}
 
-        logger.info(f"Fetching NFL schedule from {url} with params: {params}")
+        logger.info(f"Fetching {espn_league} schedule from {url} with params: {params}")
 
         try:
             response = await self.client.get(url, params=params)
@@ -53,19 +53,19 @@ class ESPNClient:
             data = response.json()
 
             event_count = len(data.get('events', []))
-            logger.info(f"Successfully fetched schedule with {event_count} games")
+            logger.info(f"Successfully fetched {espn_league} schedule with {event_count} games")
             return data
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error fetching schedule: {e.response.status_code} - {e.response.text}")
+            logger.error(f"HTTP error fetching {espn_league} schedule: {e.response.status_code} - {e.response.text}")
             raise
 
         except httpx.TimeoutException as e:
-            logger.error(f"Timeout fetching schedule: {e}")
+            logger.error(f"Timeout fetching {espn_league} schedule: {e}")
             raise
 
         except Exception as e:
-            logger.error(f"Unexpected error fetching schedule: {e}")
+            logger.error(f"Unexpected error fetching {espn_league} schedule: {e}")
             raise
 
     async def close(self):
