@@ -81,12 +81,13 @@ async def seed_users(session: AsyncSession) -> list[User]:
 async def seed_leagues(session: AsyncSession) -> list[League]:
     print("\nCreating League")
     leagues = [
-        League(
-            league_code="NFL",
-            sport_code="football",
-            league_name="National Football League",
-            espn_league_id=28,
-        ),
+        League(league_code="NFL",   espn_sport="football",   espn_league="nfl",                     league_name="National Football League",        is_active=True),
+        League(league_code="NBA",   espn_sport="basketball", espn_league="nba",                     league_name="National Basketball Association", is_active=False),
+        League(league_code="NHL",   espn_sport="hockey",     espn_league="nhl",                     league_name="National Hockey League",          is_active=False),
+        League(league_code="MLB",   espn_sport="baseball",   espn_league="mlb",                     league_name="Major League Baseball",           is_active=False),
+        League(league_code="MLS",   espn_sport="soccer",     espn_league="usa.1",                   league_name="Major League Soccer",             is_active=False),
+        League(league_code="NCAAF", espn_sport="football",   espn_league="college-football",        league_name="NCAA Football",                   is_active=False),
+        League(league_code="NCAAB", espn_sport="basketball", espn_league="mens-college-basketball", league_name="NCAA Men's Basketball",           is_active=False),
     ]
 
     session.add_all(leagues)

@@ -13,15 +13,21 @@ class LeagueRepository:
         res = await self.db.execute(select(League).where(League.league_code == league_code))
         return res.scalar_one_or_none()
 
-    async def get_by_codes(self, *, sport_code: str, league_code: str) -> Optional[League]:
+    async def get_by_codes(self, *, espn_sport: str, league_code: str) -> Optional[League]:
         res = await self.db.execute(
-            select(League).where((League.sport_code == sport_code) & (League.league_code == league_code))
+            select(League).where((League.espn_sport == espn_sport) & (League.league_code == league_code))
         )
         return res.scalar_one_or_none()
 
     async def list(self, *, limit: int = 100, offset: int = 0) -> Sequence[League]:
         res = await self.db.execute(
-            select(League).order_by(League.sport_code.asc(), League.league_code.asc()).limit(limit).offset(offset)
+            select(League).order_by(League.espn_sport.asc(), League.league_code.asc()).limit(limit).offset(offset)
+        )
+        return res.scalars().all()
+
+    async def list_active(self) -> Sequence[League]:
+        res = await self.db.execute(
+            select(League).where(League.is_active == True).order_by(League.league_code.asc())
         )
         return res.scalars().all()
 
@@ -34,14 +40,14 @@ class LeagueRepository:
         self,
         league_code: str,
         *,
-        sport_code: Optional[str] = None,
+        espn_sport: Optional[str] = None,
+        espn_league: Optional[str] = None,
         league_name: Optional[str] = None,
-        espn_league_id: Optional[int] = None,
     ) -> Optional[League]:
         values = {k: v for k, v in {
-            "sport_code": sport_code,
+            "espn_sport": espn_sport,
+            "espn_league": espn_league,
             "league_name": league_name,
-            "espn_league_id": espn_league_id,
         }.items() if v is not None}
         if not values:
             return await self.get(league_code)
@@ -51,18 +57,20 @@ class LeagueRepository:
     async def upsert(
         self,
         league_code: str,
-        sport_code: str,
+        espn_sport: str,
         league_name: str,
-        espn_league_id: Optional[int] = None,
+        espn_league: Optional[str] = None,
+        is_active: bool = False,
     ) -> League:
         existing = await self.get(league_code)
         if existing:
             return existing
         league = League(
             league_code=league_code,
-            sport_code=sport_code,
+            espn_sport=espn_sport,
+            espn_league=espn_league,
             league_name=league_name,
-            espn_league_id=espn_league_id,
+            is_active=is_active,
         )
         return await self.add(league)
 
