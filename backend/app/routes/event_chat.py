@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from uuid import UUID
@@ -32,12 +32,13 @@ async def add_event_chat(
     chat = EventChat(**chat_data.model_dump())
     return await add_new_chat_service(chat=chat, db=db)
 
-@router.delete("/{message_id}", response_model=int)
+@router.delete("/{message_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event_chat(
     message_id: UUID,
     db: AsyncSession = Depends(get_session),
 ):
-    return await remove_chat_service(message_id=message_id, db=db)
+    await remove_chat_service(message_id=message_id, db=db)
+    return None
 
 @router.get("/{message_id}", response_model=Optional[EventChatRead])
 async def get_event_chat(
