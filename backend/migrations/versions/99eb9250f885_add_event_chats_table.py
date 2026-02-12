@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('message_text', sa.String(), nullable=False),
         sa.Column('timestamp', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-        sa.ForeignKeyConstraint(['event_id'], ['events.event_id'], ),
+        sa.ForeignKeyConstraint(['event_id'], ['events.event_id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['user_id'], ['users.user_id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('message_id')
     )

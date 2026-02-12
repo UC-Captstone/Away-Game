@@ -14,7 +14,7 @@ class EventChat(Base):
     message_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     event_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("events.event_id"), nullable=False
+        ForeignKey("events.event_id", ondelete="CASCADE"), nullable=False
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False
