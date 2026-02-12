@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from uuid import UUID
@@ -24,7 +24,7 @@ async def list_event_chats(
 ):
     return await list_for_event_service(event_id=event_id, limit=limit, offset=offset, db=db)
 
-@router.post("/", response_model=EventChatRead)
+@router.post("/", response_model=EventChatRead, status_code=status.HTTP_201_CREATED)
 async def add_event_chat(
     chat_data: EventChatCreate,
     db: AsyncSession = Depends(get_session),
