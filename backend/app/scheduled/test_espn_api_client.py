@@ -12,11 +12,11 @@ from schemas.game import GameCreate
 
 
 async def test_get_teams():
-    print("Testing: get_nfl_teams()")
+    print("Testing: get_teams()")
 
     client = ESPNClient()
     try:
-        data = await client.get_nfl_teams()
+        data = await client.get_teams("football", "nfl")
 
         teams = []
         for sport in data.get('sports', []):
@@ -59,14 +59,14 @@ async def test_get_teams():
 
 async def test_get_schedule():
     print("\n")
-    print("Testing: get_nfl_schedule() with single date")
+    print("Testing: get_schedule() with single date")
 
     date = "20251123"
     print(f"Fetching games for: {date}")
 
     client = ESPNClient()
     try:
-        data = await client.get_nfl_schedule(dates=date)
+        data = await client.get_schedule("football", "nfl",dates=date)
 
         events = data.get('events', [])
         print(f"\nFound {len(events)} games")
@@ -141,7 +141,7 @@ async def test_get_schedule():
 
 async def test_get_schedule_range():
     print("\n")
-    print("Testing: get_nfl_schedule() with date range")
+    print("Testing: get_schedule() with date range")
 
     start = "20251123"
     end = (datetime(2025, 11, 23) + timedelta(days=60)).strftime("%Y%m%d")
@@ -151,7 +151,7 @@ async def test_get_schedule_range():
 
     client = ESPNClient()
     try:
-        data = await client.get_nfl_schedule(dates=date_range)
+        data = await client.get_schedule("football", "nfl",dates=date_range)
 
         events = data.get('events', [])
         print(f"\nFound {len(events)} games in next 60 days")
