@@ -39,6 +39,7 @@ class Event(Base):
     event_type = relationship("EventType")
     game = relationship("Game")
     venue = relationship("Venue", back_populates="events")
+    chats = relationship("EventChat", back_populates="event", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_events_game_date", "game_date"),

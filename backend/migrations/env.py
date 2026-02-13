@@ -21,7 +21,7 @@ from app.db.base import Base
 
 from app.models import (
     User, League, AlertType, EventType, Venue, Team, Game,
-    Event, SafetyAlert, TeamChat, UserFavoriteTeams, Favorite
+    Event, SafetyAlert, TeamChat, EventChat, UserFavoriteTeams, Favorite
 )
 
 target_metadata = Base.metadata
