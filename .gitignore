@@ -67,4 +67,7 @@ Thumbs.db
 # Azure Functions
 /backend/app/__pycache__
 /backend/app/.venv
+/backend/app/local.settings.cloud.json
+/backend/app/local.settings.local.json
 /backend/app/local.settings.json
+/backend/insert_test_data.sql
