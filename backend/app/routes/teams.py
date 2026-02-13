@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
 from db.session import get_session
+from auth import get_current_user
+from models.user import User
 from schemas.team import TeamCreate, TeamRead, TeamUpdate
 from controllers.teams import (
     get_teams_service,
@@ -21,6 +23,7 @@ async def get_teams(
     search: Optional[str] = Query(default=None, min_length=3, description="Search term for team name or location (minimum 3 characters)"),
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await get_teams_service(
@@ -35,6 +38,7 @@ async def get_teams(
 @router.get("/{team_id}", response_model=TeamRead)
 async def get_team(
     team_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await get_team_service(team_id=team_id, db=db)
@@ -43,6 +47,7 @@ async def get_team(
 @router.post("/", response_model=TeamRead, status_code=status.HTTP_201_CREATED)
 async def create_team(
     team_data: TeamCreate,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await create_team_service(team_data=team_data, db=db)
@@ -52,6 +57,7 @@ async def create_team(
 async def update_team(
     team_id: int,
     team_data: TeamUpdate,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     return await update_team_service(team_id=team_id, team_data=team_data, db=db)
@@ -60,6 +66,7 @@ async def update_team(
 @router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_team(
     team_id: int,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session)
 ):
     await delete_team_service(team_id=team_id, db=db)
