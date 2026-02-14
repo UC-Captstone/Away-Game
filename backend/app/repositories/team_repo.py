@@ -40,25 +40,21 @@ class TeamRepository:
         team_id: int,
         *,
         league_id: Optional[str] = None,
-        sport_league: Optional[str] = None,
-        sport_conference: Optional[str] = None,
-        sport_division: Optional[str] = None,
         home_location: Optional[str] = None,
         team_name: Optional[str] = None,
         display_name: Optional[str] = None,
         logo_url: Optional[str] = None,
         home_venue_id: Optional[int] = None,
+        espn_team_id: Optional[str] = None,
     ) -> Optional[Team]:
         values = {k: v for k, v in {
             "league_id": league_id,
-            "sport_league": sport_league,
-            "sport_conference": sport_conference,
-            "sport_division": sport_division,
             "home_location": home_location,
             "team_name": team_name,
             "display_name": display_name,
             "logo_url": logo_url,
             "home_venue_id": home_venue_id,
+            "espn_team_id": espn_team_id,
         }.items() if v is not None}
         if not values:
             return await self.get(team_id)
