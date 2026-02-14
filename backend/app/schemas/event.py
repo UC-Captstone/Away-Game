@@ -3,6 +3,7 @@ from __future__ import annotations
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
+from schemas.common import Location
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 from .venue import VenueRead
@@ -45,12 +46,6 @@ class TeamLogos(BaseModel):
     
     home: Optional[str] = None
     away: Optional[str] = None
-
-class Location(BaseModel):
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-    
-    lat: float
-    lng: float
 
 class EventRead(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
