@@ -38,10 +38,10 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
         # Map event_type_id to enum
         # You might need to adjust this based on your actual event type IDs
         type_map = {
-            "game": EventTypeEnum.GAME,
-            "tailgate": EventTypeEnum.TAILGATE,
-            "meetup": EventTypeEnum.MEETUP,
-            "watchparty": EventTypeEnum.WATCH_PARTY,
+            "GAME": EventTypeEnum.GAME,
+            "TAILGATE": EventTypeEnum.TAILGATE,
+            "MEETUP": EventTypeEnum.MEETUP,
+            "WATCH_PARTY": EventTypeEnum.WATCH_PARTY,
         }
         event_type = type_map.get(event.event_type_id.lower(), EventTypeEnum.GAME)
     
