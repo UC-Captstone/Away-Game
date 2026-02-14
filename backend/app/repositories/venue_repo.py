@@ -33,7 +33,7 @@ class VenueRepository:
 
     async def list(self, *, limit: int = 100, offset: int = 0) -> Sequence[Venue]:
         res = await self.db.execute(
-            select(Venue).order_by(Venue.display_name.asc()).limit(limit).offset(offset)
+            select(Venue).order_by(Venue.name.asc()).limit(limit).offset(offset)
         )
         return res.scalars().all()
 
@@ -47,27 +47,19 @@ class VenueRepository:
         venue_id: int,
         *,
         name: Optional[str] = None,
-        display_name: Optional[str] = None,
         city: Optional[str] = None,
         state_region: Optional[str] = None,
         country: Optional[str] = None,
-        timezone: Optional[str] = None,
         latitude: Optional[float] = None,
         longitude: Optional[float] = None,
-        capacity: Optional[int] = None,
-        is_indoor: Optional[bool] = None,
     ) -> Optional[Venue]:
         values = {k: v for k, v in {
             "name": name,
-            "display_name": display_name,
             "city": city,
             "state_region": state_region,
             "country": country,
-            "timezone": timezone,
             "latitude": latitude,
             "longitude": longitude,
-            "capacity": capacity,
-            "is_indoor": is_indoor,
         }.items() if v is not None}
         if not values:
             return await self.get(venue_id)

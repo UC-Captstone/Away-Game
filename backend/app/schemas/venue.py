@@ -6,15 +6,11 @@ from pydantic import BaseModel
 
 class VenueBase(BaseModel):
     name: str
-    display_name: str
     city: Optional[str] = None
     state_region: Optional[str] = None
     country: Optional[str] = None
-    timezone: str
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    capacity: Optional[int] = None
-    is_indoor: Optional[bool] = None
 
 
 class VenueCreate(VenueBase):
@@ -23,15 +19,11 @@ class VenueCreate(VenueBase):
 
 class VenueUpdate(BaseModel):
     name: Optional[str] = None
-    display_name: Optional[str] = None
     city: Optional[str] = None
     state_region: Optional[str] = None
     country: Optional[str] = None
-    timezone: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    capacity: Optional[int] = None
-    is_indoor: Optional[bool] = None
 
 
 class VenueRead(VenueBase):

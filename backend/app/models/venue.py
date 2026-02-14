@@ -11,15 +11,11 @@ class Venue(Base):
 
     venue_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str]
-    display_name: Mapped[str]
     city: Mapped[str | None]
     state_region: Mapped[str | None]
     country: Mapped[str | None]
-    timezone: Mapped[str | None]
     latitude: Mapped[float | None]
     longitude: Mapped[float | None]
-    capacity: Mapped[int | None]
-    is_indoor: Mapped[bool | None]
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=func.now())
