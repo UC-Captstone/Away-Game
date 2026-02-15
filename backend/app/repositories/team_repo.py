@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional, Sequence
-from sqlalchemy import select, update, delete
+from sqlalchemy import func, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.team import Team
 
@@ -13,6 +13,14 @@ class TeamRepository:
         res = await self.db.execute(select(Team).where(Team.team_id == team_id))
         return res.scalar_one_or_none()
 
+    async def get_by_espn_id(self, espn_team_id: int, league_id: str) -> Optional[Team]:
+        res = await self.db.execute(
+            select(Team).where(
+                (Team.espn_team_id == espn_team_id) & (Team.league_id == league_id)
+            )
+        )
+        return res.scalar_one_or_none()
+
     async def get_by_identity(self, *, league_id: str, home_location: str, team_name: str) -> Optional[Team]:
         res = await self.db.execute(
             select(Team).where(
@@ -22,6 +30,12 @@ class TeamRepository:
             )
         )
         return res.scalar_one_or_none()
+
+    async def count_by_league(self, league_id: str) -> int:
+        res = await self.db.execute(
+            select(func.count()).select_from(Team).where(Team.league_id == league_id)
+        )
+        return res.scalar_one()
 
     async def list(self, *, league_id: Optional[str] = None, limit: int = 100, offset: int = 0) -> Sequence[Team]:
         stmt = select(Team).order_by(Team.display_name.asc()).limit(limit).offset(offset)
@@ -40,9 +54,6 @@ class TeamRepository:
         team_id: int,
         *,
         league_id: Optional[str] = None,
-        sport_league: Optional[str] = None,
-        sport_conference: Optional[str] = None,
-        sport_division: Optional[str] = None,
         home_location: Optional[str] = None,
         team_name: Optional[str] = None,
         display_name: Optional[str] = None,
@@ -51,9 +62,6 @@ class TeamRepository:
     ) -> Optional[Team]:
         values = {k: v for k, v in {
             "league_id": league_id,
-            "sport_league": sport_league,
-            "sport_conference": sport_conference,
-            "sport_division": sport_division,
             "home_location": home_location,
             "team_name": team_name,
             "display_name": display_name,
@@ -67,26 +75,20 @@ class TeamRepository:
 
     async def upsert(
         self,
-        team_id: int,
+        espn_team_id: int,
         league_id: str,
-        sport_league: str,
         home_location: str,
         team_name: str,
         display_name: str,
-        sport_conference: Optional[str] = None,
-        sport_division: Optional[str] = None,
         logo_url: Optional[str] = None,
         home_venue_id: Optional[int] = None,
     ) -> Team:
-        existing = await self.get(team_id)
+        existing = await self.get_by_espn_id(espn_team_id, league_id)
         if existing:
             return existing
         team = Team(
-            team_id=team_id,
+            espn_team_id=espn_team_id,
             league_id=league_id,
-            sport_league=sport_league,
-            sport_conference=sport_conference,
-            sport_division=sport_division,
             home_location=home_location,
             team_name=team_name,
             display_name=display_name,

@@ -17,10 +17,7 @@ async def get_teams_service(
     offset: int,
     db: AsyncSession
 ) -> List[TeamRead]:
-    """
-    Get a list of teams with optional filtering by league and search term.
-    Returns converted TeamRead schemas ready for API response.
-    """
+
     stmt = (
         select(Team)
         .options(selectinload(Team.league))
@@ -31,8 +28,6 @@ async def get_teams_service(
 
     if league_id:
         stmt = stmt.where(Team.league_id == league_id)
-
-    print("league_id", league_id)
 
     if search:
         search_pattern = f"%{search}%"
@@ -74,10 +69,7 @@ async def get_team_service(team_id: int, db: AsyncSession) -> TeamRead:
 
 
 async def create_team_service(team_data: TeamCreate, db: AsyncSession) -> TeamRead:
-    """
-    Create a new team.
-    Returns converted TeamRead schema.
-    """
+
     repo = TeamRepository(db)
 
     existing_team = await repo.get_by_identity(
@@ -106,10 +98,7 @@ async def update_team_service(
     team_data: TeamUpdate,
     db: AsyncSession
 ) -> TeamRead:
-    """
-    Update an existing team.
-    Returns converted TeamRead schema.
-    """
+
     repo = TeamRepository(db)
 
     existing_team = await repo.get(team_id)
@@ -132,9 +121,7 @@ async def update_team_service(
 
 
 async def delete_team_service(team_id: int, db: AsyncSession) -> None:
-    """
-    Delete a team by ID.
-    """
+
     repo = TeamRepository(db)
 
     team = await repo.get(team_id)

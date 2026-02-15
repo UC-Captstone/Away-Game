@@ -19,7 +19,6 @@ class ESPNClient:
     async def get_teams(self, espn_sport: str, espn_league: str) -> dict:
 
         url = f"{self.BASE_URL}/{espn_sport}/{espn_league}/teams"
-        logger.info(f"Fetching {espn_league} teams from {url}")
 
         try:
             response = await self.client.get(url)
@@ -38,6 +37,23 @@ class ESPNClient:
 
         except Exception as e:
             logger.error(f"Unexpected error fetching {espn_league} teams: {e}")
+            raise
+
+    async def get_team_detail(self, espn_sport: str, espn_league: str, espn_team_id: int) -> dict:
+
+        url = f"{self.BASE_URL}/{espn_sport}/{espn_league}/teams/{espn_team_id}"
+
+        try:
+            response = await self.client.get(url)
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP error fetching team {espn_team_id}: {e.response.status_code}")
+            raise
+
+        except Exception as e:
+            logger.error(f"Error fetching team {espn_team_id}: {e}")
             raise
 
     async def get_schedule(self, espn_sport: str, espn_league: str, dates: Optional[str] = None) -> dict:
