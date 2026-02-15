@@ -10,7 +10,7 @@ from models.team import Team
 from models.game import Game
 from models.user_favorite_team import UserFavoriteTeams
 from models.team_chat import TeamChat
-from schemas.user import UserProfile, HeaderInfo, AccountSettings
+from schemas.user import UserProfile, HeaderInfo, AccountSettings, NavBarInfo
 from repositories.user_favorite_team_repo import UserFavoriteTeamsRepository
 from repositories.favorite_repo import FavoriteRepository
 from uuid import UUID
@@ -225,3 +225,19 @@ async def delete_saved_event_service(
     events = res.scalars().all()
     
     return [convert_event_to_read(e, is_saved=True) for e in events]
+
+async def get_navbar_info_service(current_user: User, db: AsyncSession) -> NavBarInfo:
+    # Build display name
+    display_name = ""
+    if current_user.first_name and current_user.last_name:
+        display_name = f"{current_user.first_name} {current_user.last_name}"
+    elif current_user.first_name:
+        display_name = current_user.first_name
+    else:
+        display_name = current_user.username
+
+    return NavBarInfo(
+        profile_picture_url = current_user.profile_picture_url,
+        username = current_user.username,
+        display_name = display_name
+    )
