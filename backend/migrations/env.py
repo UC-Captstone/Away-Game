@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+app_dir = os.path.join(backend_dir, "app")
+sys.path.insert(0, app_dir)
 sys.path.insert(0, backend_dir)
 
 config = context.config
@@ -19,7 +21,7 @@ from app.db.base import Base
 
 from app.models import (
     User, League, AlertType, EventType, Venue, Team, Game,
-    Event, SafetyAlert, TeamChat, UserFavoriteTeams, Favorite
+    Event, SafetyAlert, TeamChat, EventChat, UserFavoriteTeams, Favorite
 )
 
 target_metadata = Base.metadata

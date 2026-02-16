@@ -34,5 +34,6 @@ class User(Base):
     events = relationship("Event", back_populates="creator", cascade="all, delete-orphan")
     safety_alerts = relationship("SafetyAlert", back_populates="reporter", cascade="all, delete-orphan")
     team_chats = relationship("TeamChat", back_populates="user", cascade="all, delete-orphan")
+    event_chats = relationship("EventChat", back_populates="user", cascade="all, delete-orphan")
     favorites = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
     user_favorite_teams = relationship("UserFavoriteTeams", back_populates="user", cascade="all, delete-orphan")

@@ -10,14 +10,80 @@ We use Alembic for database migrations with the following setup:
 - **Driver**: AsyncPG
 - **Configuration**: `alembic.ini` in the backend directory
 
+## Local Development Setup
+
+### 1. Start the PostgreSQL Database
+
+From the project root directory, start the Docker database:
+
+```bash
+docker-compose up -d
+```
+
+This will create and start a PostgreSQL 16 container with:
+- Database name: `awaygame`
+- Username: `awayuser`
+- Password: `awaypass`
+- Port: `5432`
+
+Verify the database is running:
+
+```bash
+docker-compose ps
+```
+
+### 2. Configure Environment Variables
+
+Create a `.env` file in the `backend` directory with the database connection string:
+
+```bash
+cd backend
+cat > .env << 'EOF'
+# Database Configuration
+DATABASE_URL=postgresql://awayuser:awaypass@localhost:5432/awaygame?sslmode=disable
+EOF
+```
+
+**Note**: The `?sslmode=disable` parameter is required for the local Docker database. Production databases will use different connection strings with SSL enabled.
+
+### 3. Apply Database Migrations
+
+Run Alembic migrations to create all database tables:
+
+```bash
+cd backend
+alembic upgrade head
+```
+
+You should see output indicating each migration was applied successfully.
+
+### 4. Verify the Setup
+
+Check that tables were created:
+
+```bash
+docker exec -it awaygame-postgres psql -U awayuser -d awaygame -c "\dt"
+```
+
+You should see tables like `users`, `games`, `teams`, `venues`, etc.
+
+### Stopping the Database
+
+When you're done developing:
+
+```bash
+# Stop the database (preserves data)
+docker-compose down
+
+# Stop and remove all data (fresh start next time)
+docker-compose down -v
+```
+
 ## Prerequisites
 
-1. **Database Connection**: Ensure your PostgreSQL database is running and accessible
-2. **Environment Variables**: Set up your `.env` file with database credentials:
-   ```env
-   DATABASE_URL=postgresql://username:password@localhost:5432/awaygame
-   DATABASE_URL_ASYNC=postgresql+asyncpg://username:password@localhost:5432/awaygame
-   ```
+1. **Docker & Docker Compose**: Installed and running
+2. **Python 3.11+**: With pip and virtualenv
+3. **Alembic**: Installed via `pip install alembic` (or use project requirements)
 
 ## Common Migration Commands
 
