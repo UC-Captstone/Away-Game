@@ -27,7 +27,7 @@ export class SearchBarComponent {
       this.isLoading.set(true);
       this.lastTerm.set(term);
       this.showDropdown.set(true);
-      this.searchService.getSeachResults(term).subscribe({
+      this.searchService.getSearchResults(term).subscribe({
         next: (results) => {
           console.log('Search results:', results);
           this.searchResults.set(results);
