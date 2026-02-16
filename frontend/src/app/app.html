@@ -1,1 +1,10 @@
-<router-outlet />
+@if (showNavbar()) {
+  <app-navbar
+    (isLoading)="onNavBarLoading($event)"
+    [class.opacity-0]="isLoading()"
+    [class.pointer-events-none]="isLoading()"
+  ></app-navbar>
+}
+<div [ngClass]="{ 'mt-14': showNavbar() }">
+  <router-outlet />
+</div>
