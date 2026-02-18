@@ -6,8 +6,8 @@ export interface ISearchResults {
   title: string; // Name of the team, game, event, etc.
   imageUrl?: string; // Optional image URL for the result
   teamLogos?: {
-    homeLogo?: string;
-    awayLogo?: string;
+    home?: string;
+    away?: string;
   };
   metadata?: any; // Additional metadata relevant to the search result
 }

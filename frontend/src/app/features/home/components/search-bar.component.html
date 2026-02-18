@@ -117,16 +117,16 @@
                 @case (SearchTypeEnum.Game) {
                   <div class="grid grid-cols-[3rem_1fr_3rem] items-center gap-4 w-full">
                     <div class="w-12 flex items-center justify-center space-x-2">
-                      @if (result.teamLogos?.homeLogo) {
+                      @if (result.teamLogos?.home) {
                         <img
-                          [src]="result.teamLogos?.homeLogo"
+                          [src]="result.teamLogos?.home"
                           alt="Home team"
                           class="w-6 h-6 object-contain rounded-sm border border-slate-700 bg-slate-800"
                         />
                       }
-                      @if (result.teamLogos?.awayLogo) {
+                      @if (result.teamLogos?.away) {
                         <img
-                          [src]="result.teamLogos?.awayLogo"
+                          [src]="result.teamLogos?.away"
                           alt="Away team"
                           class="w-6 h-6 object-contain rounded-sm border border-slate-700 bg-slate-800"
                         />
