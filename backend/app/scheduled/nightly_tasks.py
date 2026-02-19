@@ -138,13 +138,24 @@ async def scrape_schedule(
 ):
     logger.info(f"Scraping {league_code} schedule")
 
-    start = datetime.now().strftime("%Y%m%d")
-    end = (datetime.now() + timedelta(days=180)).strftime("%Y%m%d")
-    date_range = f"{start}-{end}"
+    # For some reason the NCAAB API endpoint wouldnt accept a date range. Iterating day-day for 14 days to pull the games
+    all_events = []
+    if espn_league == "mens-college-basketball":
+        for day_offset in range(14):
+            date_str = (datetime.now() + timedelta(days=day_offset)).strftime("%Y%m%d")
+            try:
+                data = await client.get_schedule(espn_sport, espn_league, dates=date_str)
+                all_events.extend(data.get("events", []))
+            except Exception as e:
+                logger.warning(f"Failed to fetch {league_code} schedule for {date_str}: {e}")
+    else:
+        start = datetime.now().strftime("%Y%m%d")
+        end = (datetime.now() + timedelta(days=180)).strftime("%Y%m%d")
+        date_range = f"{start}-{end}"
+        data = await client.get_schedule(espn_sport, espn_league, dates=date_range)
+        all_events = data.get("events", [])
 
-    data = await client.get_schedule(espn_sport, espn_league, dates=date_range)
-
-    events = data.get("events", [])
+    events = all_events
     venues_count = 0
     games_count = 0
 

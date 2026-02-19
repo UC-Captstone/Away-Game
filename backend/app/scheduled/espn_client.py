@@ -21,7 +21,7 @@ class ESPNClient:
         url = f"{self.BASE_URL}/{espn_sport}/{espn_league}/teams"
 
         try:
-            response = await self.client.get(url)
+            response = await self.client.get(url, params={"limit": 1000})
             response.raise_for_status()
             data = response.json()
             logger.info(f"Successfully fetched {espn_league} teams")
@@ -59,7 +59,9 @@ class ESPNClient:
     async def get_schedule(self, espn_sport: str, espn_league: str, dates: Optional[str] = None) -> dict:
 
         url = f"{self.BASE_URL}/{espn_sport}/{espn_league}/scoreboard"
-        params = {"dates": dates} if dates else {}
+        params = {"limit": 1000}
+        if dates:
+            params["dates"] = dates
 
         logger.info(f"Fetching {espn_league} schedule from {url} with params: {params}")
 
