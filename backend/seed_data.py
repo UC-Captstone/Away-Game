@@ -81,12 +81,13 @@ async def seed_users(session: AsyncSession) -> list[User]:
 async def seed_leagues(session: AsyncSession) -> list[League]:
     print("\nCreating League")
     leagues = [
-        League(
-            league_code="NFL",
-            sport_code="football",
-            league_name="National Football League",
-            espn_league_id=28,
-        ),
+        League(league_code="NFL",   espn_sport="football",   espn_league="nfl",                     league_name="National Football League",        is_active=True),
+        League(league_code="NBA",   espn_sport="basketball", espn_league="nba",                     league_name="National Basketball Association", is_active=False),
+        League(league_code="NHL",   espn_sport="hockey",     espn_league="nhl",                     league_name="National Hockey League",          is_active=False),
+        League(league_code="MLB",   espn_sport="baseball",   espn_league="mlb",                     league_name="Major League Baseball",           is_active=False),
+        League(league_code="MLS",   espn_sport="soccer",     espn_league="usa.1",                   league_name="Major League Soccer",             is_active=False),
+        League(league_code="NCAAF", espn_sport="football",   espn_league="college-football",        league_name="NCAA Football",                   is_active=False),
+        League(league_code="NCAAB", espn_sport="basketball", espn_league="mens-college-basketball", league_name="NCAA Men's Basketball",           is_active=False),
     ]
 
     session.add_all(leagues)
@@ -101,66 +102,51 @@ async def seed_venues(session: AsyncSession) -> list[Venue]:
         Venue(
             venue_id=3883,
             name="MetLife Stadium",
-            display_name="MetLife Stadium",
             city="East Rutherford",
             state_region="NJ",
             country="USA",
-            timezone="America/New_York",
             latitude=40.8128,
             longitude=-74.0742,
-            capacity=82500,
             is_indoor=False,
         ),
         Venue(
             venue_id=3839,
             name="AT&T Stadium",
-            display_name="AT&T Stadium",
             city="Arlington",
             state_region="TX",
             country="USA",
-            timezone="America/Chicago",
             latitude=32.7473,
             longitude=-97.0945,
-            capacity=80000,
             is_indoor=True,
         ),
         Venue(
             venue_id=3957,
             name="Lambeau Field",
-            display_name="Lambeau Field",
             city="Green Bay",
             state_region="WI",
             country="USA",
-            timezone="America/Chicago",
             latitude=44.5013,
             longitude=-88.0622,
-            capacity=81441,
             is_indoor=False,
         ),
         Venue(
             venue_id=3738,
             name="Gillette Stadium",
-            display_name="Gillette Stadium",
             city="Foxborough",
             state_region="MA",
             country="USA",
-            timezone="America/New_York",
             latitude=42.0909,
             longitude=-71.2643,
-            capacity=65878,
             is_indoor=False,
         ),
         Venue(
             venue_id=3622,
             name="Arrowhead Stadium",
-            display_name="Arrowhead Stadium",
             city="Kansas City",
             state_region="MO",
             country="USA",
-            timezone="America/Chicago",
             latitude=39.0489,
             longitude=-94.4839,
-            capacity=76416,
             is_indoor=False,
         ),
     ]
@@ -171,85 +157,33 @@ async def seed_venues(session: AsyncSession) -> list[Venue]:
     return venues
 
 
-async def seed_teams(session: AsyncSession) -> list[Team]:
+async def seed_teams(session: AsyncSession) -> dict[str, Team]:
     print("\nCreating Test Teams")
 
-    teams = [
-        Team(
-            team_id=19,
-            league_id="NFL",
-            sport_league="NFL",
-            sport_conference="NFC",
-            sport_division="East",
-            home_location="New York",
-            team_name="Giants",
-            display_name="New York Giants",
-            home_venue_id=3883,
-        ),
-        Team(
-            team_id=20,
-            league_id="NFL",
-            sport_league="NFL",
-            sport_conference="AFC",
-            sport_division="East",
-            home_location="New York",
-            team_name="Jets",
-            display_name="New York Jets",
-            home_venue_id=3883,
-        ),
-        Team(
-            team_id=6,
-            league_id="NFL",
-            sport_league="NFL",
-            sport_conference="NFC",
-            sport_division="East",
-            home_location="Dallas",
-            team_name="Cowboys",
-            display_name="Dallas Cowboys",
-            home_venue_id=3839,
-        ),
-        Team(
-            team_id=9,
-            league_id="NFL",
-            sport_league="NFL",
-            sport_conference="NFC",
-            sport_division="North",
-            home_location="Green Bay",
-            team_name="Packers",
-            display_name="Green Bay Packers",
-            home_venue_id=3957,
-        ),
-        Team(
-            team_id=17,
-            league_id="NFL",
-            sport_league="NFL",
-            sport_conference="AFC",
-            sport_division="East",
-            home_location="New England",
-            team_name="Patriots",
-            display_name="New England Patriots",
-            home_venue_id=3738,
-        ),
-        Team(
-            team_id=12,
-            league_id="NFL",
-            sport_league="NFL",
-            sport_conference="AFC",
-            sport_division="West",
-            home_location="Kansas City",
-            team_name="Chiefs",
-            display_name="Kansas City Chiefs",
-            home_venue_id=3622,
-        ),
-    ]
+    giants = Team(espn_team_id=19, league_id="NFL", home_location="New York", team_name="Giants", display_name="New York Giants", home_venue_id=3883)
+    jets = Team(espn_team_id=20, league_id="NFL", home_location="New York", team_name="Jets", display_name="New York Jets", home_venue_id=3883)
+    cowboys = Team(espn_team_id=6, league_id="NFL", home_location="Dallas", team_name="Cowboys", display_name="Dallas Cowboys", home_venue_id=3839)
+    packers = Team(espn_team_id=9, league_id="NFL", home_location="Green Bay", team_name="Packers", display_name="Green Bay Packers", home_venue_id=3957)
+    patriots = Team(espn_team_id=17, league_id="NFL", home_location="New England", team_name="Patriots", display_name="New England Patriots", home_venue_id=3738)
+    chiefs = Team(espn_team_id=12, league_id="NFL", home_location="Kansas City", team_name="Chiefs", display_name="Kansas City Chiefs", home_venue_id=3622)
 
-    session.add_all(teams)
+    all_teams = [giants, jets, cowboys, packers, patriots, chiefs]
+    session.add_all(all_teams)
     await session.commit()
-    print(f"Created {len(teams)} teams")
-    return teams
+    print(f"Created {len(all_teams)} teams")
+
+    # Return as dict for easy reference by name (team_id is auto-generated)
+    return {
+        "giants": giants,
+        "jets": jets,
+        "cowboys": cowboys,
+        "packers": packers,
+        "patriots": patriots,
+        "chiefs": chiefs,
+    }
 
 
-async def seed_games(session: AsyncSession) -> list[Game]:
+async def seed_games(session: AsyncSession, teams: dict[str, Team]) -> list[Game]:
     print("\nCreating games")
 
     now = datetime.now()
@@ -257,36 +191,36 @@ async def seed_games(session: AsyncSession) -> list[Game]:
     games = [
         Game(
             league_id="NFL",
-            home_team_id=19,
-            away_team_id=6,
+            home_team_id=teams["giants"].team_id,
+            away_team_id=teams["cowboys"].team_id,
             venue_id=3883,
             date_time=now + timedelta(days=7),
         ),
         Game(
             league_id="NFL",
-            home_team_id=20,
-            away_team_id=17,
+            home_team_id=teams["jets"].team_id,
+            away_team_id=teams["patriots"].team_id,
             venue_id=3883,
             date_time=now + timedelta(days=7, hours=3),
         ),
         Game(
             league_id="NFL",
-            home_team_id=9,
-            away_team_id=6,
+            home_team_id=teams["packers"].team_id,
+            away_team_id=teams["cowboys"].team_id,
             venue_id=3957,
             date_time=now + timedelta(days=14),
         ),
         Game(
             league_id="NFL",
-            home_team_id=12,
-            away_team_id=17,
+            home_team_id=teams["chiefs"].team_id,
+            away_team_id=teams["patriots"].team_id,
             venue_id=3622,
             date_time=now + timedelta(days=21),
         ),
         Game(
             league_id="NFL",
-            home_team_id=19,
-            away_team_id=20,
+            home_team_id=teams["giants"].team_id,
+            away_team_id=teams["jets"].team_id,
             venue_id=3883,
             date_time=now + timedelta(days=30),
         ),
@@ -455,7 +389,7 @@ async def seed_safety_alerts(
     return alerts
 
 
-async def seed_team_chats(session: AsyncSession, users: list[User]) -> list[TeamChat]:
+async def seed_team_chats(session: AsyncSession, users: list[User], teams: dict[str, Team]) -> list[TeamChat]:
     print("\nSeeding team chats")
 
     john = users[0]
@@ -467,43 +401,43 @@ async def seed_team_chats(session: AsyncSession, users: list[User]) -> list[Team
 
     chats = [
         TeamChat(
-            team_id=19,
+            team_id=teams["giants"].team_id,
             user_id=john.user_id,
             message_text="Let's go Giants! Who's going to the game this Sunday?",
             timestamp=now - timedelta(hours=2),
         ),
         TeamChat(
-            team_id=19,
+            team_id=teams["giants"].team_id,
             user_id=jane.user_id,
             message_text="I'll be there! Section 124",
             timestamp=now - timedelta(hours=1, minutes=45),
         ),
         TeamChat(
-            team_id=19,
+            team_id=teams["giants"].team_id,
             user_id=bob.user_id,
             message_text="Count me in! Tailgating at lot C2",
             timestamp=now - timedelta(hours=1, minutes=30),
         ),
         TeamChat(
-            team_id=20,
+            team_id=teams["jets"].team_id,
             user_id=jane.user_id,
             message_text="J-E-T-S JETS JETS JETS!",
             timestamp=now - timedelta(hours=12),
         ),
         TeamChat(
-            team_id=20,
+            team_id=teams["jets"].team_id,
             user_id=alice.user_id,
             message_text="Ready for the Patriots game! Let's get this W",
             timestamp=now - timedelta(hours=11, minutes=30),
         ),
         TeamChat(
-            team_id=6,
+            team_id=teams["cowboys"].team_id,
             user_id=bob.user_id,
             message_text="How 'bout them Cowboys!",
             timestamp=now - timedelta(hours=6),
         ),
         TeamChat(
-            team_id=9,
+            team_id=teams["packers"].team_id,
             user_id=john.user_id,
             message_text="Go Pack Go! Lambeau is going to be electric this weekend",
             timestamp=now - timedelta(hours=4),
@@ -516,7 +450,7 @@ async def seed_team_chats(session: AsyncSession, users: list[User]) -> list[Team
     return chats
 
 
-async def seed_user_favorite_teams(session: AsyncSession, users: list[User]) -> list[UserFavoriteTeams]:
+async def seed_user_favorite_teams(session: AsyncSession, users: list[User], teams: dict[str, Team]) -> list[UserFavoriteTeams]:
     print("\nSeeding user favorite teams")
 
     john = users[0]
@@ -525,14 +459,14 @@ async def seed_user_favorite_teams(session: AsyncSession, users: list[User]) -> 
     alice = users[3]
 
     favorites = [
-        UserFavoriteTeams(user_id=john.user_id, team_id=19),  
-        UserFavoriteTeams(user_id=john.user_id, team_id=9),
-        UserFavoriteTeams(user_id=jane.user_id, team_id=20),
-        UserFavoriteTeams(user_id=jane.user_id, team_id=19),
-        UserFavoriteTeams(user_id=bob.user_id, team_id=6),
-        UserFavoriteTeams(user_id=bob.user_id, team_id=19),
-        UserFavoriteTeams(user_id=alice.user_id, team_id=20),
-        UserFavoriteTeams(user_id=alice.user_id, team_id=17),
+        UserFavoriteTeams(user_id=john.user_id, team_id=teams["giants"].team_id),
+        UserFavoriteTeams(user_id=john.user_id, team_id=teams["packers"].team_id),
+        UserFavoriteTeams(user_id=jane.user_id, team_id=teams["jets"].team_id),
+        UserFavoriteTeams(user_id=jane.user_id, team_id=teams["giants"].team_id),
+        UserFavoriteTeams(user_id=bob.user_id, team_id=teams["cowboys"].team_id),
+        UserFavoriteTeams(user_id=bob.user_id, team_id=teams["giants"].team_id),
+        UserFavoriteTeams(user_id=alice.user_id, team_id=teams["jets"].team_id),
+        UserFavoriteTeams(user_id=alice.user_id, team_id=teams["patriots"].team_id),
     ]
 
     session.add_all(favorites)
@@ -585,7 +519,7 @@ async def main():
         leagues = await seed_leagues(session)
         venues = await seed_venues(session)
         teams = await seed_teams(session)
-        games = await seed_games(session)
+        games = await seed_games(session, teams)
 
         event_types = await seed_event_types(session)
         events = await seed_events(session, users, games)
@@ -593,8 +527,8 @@ async def main():
         alert_types = await seed_alert_types(session)
         alerts = await seed_safety_alerts(session, users, games)
 
-        chats = await seed_team_chats(session, users)
-        user_fav_teams = await seed_user_favorite_teams(session, users)
+        chats = await seed_team_chats(session, users, teams)
+        user_fav_teams = await seed_user_favorite_teams(session, users, teams)
         favorites = await seed_favorites(session, users, events, games)
 
     print("\n" + "=" * 60)
@@ -604,7 +538,7 @@ async def main():
     print(f"  Users: {len(users)}")
     print(f"  Leagues: {len(leagues)} (NFL only)")
     print(f"  Venues: {len(venues)}")
-    print(f"  Teams: {len(teams)}")
+    print(f"  Teams: {len(teams)}  (auto-increment PKs)")
     print(f"  Games: {len(games)}")
     print(f"  Event Types: {len(event_types)}")
     print(f"  Events: {len(events)}")
