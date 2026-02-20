@@ -14,7 +14,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/components/signup/signup.component').then((m) => m.SignupComponent),
   },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   {
     path: 'profile',
     loadComponent: () =>
