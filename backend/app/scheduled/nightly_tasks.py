@@ -250,7 +250,7 @@ async def run_nightly_task():
                     await session.rollback()
                     logger.exception(f"{league.league_code} scrape failed, skipping: {e}")
 
-            logger.info("Scraper completed successfully")
+            logger.info("Scraper ran successfully")
     except Exception as e:
         logger.exception(f"Scraper failed: {e}")
         raise
