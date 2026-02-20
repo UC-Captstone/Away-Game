@@ -95,9 +95,9 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            secrets=(postgres-db postgres-user postgres-password postgres-host postgres-port 
-                    database-url sync-database-url async-database-url database-url-async 
-                    clerk-secret-key clerk-domain jwt-secret-key)
+            secrets=(postgres-db postgres-user postgres-password postgres-host postgres-port
+                    database-url sync-database-url async-database-url database-url-async
+                    clerk-secret-key clerk-domain jwt-secret-key leagues-config)
             for secret in "${secrets[@]}"; do
               value=$(az keyvault secret show --name $secret --vault-name away-game-kv --query value -o tsv)
               echo "::add-mask::$value"
