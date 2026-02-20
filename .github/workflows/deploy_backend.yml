@@ -123,6 +123,7 @@ jobs:
               {"name": "CLERK_SECRET_KEY", "value": "${{ env.CLERK_SECRET_KEY }}"},
               {"name": "CLERK_DOMAIN", "value": "${{ env.CLERK_DOMAIN }}"},
               {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}"}
+              {"name": "LEAGUES_CONFIG", "value": "${{ env.LEAGUES_CONFIG }}"}
             ]
 
       - name: Deploy to Azure Functions
