@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Chat API Tester</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .messages {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        .message {
+            background: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        .message-header img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+        .message-text {
+            margin-left: 40px;
+            color: #333;
+        }
+        .status {
+            padding: 10px;
+            background: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Event Chat API Tester</h1>
+
+    <div class="container">
+        <h2>Connection Status</h2>
+        <div id="status" class="status">
+            Checking backend connection...
+        </div>
+        
+        <h3>Configuration</h3>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+            <strong>API URL:</strong> <span id="apiUrl"></span>
+            <strong>Event ID:</strong> <span id="eventId"></span>
+            <strong>User ID:</strong> <span id="userId"></span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Statistics</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="messageCount">0</div>
+                <div class="stat-label">Total Messages</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pollCount">0</div>
+                <div class="stat-label">Polls Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="currentInterval">-</div>
+                <div class="stat-label">Poll Interval (ms)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Polling Controls</h2>
+        <div class="controls">
+            <button onclick="startPolling()" id="startBtn">Start Polling</button>
+            <button onclick="stopPolling()" id="stopBtn" disabled>Stop Polling</button>
+            <button onclick="boostPolling()">Boost Speed</button>
+            <button onclick="throttlePolling()">Throttle Speed</button>
+            <button onclick="loadInitial()">Load Initial Messages</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Send Message</h2>
+        <div class="controls">
+            <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Messages</h2>
+        <div id="messages" class="messages">
+            <p style="text-align: center; color: #999;">No messages yet. Click "Load Initial Messages" or "Start Polling"</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>API Test Actions</h2>
+        <div class="controls" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <button onclick="testGetMessages()">Test: Get Messages</button>
+            <button onclick="testGetSince()">Test: Get Since Timestamp</button>
+            <button onclick="testPaginated()">Test: Paginated</button>
+            <button onclick="testTypingOn()">Test: Typing ON</button>
+            <button onclick="testTypingOff()">Test: Typing OFF</button>
+            <button onclick="testGetTyping()">Test: Get Typing Users</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Response Log</h2>
+        <pre id="responseLog">Test results will appear here...</pre>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:7071/api/event-chats';
+        const EVENT_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+        const USER_ID = '11111111-1111-1111-1111-111111111111';
+
+        // State
+        let messages = [];
+        let pollInterval = null;
+        let currentPollSpeed = 5000;
+        let pollCount = 0;
+        let lastMessageTime = null;
+        let isPolling = false;
+
+        // Initialize
+        document.getElementById('apiUrl').textContent = API_URL;
+        document.getElementById('eventId').textContent = EVENT_ID;
+        document.getElementById('userId').textContent = USER_ID;
+
+        // Check backend connection
+        async function checkBackend() {
+            try {
+                const response = await fetch(`${API_URL}/event/${EVENT_ID}?limit=1`);
+                if (response.ok) {
+                    showStatus('✅ Backend connected successfully!', 'success');
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                showStatus(`❌ Backend not reachable: ${error.message}. Start backend with: cd backend/app && func start`, 'error');
+                return false;
+            }
+        }
+
+        function showStatus(message, type = 'status') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        function log(message) {
+            const logEl = document.getElementById('responseLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.textContent = `[${timestamp}] ${message}\n\n` + logEl.textContent;
+        }
+
+        function updateStats() {
+            document.getElementById('messageCount').textContent = messages.length;
+            document.getElementById('pollCount').textContent = pollCount;
+            document.getElementById('currentInterval').textContent = isPolling ? currentPollSpeed : '-';
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messages');
+            if (messages.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">No messages yet.</p>';
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => `
+                <div class="message">
+                    <div class="message-header">
+                        ${msg.userAvatarUrl ? `<img src="${msg.userAvatarUrl}" alt="avatar">` : ''}
+                        <strong>${msg.userName || 'Unknown User'}</strong>
+                        <span>•</span>
+                        <span>${new Date(msg.timestamp).toLocaleString()}</span>
+                    </div>
+                    <div class="message-text">${msg.messageText}</div>
+                </div>
+            `).join('');
+
+            // Auto-scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function loadInitial() {
+            try {
+                log('Loading initial messages...');
+                const response = await fetch(`${API_URL}/event/${EVENT_ID}?limit=50`);
+                const data = await response.json();
+                messages = data;
+                if (data.length > 0) {
+                    lastMessageTime = data[data.length - 1].timestamp;
+                }
+                renderMessages();
+                updateStats();
+                log(`✅ Loaded ${data.length} messages`);
+            } catch (error) {
+                log(`❌ Error loading messages: ${error.message}`);
+            }
+        }
+
+        async function pollForNew() {
+            if (!isPolling) return;
+
+            try {
+                pollCount++;
+                const url = lastMessageTime 
+                    ? `${API_URL}/event/${EVENT_ID}?since_timestamp=${encodeURIComponent(lastMessageTime)}&limit=100`
+                    : `${API_URL}/event/${EVENT_ID}?limit=100`;
+                
+                const response = await fetch(url);
+                const newMessages = await response.json();
+                
+                if (newMessages.length > 0) {
+                    log(`📨 Received ${newMessages.length} new message(s)`);
+                    messages = [...messages, ...newMessages];
+                    lastMessageTime = newMessages[newMessages.length - 1].timestamp;
+                    renderMessages();
+                    
+                    // Speed up polling (adaptive behavior)
+                    currentPollSpeed = Math.max(1000, currentPollSpeed / 2);
+                } else {
+                    // Slow down polling when idle
+                    currentPollSpeed = Math.min(30000, currentPollSpeed * 1.5);
+                }
+                
+                updateStats();
+            } catch (error) {
+                log(`❌ Poll error: ${error.message}`);
+                currentPollSpeed = Math.min(30000, currentPollSpeed * 2);
+            }
+
+            // Schedule next poll
+            if (isPolling) {
+                pollInterval = setTimeout(pollForNew, currentPollSpeed);
+            }
+        }
+
+        function startPolling() {
+            if (isPolling) return;
+            isPolling = true;
+            currentPollSpeed = 5000;
+            log('🔄 Started polling');
+            showStatus('🔄 Polling active', 'success');
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            pollForNew();
+        }
+
+        function stopPolling() {
+            if (!isPolling) return;
+            isPolling = false;
+            if (pollInterval) {
+                clearTimeout(pollInterval);
+            }
+            log('⏸️ Stopped polling');
+            showStatus('⏸️ Polling stopped', 'status');
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            updateStats();
+        }
+
+        function boostPolling() {
+            currentPollSpeed = 1000;
+            log('⚡ Boosted polling speed to 1000ms');
+            updateStats();
+        }
+
+        function throttlePolling() {
+            currentPollSpeed = 60000;
+            log('🐌 Throttled polling speed to 60000ms');
+            updateStats();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const messageText = input.value.trim();
+            
+            if (!messageText) {
+                alert('Please enter a message');
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        eventId: EVENT_ID,
+                        userId: USER_ID,
+                        messageText: messageText
+                    })
+                });
+
+                if (response.ok) {
+                    const newMessage = await response.json();
+                    log(`✅ Message sent successfully`);
+                    input.value = '';
+                    
+                    // Boost polling to quickly show the message
+                    boostPolling();
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log(`❌ Error sending message: ${error.message}`);
+                alert('Failed to send message. Check console.');
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Test functions
+        async function testGetMessages() {
+            const response = await fetch(`${API_URL}/event/${EVENT_ID}?limit=10`);
+            const data = await response.json();
+            log(`GET Messages: ${JSON.stringify(data, null, 2)}`);
+        }
+
+        async function testGetSince() {
+            const since = new Date('2026-02-05T10:30:00Z').toISOString();
+            const response = await fetch(`${API_URL}/event/${EVENT_ID}?since_timestamp=${since}`);
+            const data = await response.json();
+            log(`GET Since ${since}: ${JSON.stringify(data, null, 2)}`);
+        }
+
+        async function testPaginated() {
+            const response = await fetch(`${API_URL}/event/${EVENT_ID}/paginated?limit=2`);
+            const data = await response.json();
+            log(`GET Paginated: ${JSON.stringify(data, null, 2)}`);
+        }
+
+        async function testTypingOn() {
+            const response = await fetch(`${API_URL}/event/${EVENT_ID}/typing?user_id=${USER_ID}&is_typing=true`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+            log(`POST Typing ON: ${JSON.stringify(data, null, 2)}`);
+        }
+
+        async function testTypingOff() {
+            const response = await fetch(`${API_URL}/event/${EVENT_ID}/typing?user_id=${USER_ID}&is_typing=false`, {
+                method: 'POST'
+            });
+            const data = await response.json();
+            log(`POST Typing OFF: ${JSON.stringify(data, null, 2)}`);
+        }
+
+        async function testGetTyping() {
+            const response = await fetch(`${API_URL}/event/${EVENT_ID}/typing`);
+            const data = await response.json();
+            log(`GET Typing Users: ${JSON.stringify(data, null, 2)}`);
+        }
+
+        // Check backend on load
+        checkBackend();
+
+        // Handle visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                log('👁️ Tab hidden - throttling');
+                throttlePolling();
+            } else {
+                log('👁️ Tab visible - boosting');
+                boostPolling();
+            }
+        });
+    </script>
+</body>
+</html>

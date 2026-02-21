@@ -1,8 +1,8 @@
 from __future__ import annotations
 from uuid import UUID
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, ConfigDict, computed_field
+from typing import Optional, List
+from pydantic import BaseModel, ConfigDict, computed_field, model_validator
 from pydantic.alias_generators import to_camel
 
 class EventChatBase(BaseModel):
@@ -26,23 +26,45 @@ class EventChatRead(BaseModel):
     user_id: UUID
     message_text: str
     timestamp: datetime
+    user_name: Optional[str] = None
+    user_avatar_url: Optional[str] = None
     
-    # Computed fields from user relationship
-    @computed_field
-    @property
-    def user_name(self) -> Optional[str]:
-        if hasattr(self, 'user') and self.user:
-            return self.user.username
-        return None
-    
-    @computed_field
-    @property
-    def user_avatar_url(self) -> Optional[str]:
-        if hasattr(self, 'user') and self.user:
-            return self.user.profile_picture_url
-        return None
+    @model_validator(mode='before')
+    @classmethod
+    def extract_user_info(cls, data):
+        """Extract user information from the relationship if present."""
+        if isinstance(data, dict):
+            return data
+        
+        # If it's an ORM object, extract user info from relationship
+        if hasattr(data, 'user') and data.user:
+            # Create a dict with the data
+            result = {
+                'message_id': data.message_id,
+                'event_id': data.event_id,
+                'user_id': data.user_id,
+                'message_text': data.message_text,
+                'timestamp': data.timestamp,
+                'user_name': data.user.username if data.user else None,
+                'user_avatar_url': data.user.profile_picture_url if data.user else None,
+            }
+            return result
+        
+        return data
 
 class EventChatDelete(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
     
     message_id: UUID
+
+class EventChatPaginatedResponse(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    
+    messages: List[EventChatRead]
+    has_more: bool
+    oldest_timestamp: Optional[datetime]
+
+class TypingStatusResponse(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    
+    typing_users: List[str]

@@ -22,4 +22,11 @@ export const routes: Routes = [
         (m) => m.UserProfileComponent,
       ),
   },
+  {
+    path: 'chat-test',
+    loadComponent: () =>
+      import('./features/events/chat-test/chat-test.component').then(
+        (m) => m.ChatTestComponent,
+      ),
+  },
 ];
