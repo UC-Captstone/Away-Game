@@ -3,6 +3,7 @@ from sqlalchemy import select, and_, func
 from sqlalchemy.orm import selectinload
 from typing import List
 from datetime import datetime
+import uuid
 
 from models.event import Event
 from models.game import Game
@@ -15,24 +16,114 @@ from schemas.types import EventTypeEnum
 from schemas.event import EventRead, TeamLogos
 
 async def get_featured_events_service(db: AsyncSession, limit: int = 5) -> List[EventRead]:
-    stmt = (
-        select(Event)
-        .options(
-            selectinload(Event.game).selectinload(Game.home_team),
-            selectinload(Event.game).selectinload(Game.away_team),
-            selectinload(Event.game).selectinload(Game.league),
-            selectinload(Event.venue),
-            selectinload(Event.event_type),
-        )
-        .outerjoin(Favorite, Favorite.event_id == Event.event_id)
-        .group_by(Event.event_id)
-        .order_by(func.count(Favorite.favorite_id).desc())
-        .limit(limit)
+    event_counts_stmt = (
+        select(Favorite.event_id, func.count(Favorite.favorite_id).label("favorite_count"))
+        .where(Favorite.event_id.isnot(None))
+        .group_by(Favorite.event_id)
     )
-    result = await db.execute(stmt)
-    events = result.scalars().all()
+    game_counts_stmt = (
+        select(Favorite.game_id, func.count(Favorite.favorite_id).label("favorite_count"))
+        .where(Favorite.game_id.isnot(None))
+        .group_by(Favorite.game_id)
+    )
 
-    return [_map_event_to_read(event) for event in events]
+    event_counts_result = await db.execute(event_counts_stmt)
+    game_counts_result = await db.execute(game_counts_stmt)
+
+    ranked_items = [
+        ("event", event_id, int(favorite_count))
+        for event_id, favorite_count in event_counts_result.all()
+        if event_id is not None
+    ] + [
+        ("game", game_id, int(favorite_count))
+        for game_id, favorite_count in game_counts_result.all()
+        if game_id is not None
+    ]
+
+    ranked_items.sort(key=lambda item: item[2], reverse=True)
+    ranked_items = ranked_items[:limit]
+
+    event_ids = [item_id for item_type, item_id, _ in ranked_items if item_type == "event"]
+    game_ids = [item_id for item_type, item_id, _ in ranked_items if item_type == "game"]
+
+    events_by_id = {}
+    games_by_id = {}
+
+    if event_ids:
+        events_stmt = (
+            select(Event)
+            .where(Event.event_id.in_(event_ids))
+            .options(
+                selectinload(Event.game).selectinload(Game.home_team),
+                selectinload(Event.game).selectinload(Game.away_team),
+                selectinload(Event.game).selectinload(Game.league),
+                selectinload(Event.venue),
+                selectinload(Event.event_type),
+            )
+        )
+        events_result = await db.execute(events_stmt)
+        events = events_result.scalars().all()
+        events_by_id = {event.event_id: event for event in events}
+
+    if game_ids:
+        games_stmt = (
+            select(Game)
+            .where(Game.game_id.in_(game_ids))
+            .options(
+                selectinload(Game.home_team),
+                selectinload(Game.away_team),
+                selectinload(Game.league),
+                selectinload(Game.venue),
+            )
+        )
+        games_result = await db.execute(games_stmt)
+        games = games_result.scalars().all()
+        games_by_id = {game.game_id: game for game in games}
+
+    featured_items: List[EventRead] = []
+    for item_type, item_id, _ in ranked_items:
+        if item_type == "event":
+            event = events_by_id.get(item_id)
+            if event is not None:
+                featured_items.append(_map_event_to_read(event))
+        else:
+            game = games_by_id.get(item_id)
+            if game is not None:
+                featured_items.append(_map_game_to_read(game))
+
+    return featured_items
+
+
+def _map_game_to_read(game: Game) -> EventRead:
+    home_team_name = (
+        game.home_team.display_name
+        if game.home_team and game.home_team.display_name
+        else (game.home_team.team_name if game.home_team and game.home_team.team_name else "Home")
+    )
+    away_team_name = (
+        game.away_team.display_name
+        if game.away_team and game.away_team.display_name
+        else (game.away_team.team_name if game.away_team and game.away_team.team_name else "Away")
+    )
+    venue_lat = game.venue.latitude if game.venue and game.venue.latitude is not None else 0.0
+    venue_lng = game.venue.longitude if game.venue and game.venue.longitude is not None else 0.0
+
+    return EventRead(
+        event_id=uuid.uuid5(uuid.NAMESPACE_DNS, f"game:{game.game_id}"),
+        event_type=EventTypeEnum.GAME,
+        event_name=f"{away_team_name} @ {home_team_name}",
+        date_time=game.date_time,
+        location=Location(lat=venue_lat, lng=venue_lng),
+        venue_name=game.venue.name if game.venue else "",
+        image_url=game.home_team.logo_url if game.home_team else None,
+        team_logos=TeamLogos(
+            home=game.home_team.logo_url if game.home_team else None,
+            away=game.away_team.logo_url if game.away_team else None,
+        ),
+        league=game.league.league_code if game.league else None,
+        is_user_created=False,
+        is_saved=False,
+    )
 
 
 async def get_nearby_events_service(
@@ -43,13 +134,17 @@ async def get_nearby_events_service(
 ) -> List[EventRead]:
     # Convert miles to degrees (approximate: 1 degree = 69 miles)
     radius_degrees = radius_miles / 69.0
+    now = datetime.utcnow()
+    fetch_limit = max(limit * 3, limit)
 
-    stmt = (
+    events_stmt = (
         select(Event)
         .where(
             and_(
                 Event.latitude.isnot(None),
                 Event.longitude.isnot(None),
+                Event.game_date.isnot(None),
+                Event.game_date >= now,
                 Event.latitude >= location.lat - radius_degrees,
                 Event.latitude <= location.lat + radius_degrees,
                 Event.longitude >= location.lng - radius_degrees,
@@ -63,14 +158,52 @@ async def get_nearby_events_service(
             selectinload(Event.venue),
             selectinload(Event.event_type),
         )
-        .limit(limit)
+        .order_by(Event.game_date.asc())
+        .limit(fetch_limit)
     )
-    result = await db.execute(stmt)
-    events = result.scalars().all()
+    events_result = await db.execute(events_stmt)
+    events = events_result.scalars().all()
+
+    games_stmt = (
+        select(Game)
+        .join(Venue, Game.venue_id == Venue.venue_id)
+        .where(
+            and_(
+                Game.date_time.isnot(None),
+                Game.date_time >= now,
+                Venue.latitude.isnot(None),
+                Venue.longitude.isnot(None),
+                Venue.latitude >= location.lat - radius_degrees,
+                Venue.latitude <= location.lat + radius_degrees,
+                Venue.longitude >= location.lng - radius_degrees,
+                Venue.longitude <= location.lng + radius_degrees,
+            )
+        )
+        .options(
+            selectinload(Game.home_team),
+            selectinload(Game.away_team),
+            selectinload(Game.league),
+            selectinload(Game.venue),
+        )
+        .order_by(Game.date_time.asc())
+        .limit(fetch_limit)
+    )
+    games_result = await db.execute(games_stmt)
+    games = games_result.scalars().all()
 
     # Filter by actual distance using haversine formula
-    filtered_events = [
-        event
+    filtered_items = [
+        (
+            event.game_date,
+            _haversine_distance(
+                location.lat,
+                location.lng,
+                event.latitude,
+                event.longitude,
+            ),
+            "event",
+            event,
+        )
         for event in events
         if _haversine_distance(
             location.lat,
@@ -79,9 +212,40 @@ async def get_nearby_events_service(
             event.longitude,
         )
         <= radius_miles
+    ] + [
+        (
+            game.date_time,
+            _haversine_distance(
+                location.lat,
+                location.lng,
+                game.venue.latitude,
+                game.venue.longitude,
+            ),
+            "game",
+            game,
+        )
+        for game in games
+        if game.venue
+        and game.venue.latitude is not None
+        and game.venue.longitude is not None
+        and _haversine_distance(
+            location.lat,
+            location.lng,
+            game.venue.latitude,
+            game.venue.longitude,
+        )
+        <= radius_miles
     ]
 
-    return [_map_event_to_read(event) for event in filtered_events]
+    filtered_items.sort(key=lambda item: (item[0], item[1]))
+    filtered_items = filtered_items[:limit]
+
+    return [
+        _map_event_to_read(item)
+        if item_type == "event"
+        else _map_game_to_read(item)
+        for _, _, item_type, item in filtered_items
+    ]
 
 
 def _map_event_to_read(event: Event) -> EventRead:
