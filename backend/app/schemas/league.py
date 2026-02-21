@@ -11,16 +11,7 @@ class LeagueEnum(str, Enum):
     MLB = "MLB"
     NHL = "NHL"
     MLS = "MLS"
-
-
-# Map league enum to ESPN IDs
-LEAGUE_ESPN_ID_MAP = {
-    LeagueEnum.NBA: 1,
-    LeagueEnum.NFL: 28,
-    LeagueEnum.MLB: 2,
-    LeagueEnum.NHL: 3,
-    LeagueEnum.MLS: 4,
-}
+    NCAAB = "NCAAB"
 
 
 class LeagueBase(BaseModel):
