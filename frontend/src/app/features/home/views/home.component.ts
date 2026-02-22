@@ -8,6 +8,7 @@ import { GeolocationService } from '../../../shared/services/geolocation.service
 import { finalize, forkJoin, interval, map, of, Subscription, switchMap, tap } from 'rxjs';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
 import { IMapMarker } from '../../../shared/models/map-marker';
+import { UserProfileService } from '../../user-profile/services/user-profile.service';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private eventService: EventService,
     private geolocationService: GeolocationService,
+    private userProfileService: UserProfileService,
   ) {}
 
   ngOnInit(): void {
@@ -77,6 +79,32 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.rotationSubscription) {
       this.rotationSubscription.unsubscribe();
     }
+  }
+
+  handleFeaturedSavedToggle(event: { eventId: string; status: boolean }): void {
+    const request$ = event.status
+      ? this.userProfileService.addSavedEvent(event.eventId)
+      : this.userProfileService.deleteSavedEvent(event.eventId);
+
+    request$.subscribe({
+      next: (savedEvents: IEvent[]) => {
+        const savedIds = new Set(savedEvents.map((item) => item.eventId));
+        this.featuredEvents.set(
+          this.featuredEvents().map((item) => ({
+            ...item,
+            isSaved: savedIds.has(item.eventId),
+          })),
+        );
+      },
+      error: (error) => {
+        console.error('Error toggling featured event saved state:', error);
+        this.featuredEvents.set(
+          this.featuredEvents().map((item) =>
+            item.eventId === event.eventId ? { ...item, isSaved: !event.status } : item,
+          ),
+        );
+      },
+    });
   }
 
   private startAutoRotate(): void {

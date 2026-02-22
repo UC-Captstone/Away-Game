@@ -71,6 +71,7 @@
               <app-event-tile
                 [event]="featuredEvents()[currentEventIndex()]"
                 class="text-sm"
+                (savedToggled)="handleFeaturedSavedToggle($event)"
               ></app-event-tile>
             </div>
 
