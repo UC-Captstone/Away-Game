@@ -11,23 +11,20 @@ from schemas.types import EventTypeEnum
 
 
 def convert_league_to_read(league: League) -> LeagueRead:
-    return LeagueRead.from_db_model(league)
+    return LeagueRead.model_validate(league, from_attributes=True)
 
 
 def convert_team_to_read(team: Team) -> TeamRead:
-    league_read = None
-    if team.league:
-        league_read = convert_league_to_read(team.league)
-    
     return TeamRead(
         team_id=team.team_id,
-        league=league_read,
-        sport_conference=team.sport_conference,
-        sport_division=team.sport_division,
+        league_id=team.league_id,
         home_location=team.home_location,
         team_name=team.team_name,
         display_name=team.display_name,
-        logo_url=team.logo_url or ""
+        logo_url=team.logo_url,
+        espn_team_id=str(team.espn_team_id) if team.espn_team_id is not None else None,
+        created_at=team.created_at,
+        updated_at=team.updated_at,
     )
 
 
