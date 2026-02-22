@@ -1,4 +1,4 @@
-from controllers.auth import sync_user_service
+from auth import sync_user_service
 from fastapi import APIRouter, Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.session import get_session
