@@ -95,9 +95,9 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            secrets=(postgres-db postgres-user postgres-password postgres-host postgres-port 
-                    database-url sync-database-url async-database-url database-url-async 
-                    clerk-secret-key clerk-domain jwt-secret-key)
+            secrets=(postgres-db postgres-user postgres-password postgres-host postgres-port
+                    database-url sync-database-url async-database-url database-url-async
+                    clerk-secret-key clerk-domain jwt-secret-key leagues-config)
             for secret in "${secrets[@]}"; do
               value=$(az keyvault secret show --name $secret --vault-name away-game-kv --query value -o tsv)
               echo "::add-mask::$value"
@@ -122,7 +122,8 @@ jobs:
               {"name": "DATABASE_URL_ASYNC", "value": "${{ env.DATABASE_URL_ASYNC }}"},
               {"name": "CLERK_SECRET_KEY", "value": "${{ env.CLERK_SECRET_KEY }}"},
               {"name": "CLERK_DOMAIN", "value": "${{ env.CLERK_DOMAIN }}"},
-              {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}"}
+              {"name": "JWT_SECRET_KEY", "value": "${{ env.JWT_SECRET_KEY }}"},
+              {"name": "LEAGUES_CONFIG", "value": ${{ toJSON(env.LEAGUES_CONFIG) }}}
             ]
 
       - name: Deploy to Azure Functions

@@ -33,7 +33,7 @@ class VenueRepository:
 
     async def list(self, *, limit: int = 100, offset: int = 0) -> Sequence[Venue]:
         res = await self.db.execute(
-            select(Venue).order_by(Venue.display_name.asc()).limit(limit).offset(offset)
+            select(Venue).order_by(Venue.name.asc()).limit(limit).offset(offset)
         )
         return res.scalars().all()
 
@@ -47,32 +47,66 @@ class VenueRepository:
         venue_id: int,
         *,
         name: Optional[str] = None,
-        display_name: Optional[str] = None,
         city: Optional[str] = None,
         state_region: Optional[str] = None,
         country: Optional[str] = None,
-        timezone: Optional[str] = None,
         latitude: Optional[float] = None,
         longitude: Optional[float] = None,
-        capacity: Optional[int] = None,
         is_indoor: Optional[bool] = None,
     ) -> Optional[Venue]:
         values = {k: v for k, v in {
             "name": name,
-            "display_name": display_name,
             "city": city,
             "state_region": state_region,
             "country": country,
-            "timezone": timezone,
             "latitude": latitude,
             "longitude": longitude,
-            "capacity": capacity,
             "is_indoor": is_indoor,
         }.items() if v is not None}
         if not values:
             return await self.get(venue_id)
         await self.db.execute(update(Venue).where(Venue.venue_id == venue_id).values(**values))
         return await self.get(venue_id)
+
+    async def upsert(
+        self,
+        venue_id: int,
+        name: str,
+        city: Optional[str] = None,
+        state_region: Optional[str] = None,
+        country: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        is_indoor: Optional[bool] = None,
+    ) -> Venue:
+        existing = await self.get(venue_id)
+        if existing:
+            updates = {}
+            if existing.latitude is None and latitude is not None:
+                updates["latitude"] = latitude
+            if existing.longitude is None and longitude is not None:
+                updates["longitude"] = longitude
+            if existing.is_indoor is None and is_indoor is not None:
+                updates["is_indoor"] = is_indoor
+            if updates:
+                logger.info(f"Venue {venue_id} exists, updating missing fields: {updates}")
+                await self.db.execute(
+                    update(Venue).where(Venue.venue_id == venue_id).values(**updates)
+                )
+                await self.db.flush()
+                return await self.get(venue_id)
+            return existing
+        venue = Venue(
+            venue_id=venue_id,
+            name=name,
+            city=city,
+            state_region=state_region,
+            country=country,
+            latitude=latitude,
+            longitude=longitude,
+            is_indoor=is_indoor,
+        )
+        return await self.add(venue)
 
     async def remove(self, venue_id: int) -> int:
         res = await self.db.execute(delete(Venue).where(Venue.venue_id == venue_id))
