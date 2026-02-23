@@ -22,4 +22,11 @@ export const routes: Routes = [
         (m) => m.UserProfileComponent,
       ),
   },
+  {
+    path: 'events',
+    loadComponent: () =>
+      import('./features/event-search/views/event-search.component').then(
+        (m) => m.EventSearchComponent,
+      ),
+  },
 ];
