@@ -6,8 +6,8 @@ import { IUserProfile } from '../models/user-profile';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { UserAccountSettingsComponent } from '../components/user-account-settings/user-account-settings.component';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
-import { IEvent } from '../../events/models/event';
 import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
+import { IEvent } from '../../../shared/models/event';
 
 @Component({
   selector: 'app-user-profile',
@@ -66,7 +66,7 @@ export class UserProfileComponent implements OnInit {
     this.isLoading.set(true);
     this.userProfileService.getUserProfile().subscribe({
       next: (profile) => {
-        console.log("profile", profile)
+        console.log('profile', profile);
         this.userProfile = profile;
         this.isLoading.set(false);
       },

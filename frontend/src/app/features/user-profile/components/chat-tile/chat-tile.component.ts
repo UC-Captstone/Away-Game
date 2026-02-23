@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IChatMessage } from '../../../community/models/chat-message';
+import { IChatMessage } from '../../../../shared/models/chat-message';
 
 @Component({
   selector: 'app-chat-tile',

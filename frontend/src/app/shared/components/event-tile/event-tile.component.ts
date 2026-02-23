@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IEvent } from '../../../features/events/models/event';
+import { IEvent } from '../../models/event';
 
 @Component({
   selector: 'app-event-tile',

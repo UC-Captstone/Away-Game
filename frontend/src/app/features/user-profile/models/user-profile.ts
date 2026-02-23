@@ -1,5 +1,5 @@
-import { IChatMessage } from '../../community/models/chat-message';
-import { IEvent } from '../../events/models/event';
+import { IChatMessage } from '../../../shared/models/chat-message';
+import { IEvent } from '../../../shared/models/event';
 import { IAccountSettings } from './account-settings';
 import { IHeaderInfo } from './header';
 
