@@ -1,5 +1,5 @@
 from typing import List
-from controllers.search import search_service
+from repositories.search_repo import search_service
 from db.session import get_session
 from schemas.search import SearchResult
 from fastapi import APIRouter, Depends, Query

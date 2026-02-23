@@ -1,12 +1,15 @@
 from typing import List
-from models.game import Game
-from models.venue import Venue
-from models.team import Team
-from models.event import Event
-from schemas.search import SearchResult, SearchTypeEnum, TeamLogos
+
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
+from models.event import Event
+from models.game import Game
+from models.team import Team
+from models.venue import Venue
+from schemas.search import SearchResult, SearchTypeEnum, TeamLogos
+
 
 async def search_service(query: str, db: AsyncSession, limit: int = 7) -> List[SearchResult]:
     query_lower = query.lower().strip()
@@ -25,6 +28,7 @@ async def search_service(query: str, db: AsyncSession, limit: int = 7) -> List[S
     results.extend(city_results)
 
     return results[:limit]
+
 
 async def search_teams(query: str, db: AsyncSession, limit: int) -> List[SearchResult]:
     stmt = (
@@ -55,6 +59,7 @@ async def search_teams(query: str, db: AsyncSession, limit: int) -> List[SearchR
         )
         for team in teams
     ]
+
 
 async def search_games(query: str, db: AsyncSession, limit: int) -> List[SearchResult]:
     stmt = (
@@ -97,6 +102,7 @@ async def search_games(query: str, db: AsyncSession, limit: int) -> List[SearchR
         for game in games
     ]
 
+
 async def search_events(query: str, db: AsyncSession, limit: int) -> List[SearchResult]:
     stmt = (
         select(Event)
@@ -131,6 +137,7 @@ async def search_events(query: str, db: AsyncSession, limit: int) -> List[Search
         for event in events
     ]
 
+
 async def search_cities(query: str, db: AsyncSession, limit: int) -> List[SearchResult]:
     stmt = (
         select(Venue.city, Venue.state_region, Venue.country)
@@ -148,7 +155,7 @@ async def search_cities(query: str, db: AsyncSession, limit: int) -> List[Search
 
     return [
         SearchResult(
-            id=f"{city.city}-{city.state_region}",  # Composite ID
+            id=f"{city.city}-{city.state_region}",
             type=SearchTypeEnum.CITY,
             title=f"{city.city}, {city.state_region}" if city.state_region else city.city,
             metadata={
