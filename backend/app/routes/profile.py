@@ -3,11 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
 
-from controllers.profile import (
+from repositories.profile_repo import (
     get_user_profile_service,
     update_account_settings_service,
     update_favorite_teams_service,
     delete_account_service,
+    add_saved_event_service,
     delete_saved_event_service,
     get_navbar_info_service,
 )
@@ -64,6 +65,15 @@ async def delete_saved_event(
     db: AsyncSession = Depends(get_session)
 ):
     return await delete_saved_event_service(current_user, db, event_id)
+
+
+@router.post("/saved-events/{event_id}", response_model=List[EventRead])
+async def add_saved_event(
+    event_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session)
+):
+    return await add_saved_event_service(current_user, db, event_id)
 
 @router.get("/navbar-info", response_model=NavBarInfo)
 async def get_navbar_info(
