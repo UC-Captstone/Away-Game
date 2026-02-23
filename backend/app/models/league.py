@@ -8,8 +8,8 @@ class League(Base):
 
     league_code: Mapped[str] = mapped_column(String(10), primary_key=True)
     espn_sport: Mapped[str | None] = mapped_column(String(50))
-    league_name: Mapped[str]
     espn_league: Mapped[str | None] = mapped_column(String(50))
+    league_name: Mapped[str]
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     teams = relationship("Team", back_populates="league")

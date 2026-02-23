@@ -17,7 +17,7 @@ class TeamBase(BaseModel):
 
 
 class TeamCreate(TeamBase):
-    pass
+    espn_team_id: int
 
 
 class TeamUpdate(BaseModel):
@@ -33,13 +33,11 @@ class TeamUpdate(BaseModel):
 
 class TeamRead(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
-    
+
     team_id: int
-    league_id: str
+    espn_team_id: int
+    league: Optional[LeagueRead] = None
     home_location: str
     team_name: str
     display_name: str
-    logo_url: Optional[str] = None
-    espn_team_id: Optional[str] = None
-    created_at: datetime
-    updated_at: Optional[datetime] = None
+    logo_url: str

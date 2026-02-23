@@ -11,6 +11,7 @@ class VenueBase(BaseModel):
     country: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    is_indoor: Optional[bool] = None
 
 
 class VenueCreate(VenueBase):
@@ -24,6 +25,7 @@ class VenueUpdate(BaseModel):
     country: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    is_indoor: Optional[bool] = None
 
 
 class VenueRead(VenueBase):

@@ -9,10 +9,14 @@ from db.base import Base
 class Team(Base):
     __tablename__ = "teams"
 
-    team_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    team_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    espn_team_id: Mapped[int] = mapped_column(Integer, nullable=False)
+
     league_id: Mapped[str] = mapped_column(
         String(10), ForeignKey("leagues.league_code"), nullable=False
     )
+
     home_location: Mapped[str]
     team_name: Mapped[str]
     display_name: Mapped[str]
@@ -32,5 +36,5 @@ class Team(Base):
     user_favorite_teams = relationship("UserFavoriteTeams", back_populates="team", viewonly=True)
 
     __table_args__ = (
-        UniqueConstraint("league_id", "home_location", "team_name", name="uq_teams_league_location_name"),
+        UniqueConstraint("espn_team_id", "league_id", name="uq_teams_espn_id_league"),
     )

@@ -16,10 +16,9 @@ class LeagueEnum(str, Enum):
 
 class LeagueBase(BaseModel):
     league_code: str
-    league_name: str
-    espn_sport: Optional[str] = None
+    espn_sport: str
     espn_league: Optional[str] = None
-    is_active: bool = True
+    league_name: str
 
 
 class LeagueCreate(LeagueBase):
@@ -28,17 +27,21 @@ class LeagueCreate(LeagueBase):
 
 class LeagueUpdate(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
-    league_name: Optional[str] = None
     espn_sport: Optional[str] = None
     espn_league: Optional[str] = None
-    is_active: Optional[bool] = None
+    league_code: Optional[str] = None
+    league_name: Optional[str] = None
 
 
 class LeagueRead(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
-    
-    league_code: str
-    league_name: str
-    espn_sport: Optional[str] = None
-    espn_league: Optional[str] = None
-    is_active: bool
+
+    league_code: str = Field(alias="leagueCode", serialization_alias="leagueCode")
+    league_name: str = Field(alias="leagueName", serialization_alias="leagueName")
+
+    @classmethod
+    def from_db_model(cls, league) -> "LeagueRead":
+        return cls(
+            league_code=league.league_code,
+            league_name=league.league_name
+        )
