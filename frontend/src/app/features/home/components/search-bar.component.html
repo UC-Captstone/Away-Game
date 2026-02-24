@@ -1,0 +1,260 @@
+<form
+  class="mx-auto w-3/5 relative bg-slate-950 rounded-2xl p-[1px]"
+  role="search"
+  aria-label="Site search"
+  (submit)="$event.preventDefault(); onSearch()"
+>
+  <label for="search" class="sr-only">Search</label>
+  <div
+    class="relative group bg-slate-950 border border-slate-900 rounded-2xl shadow-lg backdrop-blur-md transition-colors group-focus-within:ring-2 group-focus-within:ring-sky-600/40 group-focus-within:ring-offset-2 group-focus-within:ring-offset-slate-950"
+  >
+    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+      <svg
+        class="w-5 h-5 text-slate-400 group-focus-within:text-sky-400 transition-colors"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-width="2"
+          d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+        />
+      </svg>
+    </div>
+    <input
+      type="search"
+      id="search"
+      #searchInput
+      class="w-full bg-slate-900 border border-slate-700 text-slate-200 placeholder-slate-500 text-sm rounded-xl pl-11 pr-24 py-3 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:bg-slate-800 outline-none transition-colors shadow-lg"
+      placeholder="Search teams, cities, events..."
+      autocomplete="off"
+      aria-label="Search"
+      (input)="onInputChanged()"
+      (keydown.enter)="onSearch()"
+    />
+    <button
+      type="submit"
+      class="absolute top-1/2 -translate-y-1/2 right-2 inline-flex items-center gap-1 bg-sky-500/90 hover:bg-sky-600 text-white font-medium text-xs px-3 py-2 rounded-lg shadow-lg transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+      aria-label="Submit search"
+    >
+      <span>Search</span>
+    </button>
+  </div>
+  @if (showDropdown()) {
+    <div
+      class="absolute left-0 right-0 mt-2 z-30 bg-slate-950/95 border border-slate-800 rounded-xl shadow-2xl backdrop-blur-md overflow-hidden"
+      role="region"
+      aria-label="Search results"
+    >
+      @if (isLoading()) {
+        <div class="p-4 flex items-center justify-center gap-3">
+          <svg
+            class="animate-spin h-5 w-5 text-sky-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            ></path>
+          </svg>
+          <span class="text-sm text-slate-300">Searching…</span>
+        </div>
+      }
+      @if (!isLoading() && searchResults().length === 0 && lastTerm()) {
+        <div class="p-4 text-center text-sm text-slate-400">No results for “{{ lastTerm() }}”.</div>
+      }
+      @if (!isLoading() && searchResults().length > 0) {
+        <ul role="listbox" class="max-h-72 overflow-auto divide-y divide-slate-800">
+          @for (result of searchResults(); track result.id) {
+            <li
+              role="option"
+              class="group px-4 py-3 hover:bg-slate-900/80 cursor-pointer transition-colors"
+            >
+              @switch (result.type) {
+                @case (SearchTypeEnum.Team) {
+                  <div class="grid grid-cols-[3rem_1fr_3rem] items-center gap-4 w-full">
+                    <div class="w-12 flex items-center justify-center">
+                      @if (result.imageUrl) {
+                        <img
+                          [src]="result.imageUrl"
+                          [alt]="result.title"
+                          class="w-8 h-8 object-contain rounded-md border border-slate-700 bg-slate-800"
+                        />
+                      }
+                    </div>
+                    <div class="flex flex-col min-w-0 text-center mx-auto">
+                      <span class="text-slate-200 text-sm font-medium truncate">{{
+                        result.title
+                      }}</span>
+                      @if (result.metadata?.league) {
+                        <span class="text-xs text-slate-500 truncate"
+                          >League: {{ result.metadata.league }}</span
+                        >
+                      }
+                    </div>
+                    <div class="w-12 flex items-center justify-center">
+                      <span
+                        class="text-[10px] px-2 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30 whitespace-nowrap"
+                        >Team</span
+                      >
+                    </div>
+                  </div>
+                }
+                @case (SearchTypeEnum.Game) {
+                  <div class="grid grid-cols-[3rem_1fr_3rem] items-center gap-4 w-full">
+                    <div class="w-12 flex items-center justify-center space-x-2">
+                      @if (result.teamLogos?.home) {
+                        <img
+                          [src]="result.teamLogos?.home"
+                          alt="Home team"
+                          class="w-6 h-6 object-contain rounded-sm border border-slate-700 bg-slate-800"
+                        />
+                      }
+                      @if (result.teamLogos?.away) {
+                        <img
+                          [src]="result.teamLogos?.away"
+                          alt="Away team"
+                          class="w-6 h-6 object-contain rounded-sm border border-slate-700 bg-slate-800"
+                        />
+                      }
+                    </div>
+                    <div class="flex flex-col min-w-0 text-center mx-auto">
+                      <span class="text-slate-200 text-sm font-medium truncate">{{
+                        result.title
+                      }}</span>
+                      @if (result.metadata?.date) {
+                        <span class="text-xs text-slate-500 truncate">{{
+                          result.metadata.date | date: 'mediumDate'
+                        }}</span>
+                      }
+                      @if (result.metadata?.location) {
+                        <span class="text-xs text-slate-500 truncate">{{
+                          result.metadata.location
+                        }}</span>
+                      }
+                    </div>
+                    <div class="w-12 flex items-center justify-center">
+                      <span
+                        class="text-[10px] px-2 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 whitespace-nowrap"
+                        >Game</span
+                      >
+                    </div>
+                  </div>
+                }
+                @case (SearchTypeEnum.Event) {
+                  <div class="grid grid-cols-[3rem_1fr_3rem] items-center gap-4 w-full">
+                    <div class="w-12 flex items-center justify-center">
+                      @if (result.imageUrl) {
+                        <img
+                          [src]="result.imageUrl"
+                          [alt]="result.title"
+                          class="w-8 h-8 object-cover rounded-md border border-slate-700 bg-slate-800"
+                        />
+                      }
+                    </div>
+                    <div class="flex flex-col min-w-0 text-center mx-auto">
+                      <span class="text-slate-200 text-sm font-medium truncate">{{
+                        result.title
+                      }}</span>
+                      @if (result.metadata?.date) {
+                        <span class="text-xs text-slate-500 line-clamp-1">{{
+                          result.metadata.description
+                        }}</span>
+                      }
+                    </div>
+                    <div class="w-12 flex items-center justify-center">
+                      <span
+                        class="text-[10px] px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 whitespace-nowrap"
+                        >Event</span
+                      >
+                    </div>
+                  </div>
+                }
+                @case (SearchTypeEnum.City) {
+                  <div class="grid grid-cols-[3rem_1fr_3rem] items-center gap-4 w-full">
+                    <div class="w-12 flex items-center justify-center">
+                      <img
+                        [src]="'/assets/city.png'"
+                        [alt]="'City'"
+                        class="w-8 h-8 object-cover rounded-md border border-slate-700 bg-slate-800"
+                      />
+                    </div>
+                    <div class="flex flex-col min-w-0 text-center mx-auto">
+                      <span class="text-slate-200 text-sm font-medium truncate">{{
+                        result.title
+                      }}</span>
+                      @if (result.metadata?.country) {
+                        <span class="text-xs text-slate-500 truncate">{{
+                          result.metadata.country
+                        }}</span>
+                      }
+                    </div>
+                    <div class="w-12 flex items-center justify-center">
+                      <span
+                        class="text-[10px] px-2 py-1 rounded-full bg-yellow-500/15 text-yellow-300 border border-yellow-500/30 whitespace-nowrap"
+                        >City</span
+                      >
+                    </div>
+                  </div>
+                }
+                @default {
+                  <div class="grid grid-cols-[3rem_1fr_3rem] items-center gap-4 w-full">
+                    <div
+                      class="w-12 h-12 rounded-md border border-slate-700 bg-slate-800 flex items-center justify-center text-slate-400 text-xs"
+                    >
+                      ?
+                    </div>
+                    <div class="flex flex-col min-w-0 text-center mx-auto">
+                      <span class="text-slate-200 text-sm font-medium truncate">{{
+                        result.title
+                      }}</span>
+                      <span class="text-xs text-slate-500 truncate">Unknown type</span>
+                    </div>
+                    <div class="w-12 flex items-center justify-center">
+                      <span
+                        class="text-[10px] px-2 py-1 rounded-full bg-slate-500/15 text-slate-300 border border-slate-500/30 whitespace-nowrap"
+                        >Item</span
+                      >
+                    </div>
+                  </div>
+                }
+              }
+            </li>
+          }
+        </ul>
+      }
+      @if (!isLoading()) {
+        <div
+          class="px-4 py-2 bg-slate-950/90 text-[10px] text-slate-500 flex items-center justify-between"
+        >
+          <span
+            >Showing {{ searchResults().length }} result{{
+              searchResults.length === 1 ? '' : 's'
+            }}</span
+          >
+          <button
+            type="button"
+            (click)="closeDropdown()"
+            class="text-sky-400 hover:text-sky-300 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      }
+    </div>
+  }
+</form>

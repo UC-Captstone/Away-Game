@@ -7,7 +7,7 @@ from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.alert import SafetyAlert
-from schemas.common import LocationPoint
+from schemas.common import Location
 
 
 class AlertRepository:
@@ -38,7 +38,7 @@ class AlertRepository:
         description: Optional[str] = None,
         game_id: Optional[UUID] = None,
         game_date: Optional[datetime] = None,
-        location: Optional[LocationPoint] = None,
+        location: Optional[Location] = None,
     ) -> SafetyAlert:
         alert = SafetyAlert(
             reporter_user_id=reporter_user_id,
@@ -63,7 +63,7 @@ class AlertRepository:
         description: Optional[str] = None,
         game_id: Optional[UUID] = None,
         game_date: Optional[datetime] = None,
-        location: Optional[LocationPoint] = None,
+        location: Optional[Location] = None,
     ) -> Optional[SafetyAlert]:
         values = {
             k: v

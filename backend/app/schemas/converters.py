@@ -3,7 +3,7 @@ from models.event import Event
 from models.team import Team
 from models.league import League
 from models.team_chat import TeamChat
-from schemas.event import EventRead, TeamLogos
+from schemas.event import EventRead, Location, TeamLogos
 from schemas.team import TeamRead
 from schemas.league import LeagueRead, LeagueEnum
 from schemas.team_chat import TeamChatRead
@@ -11,7 +11,7 @@ from schemas.types import EventTypeEnum
 
 
 def convert_league_to_read(league: League) -> LeagueRead:
-    return LeagueRead.from_db_model(league)
+    return LeagueRead.model_validate(league, from_attributes=True)
 
 
 def convert_team_to_read(team: Team) -> TeamRead:
@@ -26,7 +26,9 @@ def convert_team_to_read(team: Team) -> TeamRead:
         home_location=team.home_location,
         team_name=team.team_name,
         display_name=team.display_name,
-        logo_url=team.logo_url or ""
+        logo_url=team.logo_url,
+        created_at=team.created_at,
+        updated_at=team.updated_at,
     )
 
 
@@ -34,10 +36,10 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
     event_type = EventTypeEnum.GAME  # Default
     if event.event_type_id:
         type_map = {
-            "game": EventTypeEnum.GAME,
-            "tailgate": EventTypeEnum.TAILGATE,
-            "meetup": EventTypeEnum.MEETUP,
-            "watchparty": EventTypeEnum.WATCH_PARTY,
+            "GAME": EventTypeEnum.GAME,
+            "TAILGATE": EventTypeEnum.TAILGATE,
+            "MEETUP": EventTypeEnum.MEETUP,
+            "WATCH_PARTY": EventTypeEnum.WATCH_PARTY,
         }
         event_type = type_map.get(event.event_type_id.lower(), EventTypeEnum.GAME)
 
@@ -56,8 +58,10 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
                 league = None
 
     location = ""
+    venue_name = ""
     if event.venue:
         location = f"{event.venue.city}, {event.venue.state_region}" if event.venue.city and event.venue.state_region else event.venue.name
+        venue_name = event.venue.name or ""
     elif event.latitude and event.longitude:
         location = f"{event.latitude}, {event.longitude}"
 
@@ -69,6 +73,7 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
         event_name=event.title,
         date_time=event.game_date or event.created_at,
         location=location,
+        venue_name=venue_name,
         image_url=event.picture_url,
         team_logos=team_logos,
         league=league,

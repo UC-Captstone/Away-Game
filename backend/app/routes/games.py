@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from db.session import get_session
 from schemas.game import GameRead
-from controllers.games import (
+from repositories.game_repo import (
     get_games_by_team_service,
     get_game_service,
     list_games_service,

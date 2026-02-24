@@ -1,8 +1,12 @@
 from __future__ import annotations
+import logging
 from typing import Optional, Sequence
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.venue import Venue
+
+
+logger = logging.getLogger(__name__)
 
 
 class VenueRepository:

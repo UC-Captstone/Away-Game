@@ -120,7 +120,7 @@
                 >
                   @for (event of profile.savedEvents; track event) {
                     <app-event-tile
-                      [eventTile]="event"
+                      [event]="event"
                       [showSavedIcon]="true"
                       (savedToggled)="handleSavedToggle($event)"
                     ></app-event-tile>
@@ -137,7 +137,7 @@
                   class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
                 >
                   @for (event of profile.myEvents; track event) {
-                    <app-event-tile [eventTile]="event" [showSavedIcon]="false"></app-event-tile>
+                    <app-event-tile [event]="event" [showSavedIcon]="false"></app-event-tile>
                   } @empty {
                     <div class="col-span-full text-center">
                       <h3 class="text-2xl font-semibold text-sky-400 mb-2">No Created Events</h3>

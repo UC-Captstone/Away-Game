@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
   imports: [ClerkSignInComponent],
   standalone: true,
 })
-export class Login {
+export class LoginComponent {
   signInProps: SignInProps = {
     appearance: {
       baseTheme: dark,

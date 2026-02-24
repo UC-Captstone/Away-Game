@@ -76,3 +76,10 @@ class UserProfile(BaseModel):
     saved_events: List[EventRead] = []
     my_events: List[EventRead] = []
     my_chats: List[TeamChatRead] = []
+
+class NavBarInfo(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+    profile_picture_url: Optional[str] = None
+    username: str
+    display_name: str  # Combined first_name + last_name
