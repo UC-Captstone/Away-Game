@@ -1,6 +1,6 @@
 # Away-Game
 
-Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN and Google Maps APIs for game data, safety alerts, and fan meetups. Dockerized with PostgreSQL backend and Clerk auth.
+Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN API for game data, safety alerts, and fan meetups. Dockerized with PostgreSQL backend and Clerk auth.
 
 ### Prerequisites
 
@@ -8,6 +8,44 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN an
 - PostgreSQL 16
 - Node.js 18+
 - Azure account
+
+## Tech Stack
+
+### Frontend
+- **Framework**: Angular 20
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + PostCSS
+- **Maps**: Leaflet + OpenStreetMap tiles
+- **Auth**: Clerk (UI/SDK)
+- **State/Async**: RxJS
+- **Testing**: Karma/Jasmine
+- **Build**: Node.js/npm
+
+### Backend
+- **Framework**: FastAPI (ASGI)
+- **Language**: Python 3.11+
+- **ORM**: SQLAlchemy 2.0 (async)
+- **Database Driver**: AsyncPG (PostgreSQL)
+- **Validation**: Pydantic v2
+- **Auth**: JWT (HS256)
+- **Migrations**: Alembic
+- **Hosting**: Azure Functions (Python)
+
+### External APIs & Services
+- **Auth**: Clerk
+- **Maps**: OpenStreetMap (tiles), Leaflet (rendering)
+- **Venues**: Foursquare Places API
+- **City Search**: Geoapify Address Autocomplete API
+- **Geolocation**: Browser Geolocation API + IP-based fallback
+- **Game Data**: ESPN (game data)
+
+### DevOps & Infrastructure
+- **Containers**: Docker + Docker Compose
+- **CI/CD**: GitHub Actions (Azure deployment)
+- **Database**: PostgreSQL 16
+- **Migrations**: Alembic
+- **Environment**: `.env` + `load_env.sh`
+- **CORS**: Configured middleware
 
 ### Backend Setup
 
@@ -45,16 +83,22 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN an
    # Database
    DATABASE_URL=postgresql://username:password@localhost:5432/awaygame
    DATABASE_URL_ASYNC=postgresql+asyncpg://username:password@localhost:5432/awaygame
+
+   # Auth (Clerk + Internal JWT)
+   JWT_SECRET_KEY=your-secret-key-here
+
+   # External APIs
+   FOURSQUARE_API_KEY=your-foursquare-key
+   GEOAPIFY_API_KEY=your-geoapify-key
    ```
 
-   I wrote a script to load env vars for local testing. It can be ran by using
-
+   Load env vars for local testing:
    ```bash
    cd Away-Game/backend
    . ./load_env.sh
    ```
 
-5. **Start the FastAPI server / MUST BE IN THE BACKEND DIRECTORY**
+5. **Start the FastAPI server (must be in backend directory)**
    ```bash
    # Development mode with auto-reload
    python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
@@ -63,11 +107,52 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN an
    python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
    ```
 
-8. **Access the API**
+6. **Access the API**
    - **API Documentation (Swagger)**: http://localhost:8000/docs
    - **OpenAPI Schema**: http://localhost:8000/openapi.json
 
-9. **Start the Front End**
+### Frontend Setup
+
+1. **Navigate to frontend directory**
+   ```bash
+   cd Away-Game/frontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure Clerk**
+   - Add Clerk publishable key to your environment configuration
+
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
+
+5. **Access the application**
+   - http://localhost:4200
+
+## Map & Location Features
+
+### User Location
+- **Browser Geolocation**: Prompts user for permission on home page load
+- **Caching**: Location stored in `sessionStorage` to avoid repeated prompts
+- **Fallback**: IP-based geolocation via backend endpoint if browser permission denied
+- **Default**: Falls back to Cincinnati, OH if all methods fail
+
+### Mini-Map (Home Page)
+- **Library**: Leaflet with OpenStreetMap tiles
+- **Center**: User's current location
+- **Markers**: Shows 2-3 nearby events within 50-mile radius
+- **Features**: Interactive pan/zoom, "You are here" marker
+
+### Full Map Page (Planned)
+- **Venue Overlays**: Foursquare Places API for restaurants, bars, etc.
+- **Event Markers**: All nearby games and fan meetups
+- **City Search**: Geoapify autocomplete for manual location input
+- **Filters**: Event types, distance radius, venue categories
 
 ## Auth Flow
 
@@ -91,28 +176,37 @@ This project uses PostgreSQL 16 with async SQLAlchemy 2.0 and Alembic for migrat
 - **Models**: Located in `backend/app/models/`
 - **Schemas**: Pydantic models in `backend/app/schemas/`
 
-
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 Away-Game/
 ├── backend/
 │   ├── app/
-│   │   ├── core/          # Configuration
+│   │   ├── core/          # Configuration & middleware
 │   │   ├── db/            # Database session setup
 │   │   ├── models/        # SQLAlchemy ORM models
 │   │   ├── schemas/       # Pydantic schemas (DTOs)
 │   │   ├── repositories/  # Data access layer
 │   │   ├── routes/        # API endpoints
+│   │   ├── controllers/   # Business logic
+│   │   ├── auth.py        # JWT utilities
 │   │   └── main.py        # FastAPI app
 │   ├── migrations/        # Alembic migrations
 │   ├── requirements.txt
 │   └── alembic.ini
-├── frontend/              # Angular application
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/      # Guards, interceptors
+│   │   │   ├── shared/    # Services, models, components
+│   │   │   └── features/  # Feature modules (auth, home, etc.)
+│   │   └── assets/        # Static files (Leaflet markers, etc.)
+│   ├── angular.json
+│   └── package.json
 └── docker-compose.yml     # PostgreSQL container
 ```
 
-## 🛠️ Development
+## Development
 
 ### Testing the API
 
@@ -134,8 +228,10 @@ curl -X POST http://localhost:8000/users/ \
 
 ### Code Quality
 
-All schemas have been validated to match database models. The project follows:
+The project follows:
 - Repository pattern for data access
 - Pydantic for request/response validation
 - Type hints throughout
 - Async/await for all database operations
+- RxJS best practices (observables, operators)
+- Angular standalone components

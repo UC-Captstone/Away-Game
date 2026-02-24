@@ -8,9 +8,9 @@ from enum import Enum
 class EventTypeEnum(str, Enum):
     GAME = "Game"
     TAILGATE = "Tailgate"
-    MEETUP = "Meetup"
-    WATCH_PARTY = "WatchParty"
-
+    PREGAME = "Pregame"
+    POSTGAME = "Postgame"
+    WATCH = "Watch"
 
 class EventTypeCreate(BaseModel):
     type_name: str

@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel
-from schemas.common import LocationPoint
+from schemas.common import Location
 
 
 class AlertCreate(BaseModel):
@@ -12,7 +12,7 @@ class AlertCreate(BaseModel):
     description: Optional[str] = None
     game_id: Optional[UUID] = None
     game_date: Optional[datetime] = None
-    location: Optional[LocationPoint] = None
+    location: Optional[Location] = None
 
 
 class AlertUpdate(BaseModel):
@@ -20,7 +20,7 @@ class AlertUpdate(BaseModel):
     description: Optional[str] = None
     game_id: Optional[UUID] = None
     game_date: Optional[datetime] = None
-    location: Optional[LocationPoint] = None
+    location: Optional[Location] = None
 
 
 class AlertRead(BaseModel):

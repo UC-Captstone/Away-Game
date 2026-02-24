@@ -13,6 +13,7 @@ class TeamBase(BaseModel):
     display_name: str
     home_venue_id: Optional[int] = None
     logo_url: Optional[str] = None
+    espn_team_id: Optional[str] = None
 
 
 class TeamCreate(TeamBase):
@@ -27,6 +28,7 @@ class TeamUpdate(BaseModel):
     display_name: Optional[str] = None
     home_venue_id: Optional[int] = None
     logo_url: Optional[str] = None
+    espn_team_id: Optional[str] = None
 
 
 class TeamRead(BaseModel):

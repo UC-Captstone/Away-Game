@@ -20,13 +20,13 @@ class Team(Base):
     home_location: Mapped[str]
     team_name: Mapped[str]
     display_name: Mapped[str]
-    logo_url: Mapped[str | None]
-
     home_venue_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("venues.venue_id")
     )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=func.now())
+    logo_url: Mapped[str | None]
+    espn_team_id: Mapped[str | None] = mapped_column(String(50))
 
     league = relationship("League", back_populates="teams")
     home_venue = relationship("Venue", foreign_keys=[home_venue_id])

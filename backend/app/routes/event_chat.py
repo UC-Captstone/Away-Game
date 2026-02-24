@@ -6,7 +6,7 @@ from uuid import UUID
 from db.session import get_session
 from schemas.event_chat import EventChatRead, EventChatCreate
 from models.event_chat import EventChat
-from controllers.event_chat import (
+from repositories.event_chat_repo import (
     list_for_event_service,
     add_new_chat_service,
     remove_chat_service,

@@ -5,7 +5,7 @@ from uuid import UUID
 
 from db.session import get_session
 from schemas.event import EventRead
-from controllers.favorites import (
+from repositories.favorite_repo import (
     get_saved_events_service,
     delete_saved_event_service,
     add_saved_event_service,

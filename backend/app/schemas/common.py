@@ -1,16 +1,8 @@
 from __future__ import annotations
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, model_validator
-
-
-class LocationPoint(BaseModel):
-    """
-    Only going to be used on event/alert but defined here for reuse if we extend location features later.
-    """
-    longitude: float = Field(..., ge=-180, le=180)
-    latitude: float = Field(..., ge=-90, le=90)
-
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic.alias_generators import to_camel
 
 class TimeRange(BaseModel):
     """
@@ -25,6 +17,11 @@ class TimeRange(BaseModel):
             raise ValueError("start must be <= end")
         return self
 
+class Location(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    
+    lat: float
+    lng: float
 
 class Msg(BaseModel):
     """

@@ -1,12 +1,14 @@
 import { EventTypeEnum } from '../../../shared/models/event-type-enum';
 import { LeagueEnum } from '../../../shared/models/league-enum';
+import { ILocation } from '../../../shared/models/location';
 
 export interface IEvent {
   eventId: string; // UUID
   eventType: EventTypeEnum;
   eventName: string;
   dateTime: Date;
-  location: string;
+  location: ILocation;
+  venueName: string;
   imageUrl?: string; // optional URL to an image representing the event
   teamLogos?: {
     home?: string; // optional URL to home team logo
