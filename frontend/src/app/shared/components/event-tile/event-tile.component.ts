@@ -9,7 +9,7 @@ import { IEvent } from '../../../features/events/models/event';
   imports: [CommonModule],
 })
 export class EventTileComponent {
-  @Input() eventTile!: IEvent;
+  @Input() event!: IEvent;
   @Input() showSavedIcon: boolean = true;
   @Output() savedToggled: EventEmitter<{ eventId: string; status: boolean }> = new EventEmitter<{
     eventId: string;
@@ -19,7 +19,7 @@ export class EventTileComponent {
   navigateToEventDetails(event: Event) {
     event.preventDefault();
     // Nathan: Implement navigation logic here
-    console.log('Navigating to event details for event:', this.eventTile);
+    console.log('Navigating to event details for event:', this.event);
   }
 
   toggleSaved(event?: Event) {
@@ -27,7 +27,7 @@ export class EventTileComponent {
       event.stopPropagation();
       event.preventDefault();
     }
-    this.eventTile.isSaved = !this.eventTile.isSaved;
-    this.savedToggled.emit({ eventId: this.eventTile.eventId, status: this.eventTile.isSaved });
+    this.event.isSaved = !this.event.isSaved;
+    this.savedToggled.emit({ eventId: this.event.eventId, status: this.event.isSaved });
   }
 }

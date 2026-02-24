@@ -11,6 +11,7 @@ class LeagueEnum(str, Enum):
     MLB = "MLB"
     NHL = "NHL"
     MLS = "MLS"
+    NCAAB = "NCAAB"
 
 
 class LeagueBase(BaseModel):
@@ -25,6 +26,7 @@ class LeagueCreate(LeagueBase):
 
 
 class LeagueUpdate(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
     espn_sport: Optional[str] = None
     espn_league: Optional[str] = None
     league_code: Optional[str] = None

@@ -3,15 +3,11 @@
   onclick="navigateToEventDetails($event)"
 >
   <div class="flex-shrink-0 w-full h-1/2 bg-slate-800 relative overflow-hidden">
-    @if (eventTile.eventType === 'Game') {
+    @if (event.eventType === 'Game') {
       <div class="w-full h-full flex items-center justify-center gap-2 p-2">
         <div class="w-1/2 h-full flex items-center justify-center bg-slate-800 overflow-hidden">
-          @if (eventTile.teamLogos?.home) {
-            <img
-              [src]="eventTile.teamLogos?.home"
-              alt="home logo"
-              class="w-full h-full object-cover"
-            />
+          @if (event.teamLogos?.home) {
+            <img [src]="event.teamLogos?.home" alt="home logo" class="w-full h-full object-cover" />
           } @else {
             <div
               class="w-full h-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs"
@@ -21,12 +17,8 @@
           }
         </div>
         <div class="w-1/2 h-full flex items-center justify-center bg-slate-800 overflow-hidden">
-          @if (eventTile.teamLogos?.away) {
-            <img
-              [src]="eventTile.teamLogos?.away"
-              alt="away logo"
-              class="w-full h-full object-cover"
-            />
+          @if (event.teamLogos?.away) {
+            <img [src]="event.teamLogos?.away" alt="away logo" class="w-full h-full object-cover" />
           } @else {
             <div
               class="w-full h-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs"
@@ -37,16 +29,16 @@
         </div>
       </div>
     } @else {
-      @if (eventTile.imageUrl) {
+      @if (event.imageUrl) {
         <img
-          [src]="eventTile.imageUrl"
-          alt="{{ eventTile.eventName }}"
+          [src]="event.imageUrl"
+          alt="{{ event.eventName }}"
           class="w-full h-full object-cover"
         />
       } @else {
         <img
           [src]="'/assets/tailgate.png'"
-          alt="{{ eventTile.eventName }}"
+          alt="{{ event.eventName }}"
           class="w-full h-full object-cover"
         />
       }
@@ -55,16 +47,16 @@
 
   <div class="p-2 flex-1 flex flex-col justify-between">
     <div>
-      <h4 class="text-sky-400 text-lg font-semibold truncate">{{ eventTile.eventName }}</h4>
-      <p class="text-xs text-slate-400 mt-2 truncate">{{ eventTile.location }}</p>
-      <p class="text-xs text-slate-400 mt-2">{{ eventTile.dateTime | date: 'medium' }}</p>
+      <h4 class="text-sky-400 text-lg font-semibold truncate">{{ event.eventName }}</h4>
+      <p class="text-xs text-slate-400 mt-2 truncate">{{ event.venueName }}</p>
+      <p class="text-xs text-slate-400 mt-2">{{ event.dateTime | date: 'medium' }}</p>
     </div>
 
     <div class="flex items-center justify-center gap-2 mt-2">
       <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">{{
-        eventTile.eventType
+        event.eventType
       }}</span>
-      @if (eventTile.isUserCreated) {
+      @if (event.isUserCreated) {
         <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">Your event</span>
       }
       @if (showSavedIcon) {
@@ -72,10 +64,10 @@
           type="button"
           (click)="toggleSaved($event)"
           class="ml-auto inline-flex items-center gap-2 px-2 py-1 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700"
-          [attr.aria-pressed]="eventTile.isSaved"
-          [title]="eventTile.isSaved ? 'Saved - click to unsave' : 'Save event'"
+          [attr.aria-pressed]="event.isSaved"
+          [title]="event.isSaved ? 'Saved - click to unsave' : 'Save event'"
         >
-          @if (eventTile.isSaved) {
+          @if (event.isSaved) {
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-4 w-4 text-sky-400"
