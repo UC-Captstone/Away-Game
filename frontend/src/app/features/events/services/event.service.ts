@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { delay, map, Observable, of } from 'rxjs';
-import { IEvent } from '../models/event';
-import { EventTypeEnum } from '../../../shared/models/event-type-enum';
+import { map, Observable } from 'rxjs';
 import { ILocation } from '../../../shared/models/location';
 import { IMapMarker } from '../../../shared/models/map-marker';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { IEvent } from '../../../shared/models/event';
 
 @Injectable({
   providedIn: 'root',

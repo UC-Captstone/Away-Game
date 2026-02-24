@@ -1,6 +1,6 @@
-import { EventTypeEnum } from '../../../shared/models/event-type-enum';
-import { LeagueEnum } from '../../../shared/models/league-enum';
-import { ILocation } from '../../../shared/models/location';
+import { EventTypeEnum } from './event-type-enum';
+import { LeagueEnum } from './league-enum';
+import { ILocation } from './location';
 
 export interface IEvent {
   eventId: string; // UUID
