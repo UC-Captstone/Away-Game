@@ -1,6 +1,12 @@
 <header class="rounded-2xl overflow-hidden bg-slate-900 p-1 mx-auto max-w-4xl w-full">
-  <div class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-3 px-5 profile-header flex items-center gap-4 shadow-sm">
-    <div class="avatar-area flex items-center justify-center" role="group" aria-label="Profile picture">
+  <div
+    class="bg-slate-900/30 border border-slate-800/60 rounded-2xl p-3 px-5 profile-header flex items-center gap-4 shadow-sm"
+  >
+    <div
+      class="avatar-area flex items-center justify-center"
+      role="group"
+      aria-label="Profile picture"
+    >
       <img
         class="avatar w-20 h-20 rounded-md object-cover border border-slate-700 cursor-pointer"
         [src]="profileHeaderInfo.profilePictureUrl || '/assets/default-avatar.jpg'"
@@ -21,23 +27,34 @@
           <span class="display-name text-2xl font-semibold truncate text-sky-300">
             {{ profileHeaderInfo.displayName || 'Your name' }}
           </span>
-            @if (profileHeaderInfo.isVerified) {
+          @if (profileHeaderInfo.isVerified) {
             <span
               class="membership-badge text-orange-400 text-sm"
               title="Verified event creator"
               aria-hidden="false"
             >
-              <svg class="w-6 h-6 inline-block" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <svg
+                class="w-6 h-6 inline-block"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M20 6L9 17l-5-5"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </span>
           }
         </div>
 
         <div class="username-row mt-1">
-          <span
-            class="user-name text-md text-slate-400 truncate"
-          >
+          <span class="user-name text-md text-slate-400 truncate">
             @{{ profileHeaderInfo.username || 'Your username' }}
           </span>
         </div>
@@ -47,7 +64,7 @@
         <label class="favorites-label text-md text-slate-300">Favorite teams</label>
         <div class="team-logos flex items-center gap-2">
           @if (profileHeaderInfo.favoriteTeams.length) {
-            @for (team of profileHeaderInfo.favoriteTeams | slice : 0 : 5; track team.teamName) {
+            @for (team of profileHeaderInfo.favoriteTeams | slice: 0 : 5; track team.teamName) {
               <img
                 class="team-logo w-12 h-12 p-1 object-contain rounded-sm border border-slate-700/30 bg-slate-800/10"
                 [src]="team.logoUrl"
@@ -57,7 +74,9 @@
             }
 
             @if (profileHeaderInfo.favoriteTeams.length > 5) {
-              <div class="more-pill text-sm text-sky-300 bg-slate-800/30 px-2 py-1 rounded-full">+{{ profileHeaderInfo.favoriteTeams.length - 5 }}</div>
+              <div class="more-pill text-sm text-sky-300 bg-slate-800/30 px-2 py-1 rounded-full">
+                +{{ profileHeaderInfo.favoriteTeams.length - 5 }}
+              </div>
             }
           } @else {
             <span class="no-favorites text-slate-400 opacity-80">No favorites</span>

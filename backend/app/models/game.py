@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 
-from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint, CheckConstraint, func
+from sqlalchemy import Integer, String, ForeignKey, UniqueConstraint, CheckConstraint, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.base import Base
@@ -25,8 +25,8 @@ class Game(Base):
         Integer, ForeignKey("venues.venue_id")
     )
 
-    date_time: Mapped[datetime]
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
+    date_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     league = relationship("League", back_populates="games")
     home_team = relationship("Team", foreign_keys=[home_team_id])

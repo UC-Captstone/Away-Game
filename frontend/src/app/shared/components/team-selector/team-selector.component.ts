@@ -13,7 +13,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LeagueEnum, LeagueIdMap } from '../../models/league-enum';
+import { LeagueEnum } from '../../models/league-enum';
 import { ITeam } from '../../models/team';
 import { TeamService } from '../../services/team.service';
 import { BehaviorSubject, Subject, combineLatest, of } from 'rxjs';

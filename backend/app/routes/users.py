@@ -5,7 +5,7 @@ from uuid import UUID
 
 from db.session import get_session
 from schemas.user import UserCreate, UserRead, UserUpdate
-from controllers.users import (
+from repositories.user_repo import (
     create_user_service,
     list_users_service,
     get_user_service,

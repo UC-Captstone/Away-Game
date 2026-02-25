@@ -1,8 +1,13 @@
 from __future__ import annotations
 from uuid import UUID
 from datetime import datetime
+<<<<<<< HEAD
 from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, computed_field, model_validator
+=======
+from typing import Optional
+from pydantic import BaseModel, ConfigDict, computed_field
+>>>>>>> main
 from pydantic.alias_generators import to_camel
 
 class EventChatBase(BaseModel):
@@ -26,6 +31,7 @@ class EventChatRead(BaseModel):
     user_id: UUID
     message_text: str
     timestamp: datetime
+<<<<<<< HEAD
     user_name: Optional[str] = None
     user_avatar_url: Optional[str] = None
     
@@ -51,10 +57,28 @@ class EventChatRead(BaseModel):
             return result
         
         return data
+=======
+    
+    # Computed fields from user relationship
+    @computed_field
+    @property
+    def user_name(self) -> Optional[str]:
+        if hasattr(self, 'user') and self.user:
+            return self.user.username
+        return None
+    
+    @computed_field
+    @property
+    def user_avatar_url(self) -> Optional[str]:
+        if hasattr(self, 'user') and self.user:
+            return self.user.profile_picture_url
+        return None
+>>>>>>> main
 
 class EventChatDelete(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
     
+<<<<<<< HEAD
     message_id: UUID
 
 class EventChatPaginatedResponse(BaseModel):
@@ -68,3 +92,6 @@ class TypingStatusResponse(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
     
     typing_users: List[str]
+=======
+    message_id: UUID
+>>>>>>> main

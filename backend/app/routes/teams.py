@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from db.session import get_session
 from schemas.team import TeamCreate, TeamRead, TeamUpdate
-from controllers.teams import (
+from repositories.team_repo import (
     get_teams_service,
     get_team_service,
     create_team_service,
