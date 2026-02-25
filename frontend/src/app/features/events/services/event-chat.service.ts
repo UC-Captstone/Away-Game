@@ -3,7 +3,6 @@ import { Injectable, OnDestroy } from '@angular/core';
 import {
   BehaviorSubject,
   EMPTY,
-  Subject,
   Subscription,
   catchError,
   switchMap,
