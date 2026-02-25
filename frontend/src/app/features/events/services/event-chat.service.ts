@@ -93,10 +93,24 @@ export class EventChatService implements OnDestroy {
   private cursor: string | null = null;
 
   private pollSub: Subscription | null = null;
-  private visibilityHandler = this.handleVisibilityChange.bind(this);
+
+  private static hasVisibilityListener = false;
+  private static currentInstance: EventChatService | null = null;
+
+  private static handleDocumentVisibilityChange(): void {
+    EventChatService.currentInstance?.handleVisibilityChange();
+  }
 
   constructor(private http: HttpClient) {
-    document.addEventListener('visibilitychange', this.visibilityHandler);
+    EventChatService.currentInstance = this;
+
+    if (!EventChatService.hasVisibilityListener) {
+      document.addEventListener(
+        'visibilitychange',
+        EventChatService.handleDocumentVisibilityChange,
+      );
+      EventChatService.hasVisibilityListener = true;
+    }
   }
 
   // ── lifecycle ────────────────────────────────────────────────────────────
