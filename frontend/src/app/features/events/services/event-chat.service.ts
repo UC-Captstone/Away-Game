@@ -158,9 +158,21 @@ export class EventChatService implements OnDestroy {
     if (!this.currentEventId) return Promise.reject(new Error('No active event'));
     this.sendError$.next(null);
 
+    const trimmed = text.trim();
+    if (!trimmed) {
+      const errorMessage = 'Message cannot be empty';
+      this.sendError$.next(errorMessage);
+      return Promise.reject(new Error(errorMessage));
+    }
+    if (trimmed.length > 1000) {
+      const errorMessage = 'Message must be at most 1000 characters';
+      this.sendError$.next(errorMessage);
+      return Promise.reject(new Error(errorMessage));
+    }
+
     const body: IEventChatSend = {
       eventId: this.currentEventId,
-      messageText: text.trim(),
+      messageText: trimmed,
     };
 
     return new Promise((resolve, reject) => {
