@@ -118,11 +118,10 @@
                 <div
                   class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
                 >
-                  @for (event of profile.savedEvents; track event) {
+                  @for (event of profile.savedEvents; track event.eventId) {
                     <app-event-tile
                       [event]="event"
-                      [showSavedIcon]="true"
-                      (savedToggled)="handleSavedToggle($event)"
+                      (removedFromSaved)="removeSavedEvent($event)"
                     ></app-event-tile>
                   } @empty {
                     <div class="col-span-full text-center">

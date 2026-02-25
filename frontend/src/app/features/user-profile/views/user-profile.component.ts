@@ -7,7 +7,6 @@ import { BackButtonComponent } from '../../../shared/components/back-button/back
 import { UserAccountSettingsComponent } from '../components/user-account-settings/user-account-settings.component';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
 import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
-import { IEvent } from '../../../shared/models/event';
 
 @Component({
   selector: 'app-user-profile',
@@ -41,25 +40,16 @@ export class UserProfileComponent implements OnInit {
     this.selectedTab.set(tab);
   }
 
-  handleSavedToggle(event: { eventId: string; status: boolean }) {
-    this.isLoading.set(true);
-    this.userProfileService.deleteSavedEvent(event.eventId).subscribe({
-      next: (newEvents: IEvent[]) => {
-        console.log('Saved event deleted successfully:', event.eventId);
-        const profile = this.userProfile;
-        if (!profile) {
-          this.isLoading.set(false);
-          return;
-        }
-        profile.savedEvents = newEvents;
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        //Nathan: implement error handling UI in helper function
-        console.error('Error deleting saved event:', error);
-        this.isLoading.set(false);
-      },
-    });
+  removeSavedEvent(eventId: string): void {
+    const profile = this.userProfile;
+    if (!profile) {
+      return;
+    }
+
+    this.userProfile = {
+      ...profile,
+      savedEvents: profile.savedEvents.filter((event) => event.eventId !== eventId),
+    };
   }
 
   private loadUserProfile(): void {
