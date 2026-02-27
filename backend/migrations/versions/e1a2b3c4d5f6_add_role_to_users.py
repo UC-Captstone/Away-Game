@@ -18,7 +18,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.add_column('users', sa.Column('role', sa.String(), server_default='unverified_user', nullable=False))
-    # Existing users already had verified emails, so set them to verified_user
     op.execute("UPDATE users SET role = 'verified_user' WHERE role = 'user'")
 
 
