@@ -153,7 +153,11 @@ async def sync_user_service(request: Request, db: AsyncSession):
         role=role,
     )
 
-    if not created:
+    if role == "admin":
+        user.role = "admin"
+    elif user.is_verified:
+        user.role = "verified_creator"
+    else:
         user.role = role
 
     await db.commit()
