@@ -17,6 +17,7 @@ class UserBase(BaseModel):
     profile_picture_url: Optional[str] = None
     is_verified: bool = False
     pending_verification: bool = False
+    role: str = "user"
 
 
 class UserCreate(BaseModel):

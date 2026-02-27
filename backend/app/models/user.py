@@ -24,6 +24,8 @@ class User(Base):
     is_verified: Mapped[bool] = mapped_column(default=False, nullable=False)
     pending_verification: Mapped[bool] = mapped_column(default=False, nullable=False)
 
+    role: Mapped[str] = mapped_column(default="user", server_default="user", nullable=False)
+
     enable_nearby_event_notifications: Mapped[bool] = mapped_column(default=False, nullable=False)
     enable_favorite_team_notifications: Mapped[bool] = mapped_column(default=False, nullable=False)
     enable_safety_alert_notifications: Mapped[bool] = mapped_column(default=False, nullable=False)
