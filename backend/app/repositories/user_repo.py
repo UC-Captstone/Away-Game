@@ -81,11 +81,12 @@ class UserRepository:
         username: str,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
+        role: str = "user",
     ) -> tuple[User, bool]:
         user = await self.get_by_clerk_id(clerk_id)
         if user:
             return (user, False)
-        
+
         user = User(
             clerk_id=clerk_id,
             email=email,
@@ -94,7 +95,8 @@ class UserRepository:
             last_name=last_name,
             profile_picture_url=None,
             is_verified=False,
-            pending_verification=False
+            pending_verification=False,
+            role=role,
         )
         await self.add(user)
         await self.db.flush()
