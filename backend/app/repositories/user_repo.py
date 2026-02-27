@@ -81,7 +81,7 @@ class UserRepository:
         username: str,
         first_name: Optional[str] = None,
         last_name: Optional[str] = None,
-        role: str = "user",
+        role: str = "unverified_user",
     ) -> tuple[User, bool]:
         user = await self.get_by_clerk_id(clerk_id)
         if user:
