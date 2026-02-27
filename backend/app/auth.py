@@ -77,13 +77,22 @@ async def verify_clerk_token(token: str) -> dict:
         )
 
         metadata = decoded.get("metadata") or {}
+        email_verified = decoded.get("email_verified", False)
+
+        if metadata.get("role") == "admin":
+            role = "admin"
+        elif email_verified:
+            role = "verified_user"
+        else:
+            role = "unverified_user"
+
         return {
             "clerk_id": decoded.get("clerk_id"),
             "email": decoded.get("email"),
             "username": decoded.get("username"),
             "first_name": decoded.get("first_name"),
             "last_name": decoded.get("last_name"),
-            "role": metadata.get("role", "user"),
+            "role": role,
         }
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -134,7 +143,7 @@ async def sync_user_service(request: Request, db: AsyncSession):
         )
 
     repo = UserRepository(db)
-    role = clerk_data.get("role", "user")
+    role = clerk_data.get("role", "unverified_user")
     user, created = await repo.get_or_create_by_clerk_id(
         clerk_id=clerk_data["clerk_id"],
         email=clerk_data["email"],
