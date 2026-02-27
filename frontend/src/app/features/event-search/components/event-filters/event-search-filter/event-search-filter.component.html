@@ -1,0 +1,9 @@
+<label class="block mb-2 text-sm font-medium text-white">Search Events</label>
+<input
+  [ngModel]="keyword"
+  (ngModelChange)="onKeywordInput($event)"
+  name="keyword"
+  type="text"
+  class="bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full px-2.5 py-1.5"
+  placeholder="Search by event name or keyword"
+/>
