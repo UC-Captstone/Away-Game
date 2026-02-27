@@ -144,7 +144,10 @@ export class EventChatService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.destroy();
-    document.removeEventListener('visibilitychange', this.visibilityHandler);
+    document.removeEventListener(
+      'visibilitychange',
+      EventChatService.handleDocumentVisibilityChange,
+    );
   }
 
   // ── public API ────────────────────────────────────────────────────────────
