@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Output, signal, WritableSignal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Output, WritableSignal, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ClerkService } from '@jsrob/ngx-clerk';
-import { UserService } from '../../services/user.service';
-import { CommonModule } from '@angular/common';
-import { INavBar } from '../../models/navbar';
 import { AuthService } from '../../../features/auth/services/auth.service';
+import { INavBar } from '../../models/navbar';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-navbar',
@@ -26,6 +26,14 @@ export class NavBarComponent {
   ) {}
 
   ngOnInit() {
+    const clerk = this.clerkService.clerk();
+    const isSignedIn = !!clerk?.session;
+
+    if (!isSignedIn) {
+      this.isLoading.emit(false);
+      return;
+    }
+
     this.isLoading.emit(true);
     this.userService.getNavBarInfo().subscribe({
       next: (navBarInfo: INavBar) => {
