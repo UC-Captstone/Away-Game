@@ -238,3 +238,30 @@ async def get_optional_current_user(
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
     return user
+
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
+
+
+def require_verified_user(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role == "unverified_user":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Email verification required",
+        )
+    return current_user
+
+
+def require_verified_creator(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role not in ("verified_creator", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Verified creator access required",
+        )
+    return current_user
