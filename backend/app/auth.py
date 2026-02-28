@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
+from uuid import UUID
 
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, Request, status
@@ -265,3 +266,11 @@ def require_verified_creator(current_user: User = Depends(get_current_user)) -> 
             detail="Verified creator access required",
         )
     return current_user
+
+
+def check_owner_or_admin(user_id: UUID, current_user: User) -> None:
+    if user_id != current_user.user_id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden",
+        )
