@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
+from uuid import UUID
 
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, Request, status
@@ -77,14 +78,11 @@ async def verify_clerk_token(token: str) -> dict:
         )
 
         metadata = decoded.get("metadata") or {}
-        email_verified = decoded.get("email_verified", False)
 
         if metadata.get("role") == "admin":
             role = "admin"
-        elif email_verified:
-            role = "verified_user"
         else:
-            role = "unverified_user"
+            role = "user"
 
         return {
             "clerk_id": decoded.get("clerk_id"),
@@ -143,7 +141,7 @@ async def sync_user_service(request: Request, db: AsyncSession):
         )
 
     repo = UserRepository(db)
-    role = clerk_data.get("role", "unverified_user")
+    role = clerk_data.get("role", "user")
     user, created = await repo.get_or_create_by_clerk_id(
         clerk_id=clerk_data["clerk_id"],
         email=clerk_data["email"],
@@ -238,3 +236,30 @@ async def get_optional_current_user(
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
     return user
+
+
+def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
+
+
+
+def require_verified_creator(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role not in ("verified_creator", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Verified creator access required",
+        )
+    return current_user
+
+
+def check_owner_or_admin(user_id: UUID, current_user: User) -> None:
+    if user_id != current_user.user_id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden",
+        )

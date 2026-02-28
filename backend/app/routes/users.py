@@ -5,6 +5,8 @@ from uuid import UUID
 
 from db.session import get_session
 from schemas.user import UserCreate, UserRead, UserUpdate
+from auth import require_admin
+from models.user import User
 from repositories.user_repo import (
     create_user_service,
     list_users_service,
@@ -19,7 +21,11 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-async def create_user(user_data: UserCreate, db: AsyncSession = Depends(get_session)):
+async def create_user(
+    user_data: UserCreate,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_session),
+):
     return await create_user_service(user_data, db)
 
 
@@ -27,13 +33,18 @@ async def create_user(user_data: UserCreate, db: AsyncSession = Depends(get_sess
 async def list_users(
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
+    _admin: User = Depends(require_admin),
     db: AsyncSession = Depends(get_session),
 ):
     return await list_users_service(limit=limit, offset=offset, db=db)
 
 
 @router.get("/{user_id}", response_model=UserRead)
-async def get_user(user_id: UUID, db: AsyncSession = Depends(get_session)):
+async def get_user(
+    user_id: UUID,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_session),
+):
     return await get_user_service(user_id=user_id, db=db)
 
 
@@ -43,16 +54,29 @@ async def get_user_by_username(username: str, db: AsyncSession = Depends(get_ses
 
 
 @router.get("/email/{email}", response_model=UserRead)
-async def get_user_by_email(email: str, db: AsyncSession = Depends(get_session)):
+async def get_user_by_email(
+    email: str,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_session),
+):
     return await get_user_by_email_service(email=email, db=db)
 
 
 @router.patch("/{user_id}", response_model=UserRead)
-async def update_user(user_id: UUID, user_data: UserUpdate, db: AsyncSession = Depends(get_session)):
+async def update_user(
+    user_id: UUID,
+    user_data: UserUpdate,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_session),
+):
     return await update_user_service(user_id=user_id, user_data=user_data, db=db)
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_session)):
+async def delete_user(
+    user_id: UUID,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_session),
+):
     await delete_user_service(user_id=user_id, db=db)
     return None

@@ -17,8 +17,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('users', sa.Column('role', sa.String(), server_default='unverified_user', nullable=False))
-    op.execute("UPDATE users SET role = 'verified_user' WHERE role = 'user'")
+    op.add_column('users', sa.Column('role', sa.String(), server_default='user', nullable=False))
 
 
 def downgrade() -> None:
