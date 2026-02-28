@@ -78,14 +78,11 @@ async def verify_clerk_token(token: str) -> dict:
         )
 
         metadata = decoded.get("metadata") or {}
-        email_verified = decoded.get("email_verified", False)
 
         if metadata.get("role") == "admin":
             role = "admin"
-        elif email_verified:
-            role = "verified_user"
         else:
-            role = "unverified_user"
+            role = "user"
 
         return {
             "clerk_id": decoded.get("clerk_id"),
@@ -144,7 +141,7 @@ async def sync_user_service(request: Request, db: AsyncSession):
         )
 
     repo = UserRepository(db)
-    role = clerk_data.get("role", "unverified_user")
+    role = clerk_data.get("role", "user")
     user, created = await repo.get_or_create_by_clerk_id(
         clerk_id=clerk_data["clerk_id"],
         email=clerk_data["email"],
@@ -249,14 +246,6 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
         )
     return current_user
 
-
-def require_verified_user(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role == "unverified_user":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Email verification required",
-        )
-    return current_user
 
 
 def require_verified_creator(current_user: User = Depends(get_current_user)) -> User:
