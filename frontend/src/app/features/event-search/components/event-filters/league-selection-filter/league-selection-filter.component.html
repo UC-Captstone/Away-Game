@@ -1,0 +1,62 @@
+<label class="block mb-2 text-sm font-medium text-white">Sports Leagues</label>
+<div class="relative">
+  <div class="grid grid-cols-3 gap-2">
+    <label
+      class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-700 cursor-pointer"
+    >
+      <input
+        type="checkbox"
+        class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+        [checked]="allLeaguesSelected"
+        (click)="onAllLeaguesClick($event)"
+      />
+      <span class="text-xs text-slate-200">All</span>
+    </label>
+
+    @for (league of visibleLeagues; track league) {
+      <label
+        class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-700 cursor-pointer"
+      >
+        <input
+          type="checkbox"
+          class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+          [checked]="isLeagueSelected(league)"
+          (click)="onLeagueClick(league, $event)"
+        />
+        <span class="text-xs text-slate-200">{{ league }}</span>
+      </label>
+    }
+
+    @if (overflowLeagues.length > 0) {
+      <button
+        type="button"
+        (click)="onToggleMoreLeagues($event)"
+        class="flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200 hover:bg-slate-700 transition-colors"
+      >
+        More options
+      </button>
+    }
+  </div>
+
+  @if (showMoreLeagues && overflowLeagues.length > 0) {
+    <div
+      class="absolute z-20 mt-2 w-full rounded-lg border border-slate-700 bg-slate-900 shadow-xl p-2"
+    >
+      <div class="grid grid-cols-2 gap-2">
+        @for (league of overflowLeagues; track league) {
+          <label
+            class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-700 cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+              [checked]="isLeagueSelected(league)"
+              (click)="onLeagueClick(league, $event)"
+            />
+            <span class="text-xs text-slate-200">{{ league }}</span>
+          </label>
+        }
+      </div>
+    </div>
+  }
+</div>
