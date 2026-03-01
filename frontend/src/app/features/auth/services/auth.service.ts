@@ -45,6 +45,21 @@ export class AuthService {
     localStorage.removeItem(INTERNAL_JWT_STORAGE_KEY);
   }
 
+  getUserRole(): string | null {
+    const token = this.getInternalToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  isAdmin(): boolean {
+    return this.getUserRole() === 'admin';
+  }
+
   private getAuthHeaders(token: string): HttpHeaders {
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
