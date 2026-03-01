@@ -5,14 +5,19 @@ import { catchError, defer, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
-  // Skip adding internal token to /auth/sync - it needs the Clerk token
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
   if (req.url.includes('/auth/sync')) {
     return next(req);
   }
 
-  const authService = inject(AuthService);
-  const router = inject(Router);
+  const url = router.url ?? '';
+  const onAuthRoute = url.startsWith('/login') || url.startsWith('/signup');
+
   const token = authService.getInternalToken();
+  const hadToken = !!token;
+
   const requestWithToken = token
     ? req.clone({
         setHeaders: {
@@ -23,11 +28,16 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(requestWithToken).pipe(
     catchError((error) => {
+      if (onAuthRoute) {
+        return throwError(() => error);
+      }
+
       const alreadyRetried = requestWithToken.headers.has('X-Auth-Retry');
       const errorDetail = error?.error?.detail;
       const isAuthError =
         error?.status === 401 || (error?.status === 403 && errorDetail === 'Not authenticated');
-      const shouldRefresh = isAuthError && !alreadyRetried;
+
+      const shouldRefresh = isAuthError && !alreadyRetried && hadToken;
 
       if (!shouldRefresh) {
         return throwError(() => error);
@@ -40,7 +50,6 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
           const refreshedToken = authService.getInternalToken();
 
           if (!refreshedToken) {
-            router.navigate(['/login']);
             return throwError(() => error);
           }
 
@@ -55,7 +64,6 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
         }),
         catchError((syncError) => {
           authService.clearInternalToken();
-          router.navigate(['/login']);
           return throwError(() => syncError);
         }),
       );

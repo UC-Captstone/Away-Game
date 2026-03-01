@@ -47,8 +47,10 @@ export class SignupComponent {
       },
     },
   };
+
   private hasSynced = signal(false);
   private isSyncing = signal(false);
+
   private clerkService = inject(ClerkService);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -57,12 +59,11 @@ export class SignupComponent {
     effect(() => {
       const session = this.clerkService.session();
 
-      if (session && session.id && !this.hasSynced() && !this.isSyncing()) {
+      if (session?.id && !this.hasSynced() && !this.isSyncing()) {
         this.isSyncing.set(true);
 
         this.authService.syncUser().subscribe({
           next: () => {
-            console.log('User Synced Successfully');
             this.hasSynced.set(true);
             this.isSyncing.set(false);
             this.router.navigate(['/']);
@@ -70,13 +71,6 @@ export class SignupComponent {
           error: (err) => {
             console.error('Sync Error:', err);
             this.isSyncing.set(false);
-
-            //Nathan: improve later on to be a popup noti
-            if (err.status === 401) {
-              console.error('Authentication failed. Please try signing in again.');
-            } else if (err.status >= 500) {
-              console.error('Server error. Please try again later.');
-            }
           },
         });
       }
