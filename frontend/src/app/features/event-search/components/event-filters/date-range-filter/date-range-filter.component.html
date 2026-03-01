@@ -1,0 +1,23 @@
+<label class="block mb-2 text-sm font-medium text-white">Date Range</label>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+  <div>
+    <label class="block mb-1 text-xs font-medium text-slate-400">Start Date</label>
+    <input
+      [value]="startDate"
+      (input)="onStartDateChange($any($event.target).value)"
+      name="startDate"
+      type="date"
+      class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full px-2.5 py-1.5"
+    />
+  </div>
+  <div>
+    <label class="block mb-1 text-xs font-medium text-slate-400">End Date</label>
+    <input
+      [value]="endDate"
+      (input)="onEndDateChange($any($event.target).value)"
+      name="endDate"
+      type="date"
+      class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full px-2.5 py-1.5"
+    />
+  </div>
+</div>
