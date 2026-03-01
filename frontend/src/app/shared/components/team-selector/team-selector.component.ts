@@ -40,6 +40,7 @@ export class TeamSelectorComponent implements OnInit, OnDestroy {
   @Input() selectedTeams: ITeam[] = [];
   @Input() dropdownLimit = 4;
   @Input() isNonFavorite: boolean = false;
+  @Input() compactSelectors: boolean = false;
 
   @ViewChild('teamListbox') private teamListbox?: ElementRef<HTMLUListElement>;
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;

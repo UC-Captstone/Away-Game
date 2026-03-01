@@ -1,11 +1,19 @@
-<div class="flex flex-col gap-3 w-full">
+<div
+  class="w-full"
+  [ngClass]="compactSelectors ? 'grid grid-cols-2 gap-2 items-start' : 'flex flex-col gap-3'"
+>
   <div class="w-full">
-    <label class="block text-sm font-medium text-slate-300 mb-1.5">Select League</label>
+    <label
+      class="block text-sm font-medium text-slate-300 mb-1.5"
+      [ngClass]="compactSelectors ? 'text-xs' : 'text-sm'"
+      >Select League</label
+    >
     <div class="relative">
       <select
         [(ngModel)]="selectedLeague"
         (change)="onLeagueChange()"
-        class="w-full bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg p-2 pr-10 appearance-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors"
+        class="w-full bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg pr-10 appearance-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors"
+        [ngClass]="compactSelectors ? 'py-1 px-2 text-xs' : 'p-2'"
       >
         <option [ngValue]="null" disabled>Select a league</option>
         @for (league of leagues; track league) {
@@ -30,7 +38,10 @@
   </div>
 
   <div class="relative w-full">
-    <label class="block text-sm font-medium text-slate-300 mb-1.5">
+    <label
+      class="block font-medium text-slate-300 mb-1.5"
+      [ngClass]="compactSelectors ? 'text-xs' : 'text-sm'"
+    >
       @if (isNonFavorite) {
         Select Teams
       } @else if (multi) {
@@ -41,7 +52,8 @@
     </label>
     <button
       type="button"
-      class="w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg p-2 flex items-center justify-between gap-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      class="w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg flex items-center justify-between gap-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      [ngClass]="compactSelectors ? 'py-1 px-2 text-xs' : 'p-2'"
       (click)="toggleDropdown()"
       (keydown.enter)="toggleDropdown()"
       (keydown.space)="$event.preventDefault(); toggleDropdown()"
@@ -106,7 +118,8 @@
 
     @if (isOpen()) {
       <div
-        class="absolute z-20 mt-2 w-full bg-slate-900 border border-slate-800 rounded-xl shadow-xl backdrop-blur-md overflow-hidden"
+        class="absolute z-20 mt-2 bg-slate-900 border border-slate-800 rounded-xl shadow-xl backdrop-blur-md overflow-hidden"
+        [ngClass]="compactSelectors ? 'right-0 w-[calc(200%+0.5rem)]' : 'w-full'"
         role="region"
         aria-label="Team selector"
       >
@@ -119,6 +132,7 @@
             (input)="onSearchChange()"
             (keydown)="onSearchKeydown($event)"
             class="w-full bg-slate-700 border border-slate-600 text-white text-sm placeholder-slate-400 rounded-lg py-1.5 px-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors"
+            [ngClass]="compactSelectors ? 'py-1 text-xs' : 'py-1.5 text-sm'"
             role="combobox"
             [attr.aria-expanded]="isOpen()"
             [attr.aria-controls]="'team-listbox'"
