@@ -1,0 +1,18 @@
+<label class="flex items-start gap-4 cursor-pointer">
+  <div class="grow">
+    <span class="block text-sm font-medium text-white">Only show saved events</span>
+    <span class="block text-xs text-slate-400"> Limit results to events you’ve saved. </span>
+  </div>
+  <div class="ml-auto flex items-center">
+    <input
+      type="checkbox"
+      class="sr-only peer"
+      [(ngModel)]="savedOnly"
+      name="savedOnly"
+      (ngModelChange)="savedOnlyChange.emit($event)"
+    />
+    <div
+      class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"
+    ></div>
+  </div>
+</label>
