@@ -136,6 +136,14 @@ async def update_account_settings_service(
     await db.refresh(current_user)
 
 
+async def submit_verification_service(current_user: User, db: AsyncSession) -> None:
+    current_user.is_verified = True
+    current_user.pending_verification = False
+    current_user.role = "verified_creator"
+    await db.commit()
+    await db.refresh(current_user)
+
+
 async def update_favorite_teams_service(
     current_user: User,
     db: AsyncSession,

@@ -11,6 +11,7 @@ from repositories.profile_repo import (
     add_saved_event_service,
     delete_saved_event_service,
     get_navbar_info_service,
+    submit_verification_service,
 )
 from db.session import get_session
 from auth import get_current_user
@@ -74,6 +75,15 @@ async def add_saved_event(
     db: AsyncSession = Depends(get_session)
 ):
     return await add_saved_event_service(current_user, db, event_id)
+
+@router.post("/verify", status_code=status.HTTP_204_NO_CONTENT)
+async def submit_verification(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    await submit_verification_service(current_user, db)
+    return None
+
 
 @router.get("/navbar-info", response_model=NavBarInfo)
 async def get_navbar_info(
