@@ -11,8 +11,4 @@ import { FormsModule } from '@angular/forms';
 export class EventSearchFilterComponent {
   @Input() keyword = '';
   @Output() keywordChange = new EventEmitter<string>();
-
-  onKeywordInput(value: string): void {
-    this.keywordChange.emit(value);
-  }
 }
