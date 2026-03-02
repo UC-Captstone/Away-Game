@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { IEvent } from '../models/event';
@@ -7,6 +7,10 @@ import { ILocation } from '../models/location';
 import { IMapMarker } from '../models/map-marker';
 import { EventTypeEnum } from '../models/event-type-enum';
 import { LeagueEnum } from '../models/league-enum';
+import {
+  DEFAULT_EVENT_FILTERS,
+  IEventFilters,
+} from '../../features/event-search/models/event-search-filters';
 
 @Injectable({
   providedIn: 'root',
@@ -40,8 +44,16 @@ export class EventService {
       );
   }
 
-  searchEvents(): Observable<IEvent[]> {
-    return of(this.getMockEvents());
+  searchEvents(filters: IEventFilters = DEFAULT_EVENT_FILTERS): Observable<IEvent[]> {
+    return this.http.post<IEvent[]>(`${this.apiUrl}/search`, filters).pipe(
+      catchError((error) => {
+        console.warn(
+          'Mock search fallback used. /events/search endpoint not available yet.',
+          error,
+        );
+        return of(this.getMockEvents());
+      }),
+    );
   }
 
   private getMockEvents(): IEvent[] {
@@ -54,8 +66,8 @@ export class EventService {
         location: { lat: 34.043, lng: -118.267 },
         venueName: 'Crypto.com Arena',
         teamLogos: {
-          home: '/assets/logos/lakers.png',
-          away: '/assets/logos/warriors.png',
+          home: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
+          away: 'https://a.espncdn.com/i/teamlogos/nba/500/gsw.png',
         },
         league: LeagueEnum.NBA,
         isSaved: true,
@@ -102,8 +114,8 @@ export class EventService {
         location: { lat: 34.043, lng: -118.267 },
         venueName: 'Crypto.com Arena',
         teamLogos: {
-          home: '/assets/logos/kings.png',
-          away: '/assets/logos/kraken.png',
+          home: 'https://a.espncdn.com/i/teamlogos/nhl/500/sea.png',
+          away: 'https://a.espncdn.com/i/teamlogos/nhl/500/van.png',
         },
         league: LeagueEnum.NHL,
         isSaved: false,
