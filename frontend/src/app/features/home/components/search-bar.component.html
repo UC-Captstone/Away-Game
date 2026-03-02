@@ -83,6 +83,7 @@
             <li
               role="option"
               class="group px-4 py-3 hover:bg-slate-900/80 cursor-pointer transition-colors"
+              (click)="onResultClick(result)"
             >
               @switch (result.type) {
                 @case (SearchTypeEnum.Team) {
