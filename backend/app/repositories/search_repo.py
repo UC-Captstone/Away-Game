@@ -96,6 +96,8 @@ async def search_games(query: str, db: AsyncSession, limit: int) -> List[SearchR
             metadata={
                 "date": game.date_time.isoformat() if game.date_time else None,
                 "location": game.venue.city if game.venue else None,
+                "lat": game.venue.latitude if game.venue else None,
+                "lng": game.venue.longitude if game.venue else None,
                 "league": game.league.league_name if game.league else None,
             },
         )
