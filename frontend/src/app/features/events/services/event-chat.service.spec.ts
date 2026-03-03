@@ -261,6 +261,30 @@ describe('EventChatService', () => {
     expect(service.messages$.value.length).toBe(1);
   }));
 
+  // ── race condition guard ──────────────────────────────────────────────────
+
+  it('should discard stale responses when switching events rapidly', fakeAsync(() => {
+    const EVENT_ID_B = 'bbbbbbbb-0000-0000-0000-000000000002';
+    const msgsB = [makeMsg({ messageText: 'from B', eventId: EVENT_ID_B })];
+
+    // Start loading event A — initial load request is in-flight
+    service.initForEvent(EVENT_ID);
+    const reqA = httpMock.expectOne((r) => r.url.includes(`/event/${EVENT_ID}`));
+
+    // Switch to event B — destroy() must cancel event A's in-flight request
+    service.initForEvent(EVENT_ID_B);
+    expect(reqA.cancelled).toBeTrue();
+
+    const reqB = httpMock.expectOne((r) => r.url.includes(`/event/${EVENT_ID_B}`));
+
+    // B's response arrives — must be applied
+    reqB.flush(makePage(msgsB));
+    tick();
+
+    expect(service.messages$.value.length).toBe(1);
+    expect(service.messages$.value[0].messageText).toBe('from B');
+  }));
+
   // ── destroy ───────────────────────────────────────────────────────────────
 
   it('should clear messages$ and stop polling on destroy', fakeAsync(() => {
