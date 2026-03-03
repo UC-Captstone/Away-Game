@@ -93,6 +93,8 @@ export class EventChatService implements OnDestroy {
   private cursor: string | null = null;
 
   private pollSub: Subscription | null = null;
+  private initialLoadSub: Subscription | null = null;
+  private pendingSubs = new Set<Subscription>();
 
   private static hasVisibilityListener = false;
   private static currentInstance: EventChatService | null = null;
@@ -119,7 +121,7 @@ export class EventChatService implements OnDestroy {
    * Call this when a component mounts for a specific event.
    * Performs an initial load then starts background polling.
    */
-  async initForEvent(eventId: string): Promise<void> {
+  initForEvent(eventId: string): void {
     // If we're already watching this event, nothing to do.
     if (this.currentEventId === eventId) return;
 
@@ -129,13 +131,16 @@ export class EventChatService implements OnDestroy {
     this.messages$.next([]);
     this.sendError$.next(null);
 
-    await this.initialLoad();
-    this.startPolling();
+    this.initialLoad();
   }
 
   /** Stop polling and reset all state.  Call from ngOnDestroy. */
   destroy(): void {
     this.stopPolling();
+    this.initialLoadSub?.unsubscribe();
+    this.initialLoadSub = null;
+    this.pendingSubs.forEach((sub) => sub.unsubscribe());
+    this.pendingSubs.clear();
     this.currentEventId = null;
     this.cursor = null;
     this.messages$.next([]);
@@ -173,17 +178,20 @@ export class EventChatService implements OnDestroy {
       return Promise.reject(new Error(errorMessage));
     }
 
+    const capturedEventId = this.currentEventId;
     const body: IEventChatSend = {
-      eventId: this.currentEventId,
+      eventId: capturedEventId,
       messageText: trimmed,
     };
 
     return new Promise((resolve, reject) => {
-      this.http
+      const sub = this.http
         .post<IEventChatMessage>(`${this.apiUrl}/`, body)
         .subscribe({
           next: (msg) => {
-            this.appendMessages([msg]);
+            if (this.currentEventId === capturedEventId) {
+              this.appendMessages([msg]);
+            }
             resolve(msg);
           },
           error: (err) => {
@@ -192,6 +200,7 @@ export class EventChatService implements OnDestroy {
             reject(new Error(detail));
           },
         });
+      this.pendingSubs.add(sub);
     });
   }
 
@@ -201,12 +210,15 @@ export class EventChatService implements OnDestroy {
    */
   deleteMessage(messageId: string): Promise<void> {
     this.sendError$.next(null);
+    const capturedEventId = this.currentEventId;
     return new Promise((resolve, reject) => {
-      this.http.delete(`${this.apiUrl}/${messageId}`).subscribe({
+      const sub = this.http.delete(`${this.apiUrl}/${messageId}`).subscribe({
         next: () => {
-          this.messages$.next(
-            this.messages$.value.filter((m) => m.messageId !== messageId),
-          );
+          if (this.currentEventId === capturedEventId) {
+            this.messages$.next(
+              this.messages$.value.filter((m) => m.messageId !== messageId),
+            );
+          }
           resolve();
         },
         error: (err) => {
@@ -215,33 +227,35 @@ export class EventChatService implements OnDestroy {
           reject(new Error(detail));
         },
       });
+      this.pendingSubs.add(sub);
     });
   }
 
   // ── private helpers ───────────────────────────────────────────────────────
 
-  private async initialLoad(): Promise<void> {
+  private initialLoad(): void {
     if (!this.currentEventId) return;
     this.loading$.next(true);
+    const capturedEventId = this.currentEventId;
 
-    return new Promise((resolve) => {
-      this.http
-        .get<IEventChatPage>(`${this.apiUrl}/event/${this.currentEventId}`, {
-          params: { limit: '50' },
-        })
-        .subscribe({
-          next: (page) => {
-            this.messages$.next(page.messages);
-            this.cursor = page.nextCursor;
-            this.loading$.next(false);
-            resolve();
-          },
-          error: () => {
-            this.loading$.next(false);
-            resolve(); // don't block polling on a failed initial load
-          },
-        });
-    });
+    this.initialLoadSub = this.http
+      .get<IEventChatPage>(`${this.apiUrl}/event/${capturedEventId}`, {
+        params: { limit: '50' },
+      })
+      .subscribe({
+        next: (page) => {
+          if (this.currentEventId !== capturedEventId) return;
+          this.messages$.next(page.messages);
+          this.cursor = page.nextCursor;
+          this.loading$.next(false);
+          this.startPolling();
+        },
+        error: () => {
+          if (this.currentEventId !== capturedEventId) return;
+          this.loading$.next(false);
+          this.startPolling(); // don't block polling on a failed initial load
+        },
+      });
   }
 
   private startPolling(): void {
