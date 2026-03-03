@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './features/auth/guards/auth.guard';
+import { protectedGuard } from './features/auth/guards/protected.guard';
 
 export const routes: Routes = [
   {
@@ -21,11 +22,13 @@ export const routes: Routes = [
       import('./features/user-profile/views/user-profile.component').then(
         (m) => m.UserProfileComponent,
       ),
+    canActivate: [protectedGuard],
   },
   {
     path: 'home',
     loadComponent: () =>
       import('./features/home/views/home.component').then((m) => m.HomeComponent),
+    canActivate: [protectedGuard],
   },
   {
     path: 'events',

@@ -144,7 +144,7 @@ async def scrape_schedule(
         for day_offset in range(14):
             date_str = (datetime.now() + timedelta(days=day_offset)).strftime("%Y%m%d")
             try:
-                data = await client.get_schedule(espn_sport, espn_league, dates=date_str)
+                data = await client.get_schedule(espn_sport, espn_league, dates=date_str, groups="50")
                 all_events.extend(data.get("events", []))
             except Exception as e:
                 logger.warning(f"Failed to fetch {league_code} schedule for {date_str}: {e}")

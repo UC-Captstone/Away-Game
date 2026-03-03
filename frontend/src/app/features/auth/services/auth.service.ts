@@ -23,7 +23,7 @@ export class AuthService {
       throw new Error('User not authenticated.');
     }
 
-    return from(session.getToken({ template: 'default' }) ?? Promise.resolve(null)).pipe(
+    return from(session.getToken({ template: '__session' }) ?? Promise.resolve(null)).pipe(
       switchMap((token) => {
         if (!token) throw new Error('Failed to retrieve token');
         const headers = this.getAuthHeaders(token);
