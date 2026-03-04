@@ -64,8 +64,10 @@ export class SearchBarComponent {
     if (result.type === SearchTypeEnum.Game) {
       this.router.navigate(['/game-details'], {
         queryParams: {
+          eventId: result.metadata?.eventId ?? '',
           gameId: result.id,
           gameName: result.title,
+          saved: result.metadata?.saved ?? false,
           league: result.metadata?.league ?? '',
           location: result.metadata?.location ?? '',
           lat: result.metadata?.lat ?? '',

@@ -1,6 +1,8 @@
 import { SearchTypeEnum } from './search-type-enum';
 
 export interface ISearchResultMetadata {
+  eventId?: string;
+  saved?: boolean;
   league?: string;
   location?: string;
   date?: string;

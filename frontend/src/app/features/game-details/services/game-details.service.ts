@@ -3,7 +3,6 @@ import { ParamMap } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { EventTypeEnum } from '../../../shared/models/event-type-enum';
 import { ISafetyAlert } from '../../../shared/models/safety-alert';
-import { LeagueEnum } from '../../../shared/models/league-enum';
 import { IEvent } from '../../../shared/models/event';
 
 @Injectable({
@@ -13,12 +12,12 @@ export class GameDetailsService {
   private readonly defaultCenter = { lat: 39.8283, lng: -98.5795 };
 
   getGameFromQuery(params: ParamMap): Observable<IEvent> {
-    const eventId = params.get('eventId') ?? params.get('gameId') ?? '';
+    const eventId = params.get('eventId') ?? '';
     const parsedGameId = Number(params.get('gameId'));
     const gameId = Number.isFinite(parsedGameId) ? parsedGameId : undefined;
     const gameName = params.get('gameName') ?? 'Away Team @ Home Team';
     const venueName = params.get('location') ?? params.get('venueName') ?? 'Venue TBD';
-    const league = this.parseLeague(params.get('league'));
+    const league = params.get('league') ?? undefined;
 
     const homeLogo = params.get('homeLogo') ?? undefined;
     const awayLogo = params.get('awayLogo') ?? undefined;
@@ -124,12 +123,4 @@ export class GameDetailsService {
     ]);
   }
 
-  private parseLeague(leagueValue: string | null): LeagueEnum | undefined {
-    if (!leagueValue) {
-      return undefined;
-    }
-
-    const validLeague = Object.values(LeagueEnum).find((value) => value === leagueValue);
-    return validLeague as LeagueEnum | undefined;
-  }
 }

@@ -1,24 +1,32 @@
-from typing import List
+from typing import List, Optional
+import uuid
+from uuid import UUID
 
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from models.event import Event
+from models.favorite import Favorite
 from models.game import Game
 from models.team import Team
 from models.venue import Venue
 from schemas.search import SearchResult, SearchTypeEnum, TeamLogos
 
 
-async def search_service(query: str, db: AsyncSession, limit: int = 7) -> List[SearchResult]:
+async def search_service(
+    query: str,
+    db: AsyncSession,
+    limit: int = 7,
+    current_user_id: Optional[UUID] = None,
+) -> List[SearchResult]:
     query_lower = query.lower().strip()
     results: List[SearchResult] = []
 
     team_results = await search_teams(query_lower, db, limit)
     results.extend(team_results)
 
-    game_results = await search_games(query_lower, db, limit)
+    game_results = await search_games(query_lower, db, limit, current_user_id=current_user_id)
     results.extend(game_results)
 
     event_results = await search_events(query_lower, db, limit)
@@ -61,9 +69,22 @@ async def search_teams(query: str, db: AsyncSession, limit: int) -> List[SearchR
     ]
 
 
-async def search_games(query: str, db: AsyncSession, limit: int) -> List[SearchResult]:
+async def search_games(
+    query: str,
+    db: AsyncSession,
+    limit: int,
+    current_user_id: Optional[UUID] = None,
+) -> List[SearchResult]:
+    event_id_subquery = (
+        select(Event.event_id)
+        .where(Event.game_id == Game.game_id)
+        .order_by(Event.created_at.desc())
+        .limit(1)
+        .scalar_subquery()
+    )
+
     stmt = (
-        select(Game)
+        select(Game, event_id_subquery.label("event_id"))
         .join(Team, Team.team_id == Game.home_team_id, isouter=True)
         .join(Venue, Venue.venue_id == Game.venue_id, isouter=True)
         .where(
@@ -82,7 +103,28 @@ async def search_games(query: str, db: AsyncSession, limit: int) -> List[SearchR
         .limit(limit)
     )
     result = await db.execute(stmt)
-    games = result.scalars().all()
+    game_rows = result.all()
+    saved_game_ids: set[int] = set()
+
+    if current_user_id and game_rows:
+        game_ids = [game.game_id for game, _ in game_rows]
+
+        saved_games_result = await db.execute(
+            select(Favorite.game_id)
+            .where(Favorite.user_id == current_user_id)
+            .where(Favorite.game_id.in_(game_ids))
+        )
+        saved_game_ids.update([gid for gid in saved_games_result.scalars().all() if gid is not None])
+
+        saved_games_via_event_result = await db.execute(
+            select(Event.game_id)
+            .join(Favorite, Favorite.event_id == Event.event_id)
+            .where(Favorite.user_id == current_user_id)
+            .where(Event.game_id.in_(game_ids))
+        )
+        saved_game_ids.update([
+            gid for gid in saved_games_via_event_result.scalars().all() if gid is not None
+        ])
 
     return [
         SearchResult(
@@ -94,14 +136,16 @@ async def search_games(query: str, db: AsyncSession, limit: int) -> List[SearchR
                 away=game.away_team.logo_url if game.away_team else None,
             ),
             metadata={
+                "eventId": str(event_id) if event_id else str(uuid.uuid5(uuid.NAMESPACE_DNS, f"game:{game.game_id}")),
                 "date": game.date_time.isoformat() if game.date_time else None,
                 "location": game.venue.city if game.venue else None,
                 "lat": game.venue.latitude if game.venue else None,
                 "lng": game.venue.longitude if game.venue else None,
                 "league": game.league.league_name if game.league else None,
+                "saved": game.game_id in saved_game_ids,
             },
         )
-        for game in games
+        for game, event_id in game_rows
     ]
 
 
