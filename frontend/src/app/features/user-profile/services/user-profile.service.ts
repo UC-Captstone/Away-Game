@@ -5,7 +5,7 @@ import { catchError, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { handleError } from '../../../shared/helpers/error-handler';
 import { IAccountSettings } from '../models/account-settings';
-import { IEvent } from '../../events/models/event';
+import { IEvent } from '../../../shared/models/event';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
