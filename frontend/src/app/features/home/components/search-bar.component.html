@@ -1,5 +1,5 @@
 <form
-  class="mx-auto w-3/5 relative bg-slate-950 rounded-2xl p-[1px]"
+  class="mx-auto w-3/5 relative bg-slate-950 rounded-2xl p-px"
   role="search"
   aria-label="Site search"
   (submit)="$event.preventDefault(); onSearch()"
@@ -83,6 +83,7 @@
             <li
               role="option"
               class="group px-4 py-3 hover:bg-slate-900/80 cursor-pointer transition-colors"
+              (click)="onResultClick(result)"
             >
               @switch (result.type) {
                 @case (SearchTypeEnum.Team) {
@@ -102,7 +103,7 @@
                       }}</span>
                       @if (result.metadata?.league) {
                         <span class="text-xs text-slate-500 truncate"
-                          >League: {{ result.metadata.league }}</span
+                          >League: {{ result.metadata?.league }}</span
                         >
                       }
                     </div>
@@ -138,12 +139,12 @@
                       }}</span>
                       @if (result.metadata?.date) {
                         <span class="text-xs text-slate-500 truncate">{{
-                          result.metadata.date | date: 'mediumDate'
+                          result.metadata?.date | date: 'mediumDate'
                         }}</span>
                       }
                       @if (result.metadata?.location) {
                         <span class="text-xs text-slate-500 truncate">{{
-                          result.metadata.location
+                          result.metadata?.location
                         }}</span>
                       }
                     </div>
@@ -172,7 +173,7 @@
                       }}</span>
                       @if (result.metadata?.date) {
                         <span class="text-xs text-slate-500 line-clamp-1">{{
-                          result.metadata.description
+                          result.metadata?.description
                         }}</span>
                       }
                     </div>
@@ -199,7 +200,7 @@
                       }}</span>
                       @if (result.metadata?.country) {
                         <span class="text-xs text-slate-500 truncate">{{
-                          result.metadata.country
+                          result.metadata?.country
                         }}</span>
                       }
                     </div>
