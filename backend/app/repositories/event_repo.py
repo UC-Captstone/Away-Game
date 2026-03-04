@@ -2,6 +2,8 @@ from __future__ import annotations
 from typing import Optional, Sequence
 from uuid import UUID
 from datetime import datetime
+import math
+import time
 import uuid
 
 from sqlalchemy import select, update, delete, and_, func
@@ -199,15 +201,33 @@ def _map_game_to_read(game: Game, is_saved: bool = False) -> EventRead:
     )
 
 
+# ---------------------------------------------------------------------------
+# In-process TTL cache for nearby-events results.
+# Keyed by (lat_2dp, lng_2dp, radius, limit); TTL = 60 seconds.
+# Entries: { cache_key: (expires_at, result) }
+# ---------------------------------------------------------------------------
+_NEARBY_CACHE: dict[tuple, tuple[float, list]] = {}
+_NEARBY_CACHE_TTL = 60  # seconds
+
+
 async def get_nearby_events_service(
     location: Location,
     radius_miles: float = 50,
     db: AsyncSession = None,
     limit: int = 20,
 ) -> list[EventRead]:
-    radius_degrees = radius_miles / 69.0
+    # Check in-process cache first (rounded to ~1 km precision).
+    cache_key = (round(location.lat, 2), round(location.lng, 2), radius_miles, limit)
+    now_ts = time.monotonic()
+    cached = _NEARBY_CACHE.get(cache_key)
+    if cached is not None and now_ts < cached[0]:
+        return cached[1]
+
+    # Longitude degrees shrink with latitude; use correct per-axis degree spans.
+    lat_degrees = radius_miles / 69.0
+    lng_degrees = radius_miles / (69.0 * math.cos(math.radians(location.lat)))
     now = datetime.utcnow()
-    fetch_limit = max(limit * 3, limit)
+    fetch_limit = limit * 3  # over-fetch so haversine filtering still yields `limit` results
 
     events_stmt = (
         select(Event)
@@ -217,10 +237,8 @@ async def get_nearby_events_service(
                 Event.longitude.isnot(None),
                 Event.game_date.isnot(None),
                 Event.game_date >= now,
-                Event.latitude >= location.lat - radius_degrees,
-                Event.latitude <= location.lat + radius_degrees,
-                Event.longitude >= location.lng - radius_degrees,
-                Event.longitude <= location.lng + radius_degrees,
+                Event.latitude.between(location.lat - lat_degrees, location.lat + lat_degrees),
+                Event.longitude.between(location.lng - lng_degrees, location.lng + lng_degrees),
             )
         )
         .options(
@@ -233,8 +251,6 @@ async def get_nearby_events_service(
         .order_by(Event.game_date.asc())
         .limit(fetch_limit)
     )
-    events_result = await db.execute(events_stmt)
-    events = events_result.scalars().all()
 
     games_stmt = (
         select(Game)
@@ -245,10 +261,8 @@ async def get_nearby_events_service(
                 Game.date_time >= now,
                 Venue.latitude.isnot(None),
                 Venue.longitude.isnot(None),
-                Venue.latitude >= location.lat - radius_degrees,
-                Venue.latitude <= location.lat + radius_degrees,
-                Venue.longitude >= location.lng - radius_degrees,
-                Venue.longitude <= location.lng + radius_degrees,
+                Venue.latitude.between(location.lat - lat_degrees, location.lat + lat_degrees),
+                Venue.longitude.between(location.lng - lng_degrees, location.lng + lng_degrees),
             )
         )
         .options(
@@ -260,61 +274,45 @@ async def get_nearby_events_service(
         .order_by(Game.date_time.asc())
         .limit(fetch_limit)
     )
+
+    # Run both queries sequentially — AsyncSession is not safe for concurrent execution.
+    events_result = await db.execute(events_stmt)
     games_result = await db.execute(games_stmt)
+    events = events_result.scalars().all()
     games = games_result.scalars().all()
 
-    filtered_items = [
-        (
-            event.game_date,
-            _haversine_distance(
-                location.lat,
-                location.lng,
-                event.latitude,
-                event.longitude,
-            ),
-            "event",
-            event,
-        )
-        for event in events
-        if _haversine_distance(
-            location.lat,
-            location.lng,
-            event.latitude,
-            event.longitude,
-        ) <= radius_miles
-    ] + [
-        (
-            game.date_time,
-            _haversine_distance(
-                location.lat,
-                location.lng,
-                game.venue.latitude,
-                game.venue.longitude,
-            ),
-            "game",
-            game,
-        )
-        for game in games
-        if game.venue
-        and game.venue.latitude is not None
-        and game.venue.longitude is not None
-        and _haversine_distance(
-            location.lat,
-            location.lng,
-            game.venue.latitude,
-            game.venue.longitude,
-        ) <= radius_miles
-    ]
+    # Compute haversine once per item — not twice.
+    filtered_items: list[tuple] = []
+    for event in events:
+        dist = _haversine_distance(location.lat, location.lng, event.latitude, event.longitude)
+        if dist <= radius_miles:
+            filtered_items.append((event.game_date, dist, "event", event))
+
+    for game in games:
+        if not (game.venue and game.venue.latitude is not None and game.venue.longitude is not None):
+            continue
+        dist = _haversine_distance(location.lat, location.lng, game.venue.latitude, game.venue.longitude)
+        if dist <= radius_miles:
+            filtered_items.append((game.date_time, dist, "game", game))
 
     filtered_items.sort(key=lambda item: (item[0], item[1]))
     filtered_items = filtered_items[:limit]
 
-    return [
+    result = [
         _map_event_to_read(item)
         if item_type == "event"
         else _map_game_to_read(item)
         for _, _, item_type, item in filtered_items
     ]
+
+    # Store in cache; also evict stale entries to prevent unbounded growth.
+    _NEARBY_CACHE[cache_key] = (now_ts + _NEARBY_CACHE_TTL, result)
+    if len(_NEARBY_CACHE) > 500:
+        stale_keys = [k for k, (exp, _) in _NEARBY_CACHE.items() if now_ts >= exp]
+        for k in stale_keys:
+            _NEARBY_CACHE.pop(k, None)
+
+    return result
 
 
 def _map_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
@@ -350,12 +348,10 @@ def _map_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
 
 
 def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    from math import radians, cos, sin, asin, sqrt
-
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    c = 2 * asin(sqrt(a))
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    c = 2 * math.asin(math.sqrt(a))
     r = 3959
     return c * r
