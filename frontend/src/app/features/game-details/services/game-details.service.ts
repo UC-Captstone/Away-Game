@@ -124,18 +124,6 @@ export class GameDetailsService {
     ]);
   }
 
-  toggleSaved(isSaved: boolean): Observable<boolean> {
-    return of(!isSaved);
-  }
-
-  toggleEventSaved(events: IEvent[], payload: { eventId: string; status: boolean }): Observable<IEvent[]> {
-    return of(
-      events.map((event) =>
-        event.eventId === payload.eventId ? { ...event, isSaved: payload.status } : event,
-      ),
-    );
-  }
-
   private parseLeague(leagueValue: string | null): LeagueEnum | undefined {
     if (!leagueValue) {
       return undefined;
