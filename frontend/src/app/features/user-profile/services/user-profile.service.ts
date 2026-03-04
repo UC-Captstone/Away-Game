@@ -5,7 +5,6 @@ import { catchError, delay, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { handleError } from '../../../shared/helpers/error-handler';
 import { IAccountSettings } from '../models/account-settings';
-import { IEvent } from '../../events/models/event';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -51,15 +50,4 @@ export class UserProfileService {
       .pipe(catchError(handleError));
   }
 
-  deleteSavedEvent(eventId: string): Observable<IEvent[]> {
-    return this.http
-      .delete<IEvent[]>(`${this.apiUrl}/saved-events/${eventId}`)
-      .pipe(catchError(handleError));
-  }
-
-  addSavedEvent(eventId: string): Observable<IEvent[]> {
-    return this.http
-      .post<IEvent[]>(`${this.apiUrl}/saved-events/${eventId}`, {})
-      .pipe(catchError(handleError));
-  }
 }
