@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, WritableSignal, signal } from '@angular/core';
+import { Component, effect, EventEmitter, Output, WritableSignal, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ClerkService } from '@jsrob/ngx-clerk';
 import { AuthService } from '../../../features/auth/services/auth.service';
@@ -15,35 +15,35 @@ import { UserService } from '../../services/user.service';
 export class NavBarComponent {
   @Output() isLoading: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  navBarInfo!: INavBar;
+  navBarInfo: INavBar | null = null;
   isMenuOpen: WritableSignal<boolean> = signal(false);
+
+  private navBarLoaded = false;
 
   constructor(
     private userService: UserService,
     private authService: AuthService,
     private clerkService: ClerkService,
     private router: Router,
-  ) {}
+  ) {
+    effect(() => {
+      const clerk = this.clerkService.clerk();
+      const isSignedIn = !!clerk?.session;
 
-  ngOnInit() {
-    const clerk = this.clerkService.clerk();
-    const isSignedIn = !!clerk?.session;
+      if (!isSignedIn || this.navBarLoaded) return;
 
-    if (!isSignedIn) {
-      this.isLoading.emit(false);
-      return;
-    }
-
-    this.isLoading.emit(true);
-    this.userService.getNavBarInfo().subscribe({
-      next: (navBarInfo: INavBar) => {
-        this.navBarInfo = navBarInfo;
-        this.isLoading.emit(false);
-      },
-      error: (error) => {
-        console.error('Error fetching profile picture:', error);
-        this.isLoading.emit(false);
-      },
+      this.navBarLoaded = true;
+      this.isLoading.emit(true);
+      this.userService.getNavBarInfo().subscribe({
+        next: (navBarInfo: INavBar) => {
+          this.navBarInfo = navBarInfo;
+          this.isLoading.emit(false);
+        },
+        error: (error) => {
+          console.error('Error fetching navbar info:', error);
+          this.isLoading.emit(false);
+        },
+      });
     });
   }
 

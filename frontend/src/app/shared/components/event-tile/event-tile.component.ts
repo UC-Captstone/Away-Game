@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IEvent } from '../../../features/events/models/event';
+import { IEvent } from '../../models/event';
 import { Router } from '@angular/router';
 import { EventTypeEnum } from '../../models/event-type-enum';
 import { EventsService } from '../../services/events.service';

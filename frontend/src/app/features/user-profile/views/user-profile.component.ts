@@ -6,6 +6,7 @@ import { IUserProfile } from '../models/user-profile';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 import { UserAccountSettingsComponent } from '../components/user-account-settings/user-account-settings.component';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
+import { IEvent } from '../../../shared/models/event';
 import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
 
 @Component({

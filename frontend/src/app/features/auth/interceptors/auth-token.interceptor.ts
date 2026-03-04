@@ -18,12 +18,29 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
   const token = authService.getInternalToken();
   const hadToken = !!token;
 
+  // If the stored token is already expired (or expiring imminently), skip
+  // the backend round-trip that would just return a 401. Go straight to
+  // syncUser() to get a fresh token, then make the request once.
+  if (hadToken && authService.isTokenExpiredOrExpiringSoon()) {
+    authService.clearInternalToken();
+
+    return defer(() => authService.syncUser()).pipe(
+      switchMap(() => {
+        const freshToken = authService.getInternalToken();
+        const retryReq = freshToken
+          ? req.clone({ setHeaders: { Authorization: `Bearer ${freshToken}` } })
+          : req;
+        return next(retryReq);
+      }),
+      catchError((syncError) => {
+        authService.clearInternalToken();
+        return throwError(() => syncError);
+      }),
+    );
+  }
+
   const requestWithToken = token
-    ? req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;
 
   return next(requestWithToken).pipe(

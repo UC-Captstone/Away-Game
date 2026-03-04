@@ -7,6 +7,7 @@ export interface IUser {
   profile_picture_url?: string | null;
   is_verified: boolean;
   pending_verification: boolean;
+  role: string;
   created_at: string;
   updated_at?: string | null;
 }
