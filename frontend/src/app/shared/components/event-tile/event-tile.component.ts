@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IEvent } from '../../../features/events/models/event';
+import { Router } from '@angular/router';
+import { EventTypeEnum } from '../../models/event-type-enum';
+import { EventsService } from '../../services/events.service';
 
 @Component({
   selector: 'app-event-tile',
@@ -11,15 +14,34 @@ import { IEvent } from '../../../features/events/models/event';
 export class EventTileComponent {
   @Input() event!: IEvent;
   @Input() showSavedIcon: boolean = true;
-  @Output() savedToggled: EventEmitter<{ eventId: string; status: boolean }> = new EventEmitter<{
-    eventId: string;
-    status: boolean;
-  }>();
+
+  constructor(
+    private router: Router,
+    private eventsService: EventsService,
+  ) {}
 
   navigateToEventDetails(event: Event) {
     event.preventDefault();
-    // Nathan: Implement navigation logic here
-    console.log('Navigating to event details for event:', this.event);
+
+    if (this.event.eventType === EventTypeEnum.Game) {
+      this.router.navigate(['/game-details'], {
+        queryParams: {
+          eventId: this.event.eventId,
+          gameName: this.event.eventName,
+          venueName: this.event.venueName,
+          dateTime: this.event.dateTime,
+          lat: this.event.location?.lat,
+          lng: this.event.location?.lng,
+          homeLogo: this.event.teamLogos?.home ?? '',
+          awayLogo: this.event.teamLogos?.away ?? '',
+          league: this.event.league ?? '',
+          saved: this.event.isSaved,
+        },
+      });
+      return;
+    }
+
+    console.log('Event tile clicked (non-game event):', this.event);
   }
 
   toggleSaved(event?: Event) {
@@ -27,7 +49,21 @@ export class EventTileComponent {
       event.stopPropagation();
       event.preventDefault();
     }
-    this.event.isSaved = !this.event.isSaved;
-    this.savedToggled.emit({ eventId: this.event.eventId, status: this.event.isSaved });
+
+    const previousSavedState = this.event.isSaved;
+    this.event.isSaved = !previousSavedState;
+
+    const request$ = this.event.isSaved
+      ? this.eventsService.addSavedEvent(this.event.eventId)
+      : this.eventsService.deleteSavedEvent(this.event.eventId);
+
+    request$.subscribe({
+      next: (savedEvents) => {
+        this.event.isSaved = savedEvents.some((item) => item.eventId === this.event.eventId);
+      },
+      error: () => {
+        this.event.isSaved = previousSavedState;
+      },
+    });
   }
 }
