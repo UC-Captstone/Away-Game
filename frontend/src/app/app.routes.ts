@@ -30,4 +30,12 @@ export const routes: Routes = [
       import('./features/home/views/home.component').then((m) => m.HomeComponent),
     canActivate: [protectedGuard],
   },
+  {
+    path: 'game-details',
+    loadComponent: () =>
+      import('./features/game-details/views/game-details.component').then(
+        (m) => m.GameDetailsComponent,
+      ),
+    canActivate: [protectedGuard],
+  },
 ];

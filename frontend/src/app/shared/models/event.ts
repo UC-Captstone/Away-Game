@@ -4,6 +4,7 @@ import { ILocation } from './location';
 
 export interface IEvent {
   eventId: string; // UUID
+  gameId?: number; // numeric game id (when this event represents/is tied to a game)
   eventType: EventTypeEnum;
   eventName: string;
   dateTime: Date;
@@ -14,7 +15,7 @@ export interface IEvent {
     home?: string; // optional URL to home team logo
     away?: string; // optional URL to away team logo
   }; // optional array of team logo URLs associated with the event
-  league?: LeagueEnum;
+  league?: LeagueEnum | string;
   isUserCreated?: boolean; // indicates if the event was created by the user
   isSaved: boolean; // indicates if the event is saved by the user
 }
