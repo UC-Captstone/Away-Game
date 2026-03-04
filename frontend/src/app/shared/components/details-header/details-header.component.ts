@@ -26,12 +26,13 @@ export class DetailsHeaderComponent implements OnChanges {
       return;
     }
 
-    const previousSavedState = this.isSaved();
-    this.isSaved.set(!previousSavedState);
+    const previousSavedState = this.event.isSaved;
+    this.event.isSaved = !previousSavedState;
+    this.isSaved.set(this.event.isSaved);
 
-    const request$ = this.isSaved()
-      ? this.eventsService.deleteSavedEvent(this.event.eventId)
-      : this.eventsService.addSavedEvent(this.event.eventId);
+    const request$ = this.event.isSaved
+      ? this.eventsService.addSavedEvent(this.event.eventId)
+      : this.eventsService.deleteSavedEvent(this.event.eventId);
 
     request$.subscribe({
       next: (savedEvents) => {
