@@ -11,9 +11,9 @@ export class GeolocationService {
   readonly DEFAULT_LOCATION: ILocation = { lat: 39.1031, lng: -84.512 }; // Cincinnati, OH
 
   /**
-   * Returns the best available location synchronously (cached > default),
-   * then requests the real browser location in the background.
-   * Use `watchRealLocation()` to receive the update when it arrives.
+   * Returns the best available stored location (cached from session storage,
+   * or the default location if none is cached).
+   * Call `getRealLocation()` if you need to request the current browser location.
    */
   getUserLocation(): Observable<ILocation> {
     const cachedLocation = this.getLocationFromStorage();
