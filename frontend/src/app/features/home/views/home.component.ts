@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { SearchBarComponent } from '../components/search-bar.component';
-import { IEvent } from '../../events/models/event';
-import { EventService } from '../../events/services/event.service';
+import { IEvent } from '../../../shared/models/event';
 import { MapComponent } from '../../../shared/components/map/map.component';
 import { ILocation } from '../../../shared/models/location';
 import { GeolocationService } from '../../../shared/services/geolocation.service';
@@ -9,6 +8,7 @@ import { finalize, forkJoin, interval, map, of, Subscription, switchMap, tap } f
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
 import { IMapMarker } from '../../../shared/models/map-marker';
 import { UserProfileService } from '../../user-profile/services/user-profile.service';
+import { EventService } from '../../../shared/services/event.service';
 
 @Component({
   selector: 'app-home',
