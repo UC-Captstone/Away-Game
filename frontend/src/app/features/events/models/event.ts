@@ -4,6 +4,7 @@ import { ILocation } from '../../../shared/models/location';
 
 export interface IEvent {
   eventId: string; // UUID
+  gameId?: number; // numeric game id (when this event represents/is tied to a game)
   eventType: EventTypeEnum;
   eventName: string;
   dateTime: Date;
