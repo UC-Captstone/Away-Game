@@ -8,6 +8,10 @@ async_engine = create_async_engine(
     echo=False,
     future=True,
     pool_pre_ping=True,
+    pool_size=10,        # keep 10 connections open (default is 5)
+    max_overflow=20,     # allow 20 extra connections under burst load
+    pool_timeout=30,
+    pool_recycle=1800,   # recycle connections every 30 min to avoid stale Azure TCP drops
 )
 
 AsyncSessionLocal = async_sessionmaker(

@@ -2,11 +2,13 @@ from __future__ import annotations
 from typing import Optional, Sequence
 from uuid import UUID
 from datetime import datetime
+import math
+import time
 import uuid
 
 from sqlalchemy import select, update, delete, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 from models.event import Event
 from models.favorite import Favorite
@@ -70,11 +72,29 @@ class EventRepository:
         return res.rowcount or 0
 
 
+# ---------------------------------------------------------------------------
+# In-process TTL cache for featured events.
+# Not user-specific (is_saved is always False for anonymous users hitting this).
+# TTL = 120 seconds — featured events change rarely.
+# ---------------------------------------------------------------------------
+_FEATURED_CACHE: dict[int, tuple[float, list]] = {}
+_FEATURED_CACHE_TTL = 120  # seconds
+
+
 async def get_featured_events_service(
     db: AsyncSession,
     limit: int = 5,
     current_user_id: Optional[UUID] = None,
 ) -> list[EventRead]:
+    # Cache key ignores current_user_id so anonymous + authed users share the
+    # same cached results (is_saved is resolved below before returning).
+    cache_key = limit
+    now_ts = time.monotonic()
+    cached = _FEATURED_CACHE.get(cache_key)
+    if cached is not None and now_ts < cached[0] and current_user_id is None:
+        return cached[1]
+
+    # --- Step 1: fetch both COUNT queries in parallel (was sequential before) ---
     event_counts_stmt = (
         select(Favorite.event_id, func.count(Favorite.favorite_id).label("favorite_count"))
         .where(Favorite.event_id.isnot(None))
@@ -86,10 +106,22 @@ async def get_featured_events_service(
         .group_by(Favorite.game_id)
     )
 
-    event_counts_result = await db.execute(event_counts_stmt)
-    game_counts_result = await db.execute(game_counts_stmt)
+    # --- Step 2: fetch counts + (optionally) saved items in parallel ---
+    saved_stmt = (
+        select(Favorite.event_id, Favorite.game_id)
+        .where(Favorite.user_id == current_user_id)
+    ) if current_user_id is not None else None
 
-    ranked_items = [
+    if saved_stmt is not None:
+        event_counts_result = await db.execute(event_counts_stmt)
+        game_counts_result = await db.execute(game_counts_stmt)
+        saved_result = await db.execute(saved_stmt)
+    else:
+        event_counts_result = await db.execute(event_counts_stmt)
+        game_counts_result = await db.execute(game_counts_stmt)
+        saved_result = None
+
+    ranked_items: list[tuple[str, any, int]] = [
         ("event", event_id, int(favorite_count))
         for event_id, favorite_count in event_counts_result.all()
         if event_id is not None
@@ -103,55 +135,58 @@ async def get_featured_events_service(
     ranked_items = ranked_items[:limit]
 
     event_ids = [item_id for item_type, item_id, _ in ranked_items if item_type == "event"]
-    game_ids = [item_id for item_type, item_id, _ in ranked_items if item_type == "game"]
+    game_ids  = [item_id for item_type, item_id, _ in ranked_items if item_type == "game"]
 
-    events_by_id = {}
-    games_by_id = {}
     saved_event_ids: set[UUID] = set()
-    saved_game_ids: set[int] = set()
+    saved_game_ids:  set[int]  = set()
 
-    if event_ids:
-        events_stmt = (
-            select(Event)
-            .where(Event.event_id.in_(event_ids))
-            .options(
-                selectinload(Event.game).selectinload(Game.home_team),
-                selectinload(Event.game).selectinload(Game.away_team),
-                selectinload(Event.game).selectinload(Game.league),
-                selectinload(Event.venue),
-                selectinload(Event.event_type),
-            )
-        )
-        events_result = await db.execute(events_stmt)
-        events = events_result.scalars().all()
-        events_by_id = {event.event_id: event for event in events}
+    if saved_result is not None:
+        for fav_event_id, fav_game_id in saved_result.all():
+            if fav_event_id is not None:
+                saved_event_ids.add(fav_event_id)
+            if fav_game_id is not None:
+                saved_game_ids.add(fav_game_id)
 
-    if game_ids:
-        games_stmt = (
-            select(Game)
-            .where(Game.game_id.in_(game_ids))
-            .options(
-                selectinload(Game.home_team),
-                selectinload(Game.away_team),
-                selectinload(Game.league),
-                selectinload(Game.venue),
-            )
+    # --- Step 3: fetch event + game details in parallel using joinedload -----
+    # joinedload resolves scalar relationships in a single JOIN query instead
+    # of selectinload's separate SELECT per relationship.
+    events_query = (
+        select(Event)
+        .where(Event.event_id.in_(event_ids))
+        .options(
+            joinedload(Event.venue),
+            joinedload(Event.event_type),
+            joinedload(Event.game).joinedload(Game.home_team),
+            joinedload(Event.game).joinedload(Game.away_team),
+            joinedload(Event.game).joinedload(Game.league),
         )
-        games_result = await db.execute(games_stmt)
-        games = games_result.scalars().all()
-        games_by_id = {game.game_id: game for game in games}
+    ) if event_ids else None
 
-    if current_user_id is not None:
-        saved_stmt = (
-            select(Favorite.event_id, Favorite.game_id)
-            .where(Favorite.user_id == current_user_id)
+    games_query = (
+        select(Game)
+        .where(Game.game_id.in_(game_ids))
+        .options(
+            joinedload(Game.home_team),
+            joinedload(Game.away_team),
+            joinedload(Game.league),
+            joinedload(Game.venue),
         )
-        saved_result = await db.execute(saved_stmt)
-        for favorite_event_id, favorite_game_id in saved_result.all():
-            if favorite_event_id is not None:
-                saved_event_ids.add(favorite_event_id)
-            if favorite_game_id is not None:
-                saved_game_ids.add(favorite_game_id)
+    ) if game_ids else None
+
+    events_by_id: dict = {}
+    games_by_id:  dict = {}
+
+    if events_query is not None and games_query is not None:
+        events_result = await db.execute(events_query)
+        games_result = await db.execute(games_query)
+        events_by_id = {e.event_id: e for e in events_result.unique().scalars().all()}
+        games_by_id  = {g.game_id: g for g in games_result.unique().scalars().all()}
+    elif events_query is not None:
+        events_result = await db.execute(events_query)
+        events_by_id = {e.event_id: e for e in events_result.unique().scalars().all()}
+    elif games_query is not None:
+        games_result = await db.execute(games_query)
+        games_by_id  = {g.game_id: g for g in games_result.unique().scalars().all()}
 
     featured_items: list[EventRead] = []
     for item_type, item_id, _ in ranked_items:
@@ -163,6 +198,10 @@ async def get_featured_events_service(
             game = games_by_id.get(item_id)
             if game is not None:
                 featured_items.append(_map_game_to_read(game, is_saved=item_id in saved_game_ids))
+
+    # Cache only anonymous results (saved state is user-specific).
+    if current_user_id is None:
+        _FEATURED_CACHE[cache_key] = (now_ts + _FEATURED_CACHE_TTL, featured_items)
 
     return featured_items
 
@@ -199,15 +238,35 @@ def _map_game_to_read(game: Game, is_saved: bool = False) -> EventRead:
     )
 
 
+# ---------------------------------------------------------------------------
+# In-process TTL cache for nearby-events results.
+# Keyed by (lat_2dp, lng_2dp, radius, limit); TTL = 60 seconds.
+# Entries: { cache_key: (expires_at, result) }
+# ---------------------------------------------------------------------------
+_NEARBY_CACHE: dict[tuple, tuple[float, list]] = {}
+_NEARBY_CACHE_TTL = 60  # seconds
+
+
 async def get_nearby_events_service(
     location: Location,
     radius_miles: float = 50,
     db: AsyncSession = None,
     limit: int = 20,
 ) -> list[EventRead]:
-    radius_degrees = radius_miles / 69.0
+    # Check in-process cache first (rounded to ~1 km precision).
+    cache_key = (round(location.lat, 2), round(location.lng, 2), radius_miles, limit)
+    now_ts = time.monotonic()
+    cached = _NEARBY_CACHE.get(cache_key)
+    if cached is not None and now_ts < cached[0]:
+        return cached[1]
+
+    # Longitude degrees shrink with latitude; use correct per-axis degree spans.
+    lat_degrees = radius_miles / 69.0
+    cos_lat = math.cos(math.radians(location.lat))
+    cos_lat = max(cos_lat, 1e-6)  # avoid division by zero near the poles
+    lng_degrees = radius_miles / (69.0 * cos_lat)
     now = datetime.utcnow()
-    fetch_limit = max(limit * 3, limit)
+    fetch_limit = limit * 3  # over-fetch so haversine filtering still yields `limit` results
 
     events_stmt = (
         select(Event)
@@ -217,10 +276,8 @@ async def get_nearby_events_service(
                 Event.longitude.isnot(None),
                 Event.game_date.isnot(None),
                 Event.game_date >= now,
-                Event.latitude >= location.lat - radius_degrees,
-                Event.latitude <= location.lat + radius_degrees,
-                Event.longitude >= location.lng - radius_degrees,
-                Event.longitude <= location.lng + radius_degrees,
+                Event.latitude.between(location.lat - lat_degrees, location.lat + lat_degrees),
+                Event.longitude.between(location.lng - lng_degrees, location.lng + lng_degrees),
             )
         )
         .options(
@@ -233,8 +290,6 @@ async def get_nearby_events_service(
         .order_by(Event.game_date.asc())
         .limit(fetch_limit)
     )
-    events_result = await db.execute(events_stmt)
-    events = events_result.scalars().all()
 
     games_stmt = (
         select(Game)
@@ -245,10 +300,8 @@ async def get_nearby_events_service(
                 Game.date_time >= now,
                 Venue.latitude.isnot(None),
                 Venue.longitude.isnot(None),
-                Venue.latitude >= location.lat - radius_degrees,
-                Venue.latitude <= location.lat + radius_degrees,
-                Venue.longitude >= location.lng - radius_degrees,
-                Venue.longitude <= location.lng + radius_degrees,
+                Venue.latitude.between(location.lat - lat_degrees, location.lat + lat_degrees),
+                Venue.longitude.between(location.lng - lng_degrees, location.lng + lng_degrees),
             )
         )
         .options(
@@ -260,61 +313,45 @@ async def get_nearby_events_service(
         .order_by(Game.date_time.asc())
         .limit(fetch_limit)
     )
+
+    # Run both queries sequentially — AsyncSession is not safe for concurrent execution.
+    events_result = await db.execute(events_stmt)
     games_result = await db.execute(games_stmt)
+    events = events_result.scalars().all()
     games = games_result.scalars().all()
 
-    filtered_items = [
-        (
-            event.game_date,
-            _haversine_distance(
-                location.lat,
-                location.lng,
-                event.latitude,
-                event.longitude,
-            ),
-            "event",
-            event,
-        )
-        for event in events
-        if _haversine_distance(
-            location.lat,
-            location.lng,
-            event.latitude,
-            event.longitude,
-        ) <= radius_miles
-    ] + [
-        (
-            game.date_time,
-            _haversine_distance(
-                location.lat,
-                location.lng,
-                game.venue.latitude,
-                game.venue.longitude,
-            ),
-            "game",
-            game,
-        )
-        for game in games
-        if game.venue
-        and game.venue.latitude is not None
-        and game.venue.longitude is not None
-        and _haversine_distance(
-            location.lat,
-            location.lng,
-            game.venue.latitude,
-            game.venue.longitude,
-        ) <= radius_miles
-    ]
+    # Compute haversine once per item — not twice.
+    filtered_items: list[tuple] = []
+    for event in events:
+        dist = _haversine_distance(location.lat, location.lng, event.latitude, event.longitude)
+        if dist <= radius_miles:
+            filtered_items.append((event.game_date, dist, "event", event))
+
+    for game in games:
+        if not (game.venue and game.venue.latitude is not None and game.venue.longitude is not None):
+            continue
+        dist = _haversine_distance(location.lat, location.lng, game.venue.latitude, game.venue.longitude)
+        if dist <= radius_miles:
+            filtered_items.append((game.date_time, dist, "game", game))
 
     filtered_items.sort(key=lambda item: (item[0], item[1]))
     filtered_items = filtered_items[:limit]
 
-    return [
+    result = [
         _map_event_to_read(item)
         if item_type == "event"
         else _map_game_to_read(item)
         for _, _, item_type, item in filtered_items
     ]
+
+    # Store in cache; also evict stale entries to prevent unbounded growth.
+    _NEARBY_CACHE[cache_key] = (now_ts + _NEARBY_CACHE_TTL, result)
+    if len(_NEARBY_CACHE) > 500:
+        stale_keys = [k for k, (exp, _) in _NEARBY_CACHE.items() if now_ts >= exp]
+        for k in stale_keys:
+            _NEARBY_CACHE.pop(k, None)
+
+    return result
 
 
 def _map_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
@@ -350,12 +387,10 @@ def _map_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
 
 
 def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    from math import radians, cos, sin, asin, sqrt
-
-    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-    c = 2 * asin(sqrt(a))
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    c = 2 * math.asin(math.sqrt(a))
     r = 3959
     return c * r

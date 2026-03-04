@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
@@ -27,6 +27,7 @@ async def get_featured_events(
 
 @router.get("/nearby", response_model=List[EventRead])
 async def get_nearby_events(
+    response: Response,
     lat: float = Query(..., ge=-90, le=90, description="User latitude"),
     lng: float = Query(..., ge=-180, le=180, description="User longitude"),
     radius: float = Query(50, ge=1, le=500, description="Search radius in miles"),
@@ -34,4 +35,7 @@ async def get_nearby_events(
     db: AsyncSession = Depends(get_session),
 ):
     location = Location(lat=lat, lng=lng)
-    return await get_nearby_events_service(location, radius, db, limit)
+    result = await get_nearby_events_service(location, radius, db, limit)
+    # Allow browsers and CDN to cache nearby-events for 60 seconds.
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
+    return result

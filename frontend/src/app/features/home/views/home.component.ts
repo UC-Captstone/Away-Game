@@ -4,7 +4,7 @@ import { IEvent } from '../../../shared/models/event';
 import { MapComponent } from '../../../shared/components/map/map.component';
 import { ILocation } from '../../../shared/models/location';
 import { GeolocationService } from '../../../shared/services/geolocation.service';
-import { finalize, forkJoin, interval, map, of, Subscription, switchMap, tap } from 'rxjs';
+import { interval, Subscription, switchMap } from 'rxjs';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
 import { IMapMarker } from '../../../shared/models/map-marker';
 import { UserProfileService } from '../../user-profile/services/user-profile.service';
@@ -17,7 +17,9 @@ import { EventService } from '../../../shared/services/event.service';
   imports: [SearchBarComponent, EventTileComponent, MapComponent],
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  isLoading: WritableSignal<boolean> = signal(false);
+  // Separate loading states so featured events and nearby events render independently.
+  isFeaturedLoading: WritableSignal<boolean> = signal(false);
+  isNearbyLoading: WritableSignal<boolean> = signal(false);
   userLocation: WritableSignal<ILocation | null> = signal(null);
   nearbyEvents: WritableSignal<IMapMarker[]> = signal([]);
   featuredEvents: WritableSignal<IEvent[]> = signal([]);
@@ -32,47 +34,75 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log('Home component initializing...');
-    this.isLoading.set(true);
+    this._loadFeaturedEvents();
+    this._loadNearbyEvents();
+  }
 
-    forkJoin({
-      events: this.eventService.getFeaturedEvents(),
-      location: this.geolocationService.getUserLocation(),
-    })
-      .pipe(
-        tap(({ events, location }) => {
-          console.log('forkJoin result:', { events, location });
-        }),
-        switchMap(({ events, location }: { events: IEvent[]; location: ILocation | null }) => {
-          this.featuredEvents.set(events);
-          this.userLocation.set(location);
+  /** Load featured events independently — page shows as soon as these arrive. */
+  private _loadFeaturedEvents(): void {
+    console.time('[Home] featured events');
+    this.isFeaturedLoading.set(true);
 
-          if (events.length > 1) {
-            this.startAutoRotate();
-          }
+    this.eventService.getFeaturedEvents().subscribe({
+      next: (events) => {
+        console.timeEnd('[Home] featured events');
+        this.featuredEvents.set(events);
+        this.isFeaturedLoading.set(false);
+        if (events.length > 1) {
+          this.startAutoRotate();
+        }
+      },
+      error: (error) => {
+        console.timeEnd('[Home] featured events');
+        console.error('Error fetching featured events:', error);
+        this.isFeaturedLoading.set(false);
+      },
+    });
+  }
 
-          if (!location) {
-            return of({ nearbyEvents: null });
-          }
+  /** Load geolocation + nearby events independently — map fills in when ready. */
+  private _loadNearbyEvents(): void {
+    // Show map immediately with cached or default location — no waiting.
+    const initialLocation = this.geolocationService.getUserLocation();
 
-          return this.eventService
-            .getNearbyEvents(location)
-            .pipe(map((nearbyEvents) => ({ nearbyEvents })));
-        }),
-        finalize(() => {
-          this.isLoading.set(false);
-        }),
-      )
-      .subscribe({
-        next: ({ nearbyEvents }) => {
-          if (nearbyEvents) {
-            this.nearbyEvents.set(nearbyEvents);
-          }
-        },
-        error: (error) => {
-          console.error('Error during initialization:', error);
-        },
-      });
+    initialLocation.pipe(
+      switchMap((location) => {
+        this.userLocation.set(location);
+        this.isNearbyLoading.set(true);
+        console.time('[Home] nearby events');
+        return this.eventService.getNearbyEvents(location);
+      }),
+    ).subscribe({
+      next: (nearbyEvents) => {
+        console.timeEnd('[Home] nearby events');
+        this.nearbyEvents.set(nearbyEvents);
+        this.isNearbyLoading.set(false);
+      },
+      error: (error) => {
+        console.timeEnd('[Home] nearby events');
+        console.error('Error fetching nearby events:', error);
+        this.isNearbyLoading.set(false);
+      },
+    });
+
+    // In the background, try to get the real GPS location.
+    // If it differs from what we already used, refresh nearby events quietly.
+    this.geolocationService.getRealLocation().subscribe({
+      next: (realLocation) => {
+        const current = this.userLocation();
+        const isSame =
+          current &&
+          Math.abs(current.lat - realLocation.lat) < 0.001 &&
+          Math.abs(current.lng - realLocation.lng) < 0.001;
+
+        if (!isSame) {
+          this.userLocation.set(realLocation);
+          this.eventService.getNearbyEvents(realLocation).subscribe({
+            next: (nearbyEvents) => this.nearbyEvents.set(nearbyEvents),
+          });
+        }
+      },
+    });
   }
 
   ngOnDestroy(): void {
