@@ -47,15 +47,4 @@ export class UserProfileService {
       .pipe(catchError(handleError));
   }
 
-  deleteSavedEvent(eventId: string): Observable<IEvent[]> {
-    return this.http
-      .delete<IEvent[]>(`${this.apiUrl}/saved-events/${eventId}`)
-      .pipe(catchError(handleError));
-  }
-
-  addSavedEvent(eventId: string): Observable<IEvent[]> {
-    return this.http
-      .post<IEvent[]>(`${this.apiUrl}/saved-events/${eventId}`, {})
-      .pipe(catchError(handleError));
-  }
 }

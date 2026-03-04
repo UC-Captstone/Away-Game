@@ -1,5 +1,15 @@
 import { SearchTypeEnum } from './search-type-enum';
 
+export interface ISearchResultMetadata {
+  league?: string;
+  location?: string;
+  date?: string;
+  description?: string;
+  country?: string;
+  lat?: number;
+  lng?: number;
+}
+
 export interface ISearchResults {
   id: string; // teamID, gameID, eventID, etc.
   type: SearchTypeEnum;
@@ -9,5 +19,5 @@ export interface ISearchResults {
     home?: string;
     away?: string;
   };
-  metadata?: any; // Additional metadata relevant to the search result
+  metadata?: ISearchResultMetadata; // Additional metadata relevant to the search result
 }
