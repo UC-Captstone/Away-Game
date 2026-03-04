@@ -1,0 +1,49 @@
+<div
+	class="w-full h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0"
+>
+	<div class="p-4 border-b border-slate-800 text-left">
+		<h2 class="text-lg font-semibold text-slate-100">Game Area Map</h2>
+		<div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300">
+			<div class="flex flex-wrap gap-4">
+				<label class="inline-flex items-center gap-2 cursor-pointer">
+					<input
+						type="checkbox"
+						[checked]="showEventOverlay()"
+						(change)="onToggleEventOverlay()"
+						class="accent-amber-500"
+					/>
+					Events
+				</label>
+				<label class="inline-flex items-center gap-2 cursor-pointer">
+					<input
+						type="checkbox"
+						[checked]="showSafetyOverlay()"
+						(change)="onToggleSafetyOverlay()"
+						class="accent-red-500"
+					/>
+					Safety Alerts
+				</label>
+				<label class="inline-flex items-center gap-2 cursor-pointer">
+					<input
+						type="checkbox"
+						[checked]="showVenueOverlay()"
+						(change)="onToggleVenueOverlay()"
+						class="accent-sky-500"
+					/>
+					Venue
+				</label>
+			</div>
+		</div>
+	</div>
+	<div class="flex-1 min-h-0">
+		<app-map
+			[center]="center"
+			[zoom]="13"
+			[events]="markers()"
+			[height]="'100%'"
+			[showUserMarker]="false"
+			[fitBoundsToMarkers]="true"
+			[fillContainer]="true"
+		/>
+	</div>
+</div>
