@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DetailsHeaderComponent } from '../../../shared/components/details-header/details-header.component';
-import { IEvent } from '../../events/models/event';
 import { ISafetyAlert } from '../../../shared/models/safety-alert';
 import { GameDetailsPanelComponent } from '../components/game-details-panel/game-details-panel.component';
 import { GameMapPanelComponent } from '../components/game-map-panel/game-map-panel.component';
 import { GameDetailsService } from '../services/game-details.service';
+import { IEvent } from '../../../shared/models/event';
 
 @Component({
 	selector: 'app-game-details',

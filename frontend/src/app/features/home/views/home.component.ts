@@ -7,7 +7,6 @@ import { GeolocationService } from '../../../shared/services/geolocation.service
 import { interval, Subscription, switchMap } from 'rxjs';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
 import { IMapMarker } from '../../../shared/models/map-marker';
-import { UserProfileService } from '../../user-profile/services/user-profile.service';
 import { EventService } from '../../../shared/services/event.service';
 
 @Component({

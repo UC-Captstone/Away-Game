@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { ParamMap } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { EventTypeEnum } from '../../../shared/models/event-type-enum';
-import { IEvent } from '../../events/models/event';
 import { ISafetyAlert } from '../../../shared/models/safety-alert';
 import { LeagueEnum } from '../../../shared/models/league-enum';
+import { IEvent } from '../../../shared/models/event';
 
 @Injectable({
   providedIn: 'root',

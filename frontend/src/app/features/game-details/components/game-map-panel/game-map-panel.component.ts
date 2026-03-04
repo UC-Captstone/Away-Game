@@ -3,9 +3,9 @@ import { Component, Input, OnChanges, SimpleChanges, signal, WritableSignal } fr
 import { ILocation } from '../../../../shared/models/location';
 import { IMapMarker } from '../../../../shared/models/map-marker';
 import { MapComponent } from '../../../../shared/components/map/map.component';
-import { IEvent } from '../../../events/models/event';
 import { ISafetyAlert } from '../../../../shared/models/safety-alert';
 import * as L from 'leaflet';
+import { IEvent } from '../../../../shared/models/event';
 
 @Component({
   selector: 'app-game-map-panel',

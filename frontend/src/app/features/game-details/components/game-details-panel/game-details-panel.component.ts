@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output, signal, WritableSignal } from '@angular/core';
-import { IEvent } from '../../../events/models/event';
 import { EventTileComponent } from '../../../../shared/components/event-tile/event-tile.component';
 import { SafetyAlertTileComponent } from '../../../../shared/components/safety-alert-tile/safety-alert-tile.component';
 import { ISafetyAlert } from '../../../../shared/models/safety-alert';
+import { IEvent } from '../../../../shared/models/event';
 
 type GameDetailsTab = 'Events' | 'SafetyAlerts';
 

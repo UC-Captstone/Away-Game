@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges, signal, WritableSignal } from '@angular/core';
-import { IEvent } from '../../../features/events/models/event';
 import { EventsService } from '../../services/events.service';
+import { IEvent } from '../../models/event';
 
 @Component({
   selector: 'app-details-header',
