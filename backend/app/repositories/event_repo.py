@@ -262,7 +262,9 @@ async def get_nearby_events_service(
 
     # Longitude degrees shrink with latitude; use correct per-axis degree spans.
     lat_degrees = radius_miles / 69.0
-    lng_degrees = radius_miles / (69.0 * math.cos(math.radians(location.lat)))
+    cos_lat = math.cos(math.radians(location.lat))
+    cos_lat = max(cos_lat, 1e-6)  # avoid division by zero near the poles
+    lng_degrees = radius_miles / (69.0 * cos_lat)
     now = datetime.utcnow()
     fetch_limit = limit * 3  # over-fetch so haversine filtering still yields `limit` results
 
