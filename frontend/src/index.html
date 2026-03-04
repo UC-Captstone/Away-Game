@@ -5,6 +5,17 @@
   <title>Frontend</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Pre-warm the connection to Clerk so DNS + TCP + TLS are already
+       resolved before Clerk makes its first /v1/environment and /tokens
+       requests. Saves ~50-100 ms off every Clerk network call. -->
+  <link rel="preconnect" href="https://comic-ladybug-73.clerk.accounts.dev" crossorigin>
+  <link rel="dns-prefetch" href="https://comic-ladybug-73.clerk.accounts.dev">
+
+  <!-- Preload the Clerk browser bundle so the browser starts fetching it
+       in parallel with the Angular bundle rather than discovering it late. -->
+  <link rel="preload" href="https://comic-ladybug-73.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
+        as="script" crossorigin>
 </head>
 <body>
   <app-root></app-root>
