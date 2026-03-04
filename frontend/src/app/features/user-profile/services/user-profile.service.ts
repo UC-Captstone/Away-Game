@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IUserProfile } from '../models/user-profile';
 import { IVerificationForm } from '../models/verification-form';
-import { catchError, delay, Observable, of } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { handleError } from '../../../shared/helpers/error-handler';
 import { IAccountSettings } from '../models/account-settings';
@@ -23,11 +23,7 @@ export class UserProfileService {
   }
 
   submitVerificationApplication(form: IVerificationForm): Observable<null> {
-    console.log('Submitting verification application:', form);
-    // Nathan: Logic to submit verification application to backend API can be added here
-    return of(null).pipe(delay(1000));
-
-    //return this.http.post<null>(`${this.apiUrl}/user/verify`, form).pipe(catchError(handleError));
+    return this.http.post<null>(`${this.apiUrl}/verify`, form).pipe(catchError(handleError));
   }
 
   deleteUserAccount(): Observable<null> {
