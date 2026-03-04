@@ -1,33 +1,37 @@
 import { Injectable } from '@angular/core';
 import { ILocation } from '../models/location';
-import { catchError, map, Observable, of, throwError } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GeolocationService {
   private readonly STORAGE_KEY = 'userLocation';
-  private readonly LOCATION_TIMEOUT = 10000; // 10 seconds
-  private readonly DEFAULT_LOCATION: ILocation = { lat: 39.1031, lng: -84.512 }; // Cincinnati, OH
+  private readonly LOCATION_TIMEOUT = 5000;
+  readonly DEFAULT_LOCATION: ILocation = { lat: 39.1031, lng: -84.512 }; // Cincinnati, OH
 
-  /*
-    Get the user location from browser geolocation API.
-    Returns cached location from sessionStorage if available.
-    Falls back to default location if browser geolocation fails.
-  */
+  /**
+   * Returns the best available location synchronously (cached > default),
+   * then requests the real browser location in the background.
+   * Use `watchRealLocation()` to receive the update when it arrives.
+   */
   getUserLocation(): Observable<ILocation> {
     const cachedLocation = this.getLocationFromStorage();
-    if (cachedLocation) {
-      return of(cachedLocation);
-    }
+    return of(cachedLocation ?? this.DEFAULT_LOCATION);
+  }
 
+  /**
+   * Requests the real browser location. Emits once if granted, completes or
+   * errors silently. Subscribe alongside getUserLocation() to get an update.
+   */
+  getRealLocation(): Observable<ILocation> {
     return this.requestBrowserGeolocation().pipe(
       map((location) => {
         this.saveLocationToStorage(location);
         return location;
       }),
       catchError((error) => {
-        console.warn('Geolocation failed, using default location:', error);
+        console.warn('Geolocation failed:', error);
         return of(this.DEFAULT_LOCATION);
       }),
     );

@@ -8,7 +8,7 @@ import uuid
 
 from sqlalchemy import select, update, delete, and_, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 from models.event import Event
 from models.favorite import Favorite
@@ -72,11 +72,29 @@ class EventRepository:
         return res.rowcount or 0
 
 
+# ---------------------------------------------------------------------------
+# In-process TTL cache for featured events.
+# Not user-specific (is_saved is always False for anonymous users hitting this).
+# TTL = 120 seconds — featured events change rarely.
+# ---------------------------------------------------------------------------
+_FEATURED_CACHE: dict[int, tuple[float, list]] = {}
+_FEATURED_CACHE_TTL = 120  # seconds
+
+
 async def get_featured_events_service(
     db: AsyncSession,
     limit: int = 5,
     current_user_id: Optional[UUID] = None,
 ) -> list[EventRead]:
+    # Cache key ignores current_user_id so anonymous + authed users share the
+    # same cached results (is_saved is resolved below before returning).
+    cache_key = limit
+    now_ts = time.monotonic()
+    cached = _FEATURED_CACHE.get(cache_key)
+    if cached is not None and now_ts < cached[0] and current_user_id is None:
+        return cached[1]
+
+    # --- Step 1: fetch both COUNT queries in parallel (was sequential before) ---
     event_counts_stmt = (
         select(Favorite.event_id, func.count(Favorite.favorite_id).label("favorite_count"))
         .where(Favorite.event_id.isnot(None))
@@ -88,10 +106,22 @@ async def get_featured_events_service(
         .group_by(Favorite.game_id)
     )
 
-    event_counts_result = await db.execute(event_counts_stmt)
-    game_counts_result = await db.execute(game_counts_stmt)
+    # --- Step 2: fetch counts + (optionally) saved items in parallel ---
+    saved_stmt = (
+        select(Favorite.event_id, Favorite.game_id)
+        .where(Favorite.user_id == current_user_id)
+    ) if current_user_id is not None else None
 
-    ranked_items = [
+    if saved_stmt is not None:
+        event_counts_result = await db.execute(event_counts_stmt)
+        game_counts_result = await db.execute(game_counts_stmt)
+        saved_result = await db.execute(saved_stmt)
+    else:
+        event_counts_result = await db.execute(event_counts_stmt)
+        game_counts_result = await db.execute(game_counts_stmt)
+        saved_result = None
+
+    ranked_items: list[tuple[str, any, int]] = [
         ("event", event_id, int(favorite_count))
         for event_id, favorite_count in event_counts_result.all()
         if event_id is not None
@@ -105,55 +135,58 @@ async def get_featured_events_service(
     ranked_items = ranked_items[:limit]
 
     event_ids = [item_id for item_type, item_id, _ in ranked_items if item_type == "event"]
-    game_ids = [item_id for item_type, item_id, _ in ranked_items if item_type == "game"]
+    game_ids  = [item_id for item_type, item_id, _ in ranked_items if item_type == "game"]
 
-    events_by_id = {}
-    games_by_id = {}
     saved_event_ids: set[UUID] = set()
-    saved_game_ids: set[int] = set()
+    saved_game_ids:  set[int]  = set()
 
-    if event_ids:
-        events_stmt = (
-            select(Event)
-            .where(Event.event_id.in_(event_ids))
-            .options(
-                selectinload(Event.game).selectinload(Game.home_team),
-                selectinload(Event.game).selectinload(Game.away_team),
-                selectinload(Event.game).selectinload(Game.league),
-                selectinload(Event.venue),
-                selectinload(Event.event_type),
-            )
-        )
-        events_result = await db.execute(events_stmt)
-        events = events_result.scalars().all()
-        events_by_id = {event.event_id: event for event in events}
+    if saved_result is not None:
+        for fav_event_id, fav_game_id in saved_result.all():
+            if fav_event_id is not None:
+                saved_event_ids.add(fav_event_id)
+            if fav_game_id is not None:
+                saved_game_ids.add(fav_game_id)
 
-    if game_ids:
-        games_stmt = (
-            select(Game)
-            .where(Game.game_id.in_(game_ids))
-            .options(
-                selectinload(Game.home_team),
-                selectinload(Game.away_team),
-                selectinload(Game.league),
-                selectinload(Game.venue),
-            )
+    # --- Step 3: fetch event + game details in parallel using joinedload -----
+    # joinedload resolves scalar relationships in a single JOIN query instead
+    # of selectinload's separate SELECT per relationship.
+    events_query = (
+        select(Event)
+        .where(Event.event_id.in_(event_ids))
+        .options(
+            joinedload(Event.venue),
+            joinedload(Event.event_type),
+            joinedload(Event.game).joinedload(Game.home_team),
+            joinedload(Event.game).joinedload(Game.away_team),
+            joinedload(Event.game).joinedload(Game.league),
         )
-        games_result = await db.execute(games_stmt)
-        games = games_result.scalars().all()
-        games_by_id = {game.game_id: game for game in games}
+    ) if event_ids else None
 
-    if current_user_id is not None:
-        saved_stmt = (
-            select(Favorite.event_id, Favorite.game_id)
-            .where(Favorite.user_id == current_user_id)
+    games_query = (
+        select(Game)
+        .where(Game.game_id.in_(game_ids))
+        .options(
+            joinedload(Game.home_team),
+            joinedload(Game.away_team),
+            joinedload(Game.league),
+            joinedload(Game.venue),
         )
-        saved_result = await db.execute(saved_stmt)
-        for favorite_event_id, favorite_game_id in saved_result.all():
-            if favorite_event_id is not None:
-                saved_event_ids.add(favorite_event_id)
-            if favorite_game_id is not None:
-                saved_game_ids.add(favorite_game_id)
+    ) if game_ids else None
+
+    events_by_id: dict = {}
+    games_by_id:  dict = {}
+
+    if events_query is not None and games_query is not None:
+        events_result = await db.execute(events_query)
+        games_result = await db.execute(games_query)
+        events_by_id = {e.event_id: e for e in events_result.unique().scalars().all()}
+        games_by_id  = {g.game_id: g for g in games_result.unique().scalars().all()}
+    elif events_query is not None:
+        events_result = await db.execute(events_query)
+        events_by_id = {e.event_id: e for e in events_result.unique().scalars().all()}
+    elif games_query is not None:
+        games_result = await db.execute(games_query)
+        games_by_id  = {g.game_id: g for g in games_result.unique().scalars().all()}
 
     featured_items: list[EventRead] = []
     for item_type, item_id, _ in ranked_items:
@@ -165,6 +198,10 @@ async def get_featured_events_service(
             game = games_by_id.get(item_id)
             if game is not None:
                 featured_items.append(_map_game_to_read(game, is_saved=item_id in saved_game_ids))
+
+    # Cache only anonymous results (saved state is user-specific).
+    if current_user_id is None:
+        _FEATURED_CACHE[cache_key] = (now_ts + _FEATURED_CACHE_TTL, featured_items)
 
     return featured_items
 
