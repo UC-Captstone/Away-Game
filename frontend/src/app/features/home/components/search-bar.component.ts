@@ -61,6 +61,26 @@ export class SearchBarComponent {
   }
 
   onResultClick(result: ISearchResults): void {
+    if (result.type === SearchTypeEnum.Game) {
+      this.router.navigate(['/game-details'], {
+        queryParams: {
+          eventId: result.metadata?.eventId ?? '',
+          gameId: result.id,
+          gameName: result.title,
+          saved: result.metadata?.saved ?? false,
+          league: result.metadata?.league ?? '',
+          location: result.metadata?.location ?? '',
+          lat: result.metadata?.lat ?? '',
+          lng: result.metadata?.lng ?? '',
+          date: result.metadata?.date ?? '',
+          homeLogo: result.teamLogos?.home ?? '',
+          awayLogo: result.teamLogos?.away ?? '',
+        },
+      });
+      this.closeDropdown();
+      return;
+    }
+
     if (result.type === SearchTypeEnum.Team) {
       const parsedTeamId = Number(result.id);
       if (!Number.isFinite(parsedTeamId) || parsedTeamId <= 0) {

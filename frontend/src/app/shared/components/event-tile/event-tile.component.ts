@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IEvent } from '../../models/event';
-import { UserProfileService } from '../../../features/user-profile/services/user-profile.service';
-import { finalize, Observable } from 'rxjs';
+import { Router } from '@angular/router';
+import { EventTypeEnum } from '../../models/event-type-enum';
+import { SavedEventsService } from '../../services/saved-events.service';
 
 @Component({
   selector: 'app-event-tile',
@@ -13,52 +14,64 @@ import { finalize, Observable } from 'rxjs';
 export class EventTileComponent {
   @Input() event!: IEvent;
   @Input() showSavedIcon: boolean = true;
-  @Output() removedFromSaved: EventEmitter<string> = new EventEmitter<string>();
+  isSaving: WritableSignal<boolean> = signal(false);
 
-  isSaving: boolean = false;
-
-  constructor(private userProfileService: UserProfileService) {}
+  constructor(
+    private router: Router,
+    private savedEventsService: SavedEventsService,
+  ) {}
 
   navigateToEventDetails(event: Event) {
     event.preventDefault();
-    // Nathan: Implement navigation logic here
-    console.log('Navigating to event details for event:', this.event);
+
+    if (this.event.eventType === EventTypeEnum.Game) {
+      this.router.navigate(['/game-details'], {
+        queryParams: {
+          eventId: this.event.eventId,
+          gameName: this.event.eventName,
+          venueName: this.event.venueName,
+          dateTime: this.event.dateTime,
+          lat: this.event.location?.lat,
+          lng: this.event.location?.lng,
+          homeLogo: this.event.teamLogos?.home ?? '',
+          awayLogo: this.event.teamLogos?.away ?? '',
+          league: this.event.league ?? '',
+          saved: this.event.isSaved,
+        },
+      });
+      return;
+    }
+
+    console.log('Event tile clicked (non-game event):', this.event);
   }
 
   toggleSaved(event?: Event): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     if (event) {
       event.stopPropagation();
       event.preventDefault();
     }
 
-    if (this.isSaving) {
-      return;
-    }
+    const previousSavedState = this.event.isSaved;
+    this.isSaving.set(true);
+    this.event.isSaved = !previousSavedState;
 
-    const previousStatus = this.event.isSaved;
-    const nextStatus = !previousStatus;
-    this.event.isSaved = nextStatus;
-    this.isSaving = true;
+    const request$ = this.event.isSaved
+      ? this.savedEventsService.addSavedEvent(this.event.eventId)
+      : this.savedEventsService.deleteSavedEvent(this.event.eventId);
 
-    this.getSaveRequest(nextStatus)
-      .pipe()
-      .subscribe({
-        next: () => {
-          this.isSaving = false;
-          if (!nextStatus) {
-            this.removedFromSaved.emit(this.event.eventId);
-          }
-        },
-        error: (error) => {
-          console.error('Error toggling saved event:', error);
-          this.event.isSaved = previousStatus;
-        },
-      });
-  }
-
-  private getSaveRequest(nextStatus: boolean): Observable<IEvent[]> {
-    return nextStatus
-      ? this.userProfileService.addSavedEvent(this.event.eventId)
-      : this.userProfileService.deleteSavedEvent(this.event.eventId);
+    request$.subscribe({
+      next: (savedEvents) => {
+        this.event.isSaved = savedEvents.some((item) => item.eventId === this.event.eventId);
+        this.isSaving.set(false);
+      },
+      error: () => {
+        this.event.isSaved = previousSavedState;
+        this.isSaving.set(false);
+      },
+    });
   }
 }

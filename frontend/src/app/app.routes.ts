@@ -37,4 +37,12 @@ export const routes: Routes = [
         (m) => m.EventSearchComponent,
       ),
   },
+  {
+    path: 'game-details',
+    loadComponent: () =>
+      import('./features/game-details/views/game-details.component').then(
+        (m) => m.GameDetailsComponent,
+      ),
+    canActivate: [protectedGuard],
+  },
 ];

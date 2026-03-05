@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EventFiltersPanelComponent } from '../components/event-filters-panel/event-filters-panel.component';
 import { EventResultGridComponent } from '../components/event-result-grid/event-result-grid.component';
 import { IEvent } from '../../../shared/models/event';
-import { EventService } from '../../../shared/services/event.service';
+import { EventsService } from '../../../shared/services/events.service';
 import { DEFAULT_EVENT_FILTERS, IEventFilters } from '../models/event-search-filters';
 import { ITeam } from '../../../shared/models/team';
 import { LeagueEnum } from '../../../shared/models/league-enum';
@@ -24,7 +24,7 @@ export class EventSearchComponent implements OnInit {
   initialSelectedTeams: ITeam[] = [];
 
   constructor(
-    private eventService: EventService,
+    private eventService: EventsService,
     private route: ActivatedRoute,
   ) {}
 

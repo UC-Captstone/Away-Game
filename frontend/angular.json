@@ -60,6 +60,7 @@
                   "with": "src/environments/environment.dev.ts"
                 }
               ],
+              "outputHashing": "all",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true

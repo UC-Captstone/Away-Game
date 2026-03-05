@@ -103,7 +103,7 @@
                       }}</span>
                       @if (result.metadata?.league) {
                         <span class="text-xs text-slate-500 truncate"
-                          >League: {{ result.metadata.league }}</span
+                          >League: {{ result.metadata?.league }}</span
                         >
                       }
                     </div>
@@ -139,12 +139,12 @@
                       }}</span>
                       @if (result.metadata?.date) {
                         <span class="text-xs text-slate-500 truncate">{{
-                          result.metadata.date | date: 'mediumDate'
+                          result.metadata?.date | date: 'mediumDate'
                         }}</span>
                       }
                       @if (result.metadata?.location) {
                         <span class="text-xs text-slate-500 truncate">{{
-                          result.metadata.location
+                          result.metadata?.location
                         }}</span>
                       }
                     </div>
@@ -173,7 +173,7 @@
                       }}</span>
                       @if (result.metadata?.date) {
                         <span class="text-xs text-slate-500 line-clamp-1">{{
-                          result.metadata.description
+                          result.metadata?.description
                         }}</span>
                       }
                     </div>
@@ -200,7 +200,7 @@
                       }}</span>
                       @if (result.metadata?.country) {
                         <span class="text-xs text-slate-500 truncate">{{
-                          result.metadata.country
+                          result.metadata?.country
                         }}</span>
                       }
                     </div>

@@ -121,7 +121,7 @@
                   @for (event of profile.savedEvents; track event.eventId) {
                     <app-event-tile
                       [event]="event"
-                      (removedFromSaved)="removeSavedEvent($event)"
+                      [showSavedIcon]="true"
                     ></app-event-tile>
                   } @empty {
                     <div class="col-span-full text-center">

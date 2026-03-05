@@ -1,0 +1,73 @@
+<div
+	class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md px-3 py-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4"
+>
+	<div class="text-left min-w-0">
+		<h1 class="text-sm md:text-base font-semibold text-slate-100 truncate">
+			{{ event?.eventName ?? 'Away Team @ Home Team' }}
+		</h1>
+		<div class="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+			<span class="px-2 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-300">{{
+				event?.league ?? 'Unknown League'
+			}}</span>
+			<span>{{ event?.venueName ?? 'Venue TBD' }}</span>
+			@if (event?.dateTime) {
+				<span>• {{ event?.dateTime | date: 'short' }}</span>
+			}
+		</div>
+	</div>
+
+	<div class="flex items-center justify-center gap-4">
+		<div
+			class="w-16 h-16 rounded-xl border border-slate-700 bg-slate-800 p-1.5 flex items-center justify-center"
+		>
+			@if (event?.teamLogos?.away) {
+				<img [src]="event?.teamLogos?.away" alt="Away team logo" class="w-full h-full object-contain" />
+			} @else {
+				<span class="text-slate-500 text-xs">Away</span>
+			}
+		</div>
+		<span class="text-slate-400 text-[11px] font-semibold">VS</span>
+		<div
+			class="w-16 h-16 rounded-xl border border-slate-700 bg-slate-800 p-1.5 flex items-center justify-center"
+		>
+			@if (event?.teamLogos?.home) {
+				<img [src]="event?.teamLogos?.home" alt="Home team logo" class="w-full h-full object-contain" />
+			} @else {
+				<span class="text-slate-500 text-xs">Home</span>
+			}
+		</div>
+	</div>
+
+	<button
+		type="button"
+		(click)="onSavedToggle()"
+		class="inline-flex items-center justify-center p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors justify-self-end"
+		[title]="isSaved() ? 'Saved game - click to unsave' : 'Save game'"
+	>
+		@if (isSaved()) {
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-5 w-5 text-sky-400"
+				viewBox="0 0 20 20"
+				fill="currentColor"
+			>
+				<path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v12l-7-3-7 3V5z" />
+			</svg>
+		} @else {
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				class="h-5 w-5 text-slate-300"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M5 5v14l7-3 7 3V5a2 2 0 00-2-2H7a2 2 0 00-2 2z"
+				/>
+			</svg>
+		}
+	</button>
+</div>

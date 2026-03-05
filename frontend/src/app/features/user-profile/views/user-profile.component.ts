@@ -40,18 +40,6 @@ export class UserProfileComponent implements OnInit {
     this.selectedTab.set(tab);
   }
 
-  removeSavedEvent(eventId: string): void {
-    const profile = this.userProfile;
-    if (!profile) {
-      return;
-    }
-
-    this.userProfile = {
-      ...profile,
-      savedEvents: profile.savedEvents.filter((event) => event.eventId !== eventId),
-    };
-  }
-
   private loadUserProfile(): void {
     this.isLoading.set(true);
     this.userProfileService.getUserProfile().subscribe({
