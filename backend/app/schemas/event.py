@@ -55,7 +55,7 @@ class EventRead(BaseModel):
     event_type: EventTypeEnum
     event_name: str
     date_time: datetime
-    location: Location
+    location: Optional[Location] = None
     venue_name: str
     image_url: Optional[str] = None
     team_logos: Optional[TeamLogos] = None
