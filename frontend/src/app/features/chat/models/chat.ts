@@ -18,5 +18,6 @@ export interface IChatPage {
 /** Request body for POST /api/event-chats/ */
 export interface IChatSend {
   eventId: string;
+  gameId?: number;
   messageText: string;
 }
