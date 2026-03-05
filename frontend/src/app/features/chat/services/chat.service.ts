@@ -68,7 +68,12 @@ export class ChatService implements OnDestroy {
    * the cursor are preserved so polling can resume exactly where it left off.
    */
   pausePolling(): void {
+    // Stop ongoing polling interval.
     this.stopPolling();
+    // Also cancel any in-flight initial load so it cannot restart polling
+    // after we have paused.
+    this.initialLoadSub?.unsubscribe();
+    this.initialLoadSub = null;
   }
 
   /**
