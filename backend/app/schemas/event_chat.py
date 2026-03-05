@@ -11,10 +11,15 @@ class EventChatCreate(BaseModel):
     Used when a client posts a new message.
     user_id is intentionally absent — it is injected server-side from the
     authenticated JWT so callers cannot spoof another user's identity.
+
+    game_id is optional: when provided alongside a synthetic event_id (one
+    generated client-side from uuid5), the server uses it to find-or-create
+    the canonical events-table row, eliminating the FK violation.
     """
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
     event_id: UUID
+    game_id: Optional[int] = None
     message_text: str = Field(..., min_length=1, max_length=1000)
 
 

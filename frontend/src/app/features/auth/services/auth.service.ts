@@ -98,6 +98,18 @@ export class AuthService {
     }
   }
 
+  /** Returns the current user's internal UUID (the JWT `sub` claim), or null if not signed in. */
+  getCurrentUserId(): string | null {
+    const token = this.getInternalToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   isAdmin(): boolean {
     return this.getUserRole() === 'admin';
   }

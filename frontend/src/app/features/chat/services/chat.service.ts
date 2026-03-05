@@ -17,6 +17,7 @@ export class ChatService implements OnDestroy {
   readonly loading$ = new BehaviorSubject<boolean>(false);
 
   private currentEventId: string | null = null;
+  private currentGameId: number | null = null;
   private cursor: string | null = null;
   private pollSub: Subscription | null = null;
   private initialLoadSub: Subscription | null = null;
@@ -47,17 +48,37 @@ export class ChatService implements OnDestroy {
   /**
    * Initializes chat state for one event and starts the initial fetch flow.
    */
-  initForEvent(eventId: string): void {
+  initForEvent(eventId: string, gameId?: number): void {
     if (this.currentEventId === eventId) {
       return;
     }
 
     this.destroy();
     this.currentEventId = eventId;
+    this.currentGameId = gameId ?? null;
     this.cursor = null;
     this.messages$.next([]);
     this.sendError$.next(null);
     this.initialLoad();
+  }
+
+  /**
+   * Pauses polling without clearing any state. Use when the chat panel is
+   * hidden (e.g. the user switched to a different in-app tab). Messages and
+   * the cursor are preserved so polling can resume exactly where it left off.
+   */
+  pausePolling(): void {
+    this.stopPolling();
+  }
+
+  /**
+   * Resumes polling if there is an active event and no poll is already running.
+   * Safe to call even if polling was never paused.
+   */
+  resumePolling(): void {
+    if (this.currentEventId && !this.pollSub) {
+      this.startPolling();
+    }
   }
 
   /**
@@ -70,6 +91,7 @@ export class ChatService implements OnDestroy {
     this.pendingSubs.forEach((sub) => sub.unsubscribe());
     this.pendingSubs.clear();
     this.currentEventId = null;
+    this.currentGameId = null;
     this.cursor = null;
     this.messages$.next([]);
     this.sendError$.next(null);
@@ -109,6 +131,7 @@ export class ChatService implements OnDestroy {
     const capturedEventId = this.currentEventId;
     const body: IChatSend = {
       eventId: capturedEventId,
+      ...(this.currentGameId != null ? { gameId: this.currentGameId } : {}),
       messageText: trimmed,
     };
 

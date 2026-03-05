@@ -222,6 +222,7 @@ def _map_game_to_read(game: Game, is_saved: bool = False) -> EventRead:
 
     return EventRead(
         event_id=uuid.uuid5(uuid.NAMESPACE_DNS, f"game:{game.game_id}"),
+        game_id=game.game_id,
         event_type=EventTypeEnum.GAME,
         event_name=f"{away_team_name} @ {home_team_name}",
         date_time=game.date_time,
@@ -370,6 +371,7 @@ def _map_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
 
     return EventRead(
         event_id=event.event_id,
+        game_id=event.game_id,
         event_type=event_type_value,
         event_name=event.title,
         date_time=event.game_date,
