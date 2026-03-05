@@ -63,7 +63,7 @@ export class GameChatPanelComponent implements OnInit, OnChanges, OnDestroy, Aft
     if (changes['eventId'] && this.eventId) {
       // If it's the same event (user switched back to Chat tab), just resume
       // polling from where it left off — no reload needed.
-      const alreadyActive = (this.chatService as unknown as { currentEventId: string | null }).currentEventId === this.eventId;
+      const alreadyActive = this.chatService.isActiveFor(this.eventId);
       if (alreadyActive) {
         this.chatService.resumePolling();
       } else {

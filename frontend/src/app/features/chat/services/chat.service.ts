@@ -46,6 +46,14 @@ export class ChatService implements OnDestroy {
   }
 
   /**
+   * Returns true if the service is currently active for the given event id.
+   * Prefer this over casting to access the private `currentEventId` field.
+   */
+  isActiveFor(eventId: string): boolean {
+    return this.currentEventId === eventId;
+  }
+
+  /**
    * Initializes chat state for one event and starts the initial fetch flow.
    */
   initForEvent(eventId: string, gameId?: number): void {

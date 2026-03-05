@@ -4,4 +4,7 @@ export enum EventTypeEnum {
   Pregame = 'Pregame',
   Postgame = 'Postgame',
   Watch = 'Watch',
+  WatchParty = 'Watch Party',
+  Meetup = 'Meetup',
+  Other = 'Other',
 }
