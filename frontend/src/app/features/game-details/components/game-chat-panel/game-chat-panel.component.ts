@@ -121,7 +121,14 @@ export class GameChatPanelComponent implements OnInit, OnChanges, OnDestroy, Aft
   }
 
   formatTime(timestamp: string): string {
-    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // Timestamps from the backend are always UTC. If the string has no
+    // timezone suffix (no 'Z' or '+'), append 'Z' so the browser parses
+    // it as UTC instead of local time.
+    const utc =
+      timestamp.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(timestamp)
+        ? timestamp
+        : timestamp + 'Z';
+    return new Date(utc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
   onDelete(messageId: string): void {

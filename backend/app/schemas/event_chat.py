@@ -1,8 +1,8 @@
 from __future__ import annotations
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 from pydantic.alias_generators import to_camel
 
 
@@ -50,6 +50,15 @@ class EventChatRead(BaseModel):
     timestamp: datetime
     user_name: Optional[str] = None
     user_avatar_url: Optional[str] = None
+
+    @field_serializer('timestamp')
+    def _serialize_timestamp(self, v: datetime) -> str:
+        """Ensure naive datetimes (stored as UTC in the DB) are always
+        serialised with an explicit UTC offset so the browser parses them
+        correctly instead of treating them as local time."""
+        if v.tzinfo is None:
+            v = v.replace(tzinfo=timezone.utc)
+        return v.isoformat()
 
     @model_validator(mode="before")
     @classmethod
