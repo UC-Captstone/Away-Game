@@ -243,6 +243,35 @@ describe('ChatService', () => {
     expect(service.messages$.value[0].messageText).toBe('from B');
   }));
 
+  it('should include gameId in the POST body when initialized with a gameId', fakeAsync(() => {
+    const GAME_ID = 42;
+    service.initForEvent(EVENT_ID, GAME_ID);
+    httpMock.expectOne((r) => r.url.includes(`/event/${EVENT_ID}`)).flush(makePage([]));
+    tick();
+
+    const newMsg = makeMsg({ messageText: 'with game' });
+    service.sendMessage('with game');
+
+    const postReq = httpMock.expectOne(`${BASE}/`);
+    expect(postReq.request.body.gameId).toBe(GAME_ID);
+    postReq.flush(newMsg);
+    tick();
+  }));
+
+  it('should NOT include gameId in the POST body when initialized without a gameId', fakeAsync(() => {
+    service.initForEvent(EVENT_ID);
+    httpMock.expectOne((r) => r.url.includes(`/event/${EVENT_ID}`)).flush(makePage([]));
+    tick();
+
+    const newMsg = makeMsg({ messageText: 'no game' });
+    service.sendMessage('no game');
+
+    const postReq = httpMock.expectOne(`${BASE}/`);
+    expect(postReq.request.body.gameId).toBeUndefined();
+    postReq.flush(newMsg);
+    tick();
+  }));
+
   it('should clear messages$ and stop polling on destroy', fakeAsync(() => {
     service.initForEvent(EVENT_ID);
     httpMock.expectOne((r) => r.url.includes(`/event/${EVENT_ID}`)).flush(makePage([makeMsg()]));
