@@ -1,111 +1,125 @@
 <div
-	class="w-full h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0"
+  class="w-full h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0"
 >
-	<div class="p-3 border-b border-slate-800">
-		<div class="relative rounded-lg bg-slate-800 border border-slate-700 p-1 grid grid-cols-3 max-w-sm mx-auto">
-			<div
-				class="absolute left-1 top-1 bottom-1 w-[calc(33.333%-0.1667rem)] rounded-md bg-sky-500 transition-transform duration-200"
-				[ngClass]="{
-					'translate-x-0': selectedTab() === 'Events',
-					'translate-x-full': selectedTab() === 'SafetyAlerts',
-					'translate-x-[200%]': selectedTab() === 'Chat'
-				}"
-			></div>
+  <div class="p-3 border-b border-slate-800">
+    <div
+      class="relative rounded-lg bg-slate-800 border border-slate-700 p-1 grid grid-cols-3 max-w-sm mx-auto"
+    >
+      <div
+        class="absolute left-1 top-1 bottom-1 w-[calc(33.333%-0.1667rem)] rounded-md bg-sky-500 transition-transform duration-200"
+        [ngClass]="{
+          'translate-x-0': selectedTab() === 'Events',
+          'translate-x-full': selectedTab() === 'SafetyAlerts',
+          'translate-x-[200%]': selectedTab() === 'Chat',
+        }"
+      ></div>
 
-			<button
-				type="button"
-				class="relative z-10 text-xs py-1 rounded-md transition-colors"
-				[ngClass]="selectedTab() === 'Events' ? 'text-white font-medium' : 'text-slate-300'"
-				(click)="onTabChange('Events')"
-			>
-				Events
-			</button>
-			<button
-				type="button"
-				class="relative z-10 text-xs py-1 rounded-md transition-colors"
-				[ngClass]="selectedTab() === 'SafetyAlerts' ? 'text-white font-medium' : 'text-slate-300'"
-				(click)="onTabChange('SafetyAlerts')"
-			>
-				Alerts
-			</button>
-			<button
-				type="button"
-				class="relative z-10 text-xs py-1 rounded-md transition-colors"
-				[ngClass]="selectedTab() === 'Chat' ? 'text-white font-medium' : 'text-slate-300'"
-				(click)="onTabChange('Chat')"
-			>
-				Chat
-			</button>
-		</div>
-	</div>
+      <button
+        type="button"
+        class="relative z-10 text-xs py-1 rounded-md transition-colors"
+        [ngClass]="selectedTab() === 'Events' ? 'text-white font-medium' : 'text-slate-300'"
+        (click)="onTabChange('Events')"
+      >
+        Events
+      </button>
+      <button
+        type="button"
+        class="relative z-10 text-xs py-1 rounded-md transition-colors"
+        [ngClass]="selectedTab() === 'SafetyAlerts' ? 'text-white font-medium' : 'text-slate-300'"
+        (click)="onTabChange('SafetyAlerts')"
+      >
+        Alerts
+      </button>
+      <button
+        type="button"
+        class="relative z-10 text-xs py-1 rounded-md transition-colors"
+        [ngClass]="selectedTab() === 'Chat' ? 'text-white font-medium' : 'text-slate-300'"
+        (click)="onTabChange('Chat')"
+      >
+        Chat
+      </button>
+    </div>
+  </div>
 
-	<div class="p-4 flex-1 min-h-0 flex flex-col">
-		@switch (selectedTab()) {
-			@case ('Events') {
-				<div class="mb-4 flex justify-end">
-					<button
-						type="button"
-						(click)="onAddEventClicked()"
-						class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-4 w-4"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-						</svg>
-						Add Event
-					</button>
-				</div>
-				<div class="flex-1 min-h-0 overflow-auto">
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
-						@for (event of gameEvents; track event.eventId) {
-							<app-event-tile [event]="event" [showSavedIcon]="true"></app-event-tile>
-						} @empty {
-							<div class="col-span-full text-center text-slate-400 text-sm">No game events yet.</div>
-						}
-					</div>
-				</div>
-			}
-			@case ('SafetyAlerts') {
-				<div class="mb-4 flex justify-end">
-					<button
-						type="button"
-						(click)="onAddSafetyAlertClicked()"
-						class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							class="h-4 w-4"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-						</svg>
-						Add Safety Alert
-					</button>
-				</div>
-				<div class="flex-1 min-h-0 overflow-auto">
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
-						@for (alert of safetyAlerts; track alert.alertId) {
-							<app-safety-alert-tile [alert]="alert"></app-safety-alert-tile>
-						} @empty {
-							<div class="col-span-full text-center text-slate-400 text-sm">No alerts nearby.</div>
-						}
-					</div>
-				</div>
-			}
-			@case ('Chat') {
-				<app-game-chat-panel
-					class="flex flex-col flex-1 min-h-0"
-					[eventId]="eventId"
-					[gameId]="gameId"
-				></app-game-chat-panel>
-			}
-		}
-	</div>
+  <div class="p-4 flex-1 min-h-0 flex flex-col">
+    @switch (selectedTab()) {
+      @case ('Events') {
+        <div class="mb-4 flex justify-end">
+          <button
+            type="button"
+            (click)="onAddEventClicked()"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Event
+          </button>
+        </div>
+        <div class="flex-1 min-h-0 overflow-auto">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
+            @for (event of gameEvents; track event.eventId) {
+              <app-event-tile [event]="event" [showSavedIcon]="true"></app-event-tile>
+            } @empty {
+              <div class="col-span-full text-center text-slate-400 text-sm">
+                No game events yet.
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @case ('SafetyAlerts') {
+        <div class="mb-4 flex justify-end">
+          <button
+            type="button"
+            (click)="onAddSafetyAlertClicked()"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Safety Alert
+          </button>
+        </div>
+        <div class="flex-1 min-h-0 overflow-auto">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
+            @for (alert of safetyAlerts; track alert.alertId) {
+              <app-safety-alert-tile [alert]="alert"></app-safety-alert-tile>
+            } @empty {
+              <div class="col-span-full text-center text-slate-400 text-sm">No alerts nearby.</div>
+            }
+          </div>
+        </div>
+      }
+      @case ('Chat') {
+        <app-chat-panel
+          class="flex flex-col flex-1 min-h-0"
+          [eventId]="eventId"
+          [gameId]="gameId"
+        ></app-chat-panel>
+      }
+    }
+  </div>
 </div>

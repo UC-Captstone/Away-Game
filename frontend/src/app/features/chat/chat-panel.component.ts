@@ -10,26 +10,26 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { ChatService } from '../../../chat/services/chat.service';
-import { IChatMessage } from '../../../chat/models/chat';
-import { AuthService } from '../../../auth/services/auth.service';
+import { ChatService } from './services/chat.service';
+import { IChatMessage } from './models/chat';
+import { AuthService } from '../auth/services/auth.service';
+import { ChatMessageItemComponent } from './components/chat-message-item/chat-message-item.component';
+import { ChatTypingBarComponent } from './components/chat-typing-bar/chat-typing-bar.component';
 
 @Component({
-  selector: 'app-game-chat-panel',
-  templateUrl: './game-chat-panel.component.html',
+  selector: 'app-chat-panel',
+  templateUrl: './chat-panel.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ChatMessageItemComponent, ChatTypingBarComponent],
 })
-export class GameChatPanelComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
+export class ChatPanelComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
   @Input() eventId: string = '';
   @Input() gameId: number | undefined = undefined;
 
   @ViewChild('messageList') private messageList!: ElementRef<HTMLElement>;
 
   messages: IChatMessage[] = [];
-  messageText = '';
   sendError: string | null = null;
   loading = false;
   sending = false;
@@ -61,8 +61,6 @@ export class GameChatPanelComponent implements OnInit, OnChanges, OnDestroy, Aft
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['eventId'] && this.eventId) {
-      // If it's the same event (user switched back to Chat tab), just resume
-      // polling from where it left off — no reload needed.
       const alreadyActive = this.chatService.isActiveFor(this.eventId);
       if (alreadyActive) {
         this.chatService.resumePolling();
@@ -82,63 +80,25 @@ export class GameChatPanelComponent implements OnInit, OnChanges, OnDestroy, Aft
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
-    // Pause (don't destroy) so messages and cursor are preserved when the user
-    // switches back to this tab.
     this.chatService.pausePolling();
   }
 
-  onSend(): void {
-    const text = this.messageText.trim();
+  onSend(text: string): void {
     if (!text || this.sending) return;
 
     this.sending = true;
     this.shouldScrollToBottom = true;
-    this.chatService
-      .sendMessage(text)
-      .then(() => {
-        this.messageText = '';
-      })
-      .finally(() => {
-        this.sending = false;
-      });
-  }
-
-  onKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      this.onSend();
-    }
-  }
-
-  getInitials(name: string | null): string {
-    if (!name) return '?';
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
-
-  formatTime(timestamp: string): string {
-    // Timestamps from the backend are always UTC. If the string has no
-    // timezone suffix (no 'Z' or '+'), append 'Z' so the browser parses
-    // it as UTC instead of local time.
-    const utc =
-      timestamp.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(timestamp)
-        ? timestamp
-        : timestamp + 'Z';
-    return new Date(utc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    this.chatService.sendMessage(text).finally(() => {
+      this.sending = false;
+    });
   }
 
   onDelete(messageId: string): void {
     if (this.deletingId) return;
     this.deletingId = messageId;
-    this.chatService
-      .deleteMessage(messageId)
-      .finally(() => {
-        this.deletingId = null;
-      });
+    this.chatService.deleteMessage(messageId).finally(() => {
+      this.deletingId = null;
+    });
   }
 
   private isNearBottom(): boolean {

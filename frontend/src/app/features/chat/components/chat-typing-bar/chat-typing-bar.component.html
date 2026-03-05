@@ -1,0 +1,50 @@
+<div class="shrink-0 pt-2 border-t border-slate-800">
+  <div class="flex items-end gap-2">
+    <textarea
+      [(ngModel)]="messageText"
+      (keydown)="onKeydown($event)"
+      [disabled]="sending"
+      placeholder="Send a message... (Enter to send)"
+      rows="1"
+      class="flex-1 resize-none rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-sky-500 transition-colors disabled:opacity-50 min-h-10 max-h-28 overflow-y-auto"
+    ></textarea>
+    <button
+      type="button"
+      (click)="onSend()"
+      [disabled]="!messageText.trim() || sending"
+      class="shrink-0 h-10 w-10 rounded-xl bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+    >
+      @if (sending) {
+        <svg
+          class="animate-spin h-4 w-4 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          ></path>
+        </svg>
+      } @else {
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4 text-white"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+        </svg>
+      }
+    </button>
+  </div>
+</div>
