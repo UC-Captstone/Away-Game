@@ -25,6 +25,18 @@ class SafetyAlertCreate(SafetyAlertBase):
     pass
 
 
+class SafetyAlertCreateRequest(BaseModel):
+    alert_type_id: str
+    game_id: Optional[int] = None
+    venue_id: Optional[int] = None
+    title: str
+    description: Optional[str] = None
+    severity: str = "low"
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    expires_at: Optional[datetime] = None
+
+
 class SafetyAlertUpdate(BaseModel):
     alert_type_id: Optional[str] = None
     game_id: Optional[int] = None
