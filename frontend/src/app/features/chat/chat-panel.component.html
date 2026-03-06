@@ -1,0 +1,76 @@
+<div class="flex flex-col h-full min-h-0">
+  @if (loading) {
+    <div class="flex-1 flex items-center justify-center">
+      <div class="flex flex-col items-center gap-2 text-slate-400">
+        <svg
+          class="animate-spin h-6 w-6 text-sky-400"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          ></path>
+        </svg>
+        <span class="text-xs">Loading chat...</span>
+      </div>
+    </div>
+  }
+
+  @if (!loading) {
+    <div
+      #messageList
+      class="flex-1 min-h-0 overflow-y-auto pr-1 space-y-4 py-2"
+      style="scroll-behavior: smooth"
+    >
+      @if (messages.length === 0) {
+        <div class="flex items-center justify-center h-full text-slate-500 text-sm select-none">
+          No messages yet. Be the first to say something!
+        </div>
+      }
+
+      @for (msg of messages; track msg.messageId) {
+        <app-chat-message-item
+          [message]="msg"
+          [currentUserId]="currentUserId"
+          [deleting]="deletingId === msg.messageId"
+          (deleteClicked)="onDelete($event)"
+        ></app-chat-message-item>
+      }
+    </div>
+  }
+
+  @if (sendError) {
+    <div
+      class="mx-1 mb-2 px-3 py-2 rounded-lg bg-red-900/60 border border-red-700 text-red-300 text-xs flex items-center gap-2"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-4 w-4 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+        />
+      </svg>
+      {{ sendError }}
+    </div>
+  }
+
+  <app-chat-typing-bar [sending]="sending" (sendClicked)="onSend($event)"></app-chat-typing-bar>
+</div>

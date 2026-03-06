@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { ParamMap } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { EventTypeEnum } from '../../../shared/models/event-type-enum';
 import { ISafetyAlert } from '../../../shared/models/safety-alert';
 import { IEvent } from '../../../shared/models/event';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -11,10 +13,19 @@ import { IEvent } from '../../../shared/models/event';
 export class GameDetailsService {
   private readonly defaultCenter = { lat: 39.8283, lng: -98.5795 };
 
+  constructor(private readonly http: HttpClient) {}
+
+  getGameChatEventId(gameId: number): Observable<string> {
+    return this.http
+      .get<{ eventId: string }>(`${environment.apiUrl}/events/game-channel/${gameId}`)
+      .pipe(map((res) => res.eventId));
+  }
+
   getGameFromQuery(params: ParamMap): Observable<IEvent> {
     const eventId = params.get('eventId') ?? '';
-    const parsedGameId = Number(params.get('gameId'));
-    const gameId = Number.isFinite(parsedGameId) ? parsedGameId : undefined;
+    const gameIdParam = params.get('gameId');
+    const parsedGameId = gameIdParam ? Number(gameIdParam) : NaN;
+    const gameId = Number.isFinite(parsedGameId) && parsedGameId > 0 ? parsedGameId : undefined;
     const gameName = params.get('gameName') ?? 'Away Team @ Home Team';
     const venueName = params.get('location') ?? params.get('venueName') ?? 'Venue TBD';
     const league = params.get('league') ?? undefined;

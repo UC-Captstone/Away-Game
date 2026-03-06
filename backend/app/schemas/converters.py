@@ -3,7 +3,8 @@ from models.event import Event
 from models.team import Team
 from models.league import League
 from models.team_chat import TeamChat
-from schemas.event import EventRead, Location, TeamLogos
+from schemas.event import EventRead, TeamLogos
+from schemas.common import Location
 from schemas.team import TeamRead
 from schemas.league import LeagueRead, LeagueEnum
 from schemas.team_chat import TeamChatRead
@@ -38,10 +39,14 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
         type_map = {
             "GAME": EventTypeEnum.GAME,
             "TAILGATE": EventTypeEnum.TAILGATE,
-            "MEETUP": EventTypeEnum.MEETUP,
+            "PREGAME": EventTypeEnum.PREGAME,
+            "POSTGAME": EventTypeEnum.POSTGAME,
+            "WATCH": EventTypeEnum.WATCH,
             "WATCH_PARTY": EventTypeEnum.WATCH_PARTY,
+            "MEETUP": EventTypeEnum.MEETUP,
+            "OTHER": EventTypeEnum.OTHER,
         }
-        event_type = type_map.get(event.event_type_id.lower(), EventTypeEnum.GAME)
+        event_type = type_map.get(event.event_type_id.upper(), EventTypeEnum.GAME)
 
     team_logos = None
     league = None
@@ -57,13 +62,16 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
             except ValueError:
                 league = None
 
-    location = ""
+    location = None
     venue_name = ""
     if event.venue:
-        location = f"{event.venue.city}, {event.venue.state_region}" if event.venue.city and event.venue.state_region else event.venue.name
+        lat = event.venue.latitude
+        lng = event.venue.longitude
+        if lat is not None and lng is not None:
+            location = Location(lat=lat, lng=lng)
         venue_name = event.venue.name or ""
-    elif event.latitude and event.longitude:
-        location = f"{event.latitude}, {event.longitude}"
+    elif event.latitude is not None and event.longitude is not None:
+        location = Location(lat=event.latitude, lng=event.longitude)
 
     is_user_created = event.game_id is None
 

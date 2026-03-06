@@ -27,6 +27,7 @@ export class EventTileComponent {
       this.router.navigate(['/game-details'], {
         queryParams: {
           eventId: this.event.eventId,
+          gameId: this.event.gameId ?? undefined,
           gameName: this.event.eventName,
           venueName: this.event.venueName,
           dateTime: this.event.dateTime,

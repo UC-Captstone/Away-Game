@@ -71,16 +71,11 @@ export class AuthService {
    * skip the backend round-trip and go straight to syncUser().
    */
   isTokenExpiredOrExpiringSoon(): boolean {
-    const token = this.getInternalToken();
-    if (!token) return true;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const expiresAt: number = payload.exp ?? 0;
-      const nowSeconds = Math.floor(Date.now() / 1000);
-      return expiresAt - nowSeconds < TOKEN_EXPIRY_BUFFER_SECONDS;
-    } catch {
-      return true;
-    }
+    const payload = this.decodeJwtPayload();
+    if (!payload) return true;
+    const expiresAt: number = (payload['exp'] as number) ?? 0;
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    return expiresAt - nowSeconds < TOKEN_EXPIRY_BUFFER_SECONDS;
   }
 
   clearInternalToken(): void {
@@ -88,14 +83,14 @@ export class AuthService {
   }
 
   getUserRole(): string | null {
-    const token = this.getInternalToken();
-    if (!token) return null;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role ?? null;
-    } catch {
-      return null;
-    }
+    const payload = this.decodeJwtPayload();
+    return payload ? ((payload['role'] as string) ?? null) : null;
+  }
+
+  /** Returns the current user's internal UUID (the JWT `sub` claim), or null if not signed in. */
+  getCurrentUserId(): string | null {
+    const payload = this.decodeJwtPayload();
+    return payload ? ((payload['sub'] as string) ?? null) : null;
   }
 
   isAdmin(): boolean {
@@ -107,5 +102,21 @@ export class AuthService {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     });
+  }
+
+  /** Decodes the JWT payload from the stored internal token. Returns null on any failure. */
+  private decodeJwtPayload(): Record<string, unknown> | null {
+    const token = this.getInternalToken();
+    if (!token) return null;
+    try {
+      const parts = token.split('.');
+      if (parts.length < 2) return null;
+      // Pad to a multiple of 4 to handle base64url without padding.
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+      return JSON.parse(atob(padded)) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
   }
 }

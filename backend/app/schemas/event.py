@@ -51,10 +51,11 @@ class EventRead(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
     
     event_id: UUID
+    game_id: Optional[int] = None
     event_type: EventTypeEnum
     event_name: str
     date_time: datetime
-    location: Location
+    location: Optional[Location] = None
     venue_name: str
     image_url: Optional[str] = None
     team_logos: Optional[TeamLogos] = None
