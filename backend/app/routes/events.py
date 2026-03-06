@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
-from repositories.event_repo import get_featured_events_service, get_nearby_events_service
+from repositories.event_repo import get_featured_events_service, get_nearby_events_service, _map_event_to_read
+from repositories.game_channel_repo import get_or_create_game_channel_event
 from db.session import get_session
-from auth import get_optional_current_user
+from auth import get_optional_current_user, get_current_user
 from models.user import User
 from schemas.event import EventRead
 from schemas.common import Location
@@ -24,7 +25,6 @@ async def get_featured_events(
         current_user_id=current_user.user_id if current_user else None,
     )
 
-
 @router.get("/nearby", response_model=List[EventRead])
 async def get_nearby_events(
     response: Response,
@@ -39,3 +39,18 @@ async def get_nearby_events(
     # Allow browsers and CDN to cache nearby-events for 60 seconds.
     response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
     return result
+
+
+@router.get("/game-channel/{game_id}", response_model=EventRead)
+async def get_or_create_game_channel(
+    game_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+) -> EventRead:
+    """
+    Returns the canonical Events-table record that represents a game's chat
+    channel, creating it if it doesn't exist yet.  The returned event_id is
+    safe to use as the event_id for event_chats FK.
+    """
+    event = await get_or_create_game_channel_event(game_id, current_user, db)
+    return _map_event_to_read(event)
