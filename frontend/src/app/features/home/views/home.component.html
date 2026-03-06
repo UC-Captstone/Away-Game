@@ -1,34 +1,6 @@
 <div
   class="h-[calc(100vh-3.5rem)] flex items-center justify-center text-center bg-gradient-to-b from-slate-800 to-slate-900 overflow-auto"
 >
-  @if (isLoading()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="flex flex-col items-center gap-3">
-        <svg
-          class="animate-spin h-12 w-12 text-sky-400"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-          ></path>
-        </svg>
-        <span class="text-sm font-medium text-slate-300">Loading…</span>
-      </div>
-    </div>
-  }
   <div class="bg-transparent h-[calc(100%-5rem)] w-full py-3 px-6 flex flex-col overflow-hidden">
     <app-search-bar></app-search-bar>
 
@@ -53,7 +25,14 @@
         <div
           class="relative w-full h-[340px] flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50"
         >
-          @if (featuredEvents().length > 0) {
+          @if (isFeaturedLoading()) {
+            <!-- Skeleton while featured events load -->
+            <div class="w-full h-full animate-pulse flex flex-col gap-3 p-6 justify-center items-center">
+              <div class="h-6 w-48 rounded bg-slate-600/50"></div>
+              <div class="h-4 w-32 rounded bg-slate-700/50"></div>
+              <div class="h-4 w-40 rounded bg-slate-700/50"></div>
+            </div>
+          } @else if (featuredEvents().length > 0) {
             <div class="absolute left-0 z-0 opacity-35 scale-75 -translate-x-6 pointer-events-none">
               @if (featuredEvents().length > 1) {
                 <app-event-tile
@@ -71,7 +50,6 @@
               <app-event-tile
                 [event]="featuredEvents()[currentEventIndex()]"
                 class="text-sm"
-                (savedToggled)="handleFeaturedSavedToggle($event)"
               ></app-event-tile>
             </div>
 
@@ -92,7 +70,20 @@
           <h2 class="text-xl font-semibold text-slate-100">Events Near You</h2>
           <span class="text-xs font-medium text-sky-400/60">LOCATION</span>
         </div>
-        @if (userLocation()) {
+        @if (isNearbyLoading()) {
+          <!-- Skeleton while location + nearby events load -->
+          <div
+            class="w-full h-[340px] rounded-2xl ring-1 ring-slate-600/30 bg-gradient-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md flex items-center justify-center shadow-2xl shadow-slate-900/50 animate-pulse"
+          >
+            <div class="flex flex-col items-center gap-2 text-slate-500">
+              <svg class="w-8 h-8 opacity-40 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              </svg>
+              <span class="text-sm">Locating nearby events…</span>
+            </div>
+          </div>
+        } @else if (userLocation()) {
           <div
             class="rounded-2xl overflow-hidden bg-gradient-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50 h-[340px]"
           >

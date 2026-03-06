@@ -32,12 +32,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
   @Input() height: string = '300px';
   @Input() showUserMarker: boolean = true;
   @Input() fitBoundsToMarkers: boolean = false;
+  @Input() fillContainer: boolean = false;
 
   isMapReady: WritableSignal<boolean> = signal(false);
 
   private map?: L.Map;
   private markerLayer?: L.LayerGroup;
   private markerInstances: L.Marker[] = [];
+  private resizeObserver?: ResizeObserver;
 
   // Custom icon definitions
   private readonly userIcon = L.icon({
@@ -75,11 +77,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
 
     this.ngZone.runOutsideAngular(() => {
       this.initializeMap();
+      this.observeContainerResize();
     });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.map) return;
+
+    this.invalidateMapSize();
 
     if (changes['center'] && this.center) {
       this.map.setView([this.center.lat, this.center.lng], this.zoom);
@@ -96,6 +101,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
   }
 
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+
     if (this.map) {
       this.map.remove();
     }
@@ -123,6 +130,15 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
 
   private initializeMap(): void {
     try {
+      if (this.map) {
+        this.map.remove();
+      }
+
+      const mapElement = this.mapContainer.nativeElement as HTMLDivElement & { _leaflet_id?: number };
+      if (mapElement._leaflet_id) {
+        delete mapElement._leaflet_id;
+      }
+
       this.map = L.map(this.mapContainer.nativeElement, {
         center: [this.center.lat, this.center.lng],
         zoom: this.zoom,
@@ -147,7 +163,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
         this.adjustZoomToFitMarkers();
       }
 
-      setTimeout(() => this.map?.invalidateSize(), 0);
+      this.invalidateMapSize();
 
       this.ngZone.run(() => {
         this.isMapReady.set(true);
@@ -155,6 +171,23 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
     } catch (error) {
       console.error('Error initializing map:', error);
     }
+  }
+
+  private invalidateMapSize(): void {
+    setTimeout(() => this.map?.invalidateSize(), 0);
+    setTimeout(() => this.map?.invalidateSize(), 150);
+  }
+
+  private observeContainerResize(): void {
+    if (!this.mapContainer?.nativeElement) {
+      return;
+    }
+
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = new ResizeObserver(() => {
+      this.invalidateMapSize();
+    });
+    this.resizeObserver.observe(this.mapContainer.nativeElement);
   }
 
   private addUserMarker(): void {

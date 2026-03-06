@@ -1,10 +1,12 @@
 <div
-  class="relative w-full rounded-lg overflow-hidden shadow-lg ring-1 ring-slate-700"
+  class="relative w-full overflow-hidden"
+  [ngClass]="fillContainer ? '' : 'rounded-lg shadow-lg ring-1 ring-slate-700'"
   [style.height]="height"
 >
   @if (!isMapReady()) {
   <div
-    class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/90 rounded-lg"
+    class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/90"
+    [ngClass]="fillContainer ? '' : 'rounded-lg'"
     [style.height]="height"
   >
     <div class="flex flex-col items-center gap-2">
