@@ -40,10 +40,11 @@ from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import get_current_user
+from core.content_filter import clean_message
 from db.session import get_session
 from models.event_chat import EventChat
 from models.user import User
@@ -53,6 +54,7 @@ from repositories.event_chat_repo import (
     list_for_event_service,
     remove_chat_service,
 )
+from repositories.game_channel_repo import get_or_create_game_channel_event
 from schemas.event_chat import EventChatCreate, EventChatPage, EventChatRead
 
 router = APIRouter(prefix="/event-chats", tags=["event-chats"])
@@ -115,10 +117,21 @@ async def add_event_chat(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ) -> EventChatRead:
+    resolved_event_id = chat_data.event_id
+
+    # If a game_id was supplied, use find-or-create to ensure a real events row
+    # exists. This handles the case where the client has a synthetic UUID
+    # (uuid5 of game_id) that was never inserted into the events table.
+    if chat_data.game_id is not None:
+        channel = await get_or_create_game_channel_event(
+            chat_data.game_id, current_user, db
+        )
+        resolved_event_id = channel.event_id
+
     chat = EventChat(
-        event_id=chat_data.event_id,
-        user_id=current_user.user_id,   # always from JWT — never trusted from body
-        message_text=chat_data.message_text,
+        event_id=resolved_event_id,
+        user_id=current_user.user_id,
+        message_text=clean_message(chat_data.message_text),
     )
     return await add_new_chat_service(chat=chat, db=db)
 

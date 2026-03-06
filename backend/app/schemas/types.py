@@ -11,6 +11,9 @@ class EventTypeEnum(str, Enum):
     PREGAME = "Pregame"
     POSTGAME = "Postgame"
     WATCH = "Watch"
+    WATCH_PARTY = "Watch Party"
+    MEETUP = "Meetup"
+    OTHER = "Other"
 
 class EventTypeCreate(BaseModel):
     type_name: str
