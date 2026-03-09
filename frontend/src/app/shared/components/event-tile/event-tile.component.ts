@@ -1,9 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IEvent } from '../../models/event';
 import { Router } from '@angular/router';
 import { EventTypeEnum } from '../../models/event-type-enum';
-import { EventsService } from '../../services/events.service';
+import { SavedEventsService } from '../../services/saved-events.service';
 
 @Component({
   selector: 'app-event-tile',
@@ -14,10 +14,11 @@ import { EventsService } from '../../services/events.service';
 export class EventTileComponent {
   @Input() event!: IEvent;
   @Input() showSavedIcon: boolean = true;
+  isSaving: WritableSignal<boolean> = signal(false);
 
   constructor(
     private router: Router,
-    private eventsService: EventsService,
+    private savedEventsService: SavedEventsService,
   ) {}
 
   navigateToEventDetails(event: Event) {
@@ -45,25 +46,32 @@ export class EventTileComponent {
     console.log('Event tile clicked (non-game event):', this.event);
   }
 
-  toggleSaved(event?: Event) {
+  toggleSaved(event?: Event): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     if (event) {
       event.stopPropagation();
       event.preventDefault();
     }
 
     const previousSavedState = this.event.isSaved;
+    this.isSaving.set(true);
     this.event.isSaved = !previousSavedState;
 
     const request$ = this.event.isSaved
-      ? this.eventsService.addSavedEvent(this.event.eventId)
-      : this.eventsService.deleteSavedEvent(this.event.eventId);
+      ? this.savedEventsService.addSavedEvent(this.event.eventId)
+      : this.savedEventsService.deleteSavedEvent(this.event.eventId);
 
     request$.subscribe({
       next: (savedEvents) => {
         this.event.isSaved = savedEvents.some((item) => item.eventId === this.event.eventId);
+        this.isSaving.set(false);
       },
       error: () => {
         this.event.isSaved = previousSavedState;
+        this.isSaving.set(false);
       },
     });
   }

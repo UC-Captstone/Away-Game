@@ -1,0 +1,28 @@
+<label class="block mb-1.5 text-xs font-medium text-white">Event Types</label>
+<div class="grid grid-cols-3 gap-1.5">
+  <label
+    class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 cursor-pointer"
+  >
+    <input
+      type="checkbox"
+      class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+      [checked]="allEventTypesSelected"
+      (click)="onAllEventTypesClick($event)"
+    />
+    <span class="text-xs text-slate-200">All</span>
+  </label>
+
+  @for (eventType of eventTypes; track eventType) {
+    <label
+      class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800 border border-slate-700 cursor-pointer"
+    >
+      <input
+        type="checkbox"
+        class="h-3.5 w-3.5 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+        [checked]="isEventTypeSelected(eventType)"
+        (click)="onEventTypeClick(eventType, $event)"
+      />
+      <span class="text-xs text-slate-200">{{ eventType }}</span>
+    </label>
+  }
+</div>

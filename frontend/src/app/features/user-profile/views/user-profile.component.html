@@ -1,5 +1,5 @@
 <div
-  class="h-screen flex items-center justify-center text-center bg-gradient-to-b from-slate-800 to-slate-900 overflow-auto"
+  class="h-screen flex items-center justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
 >
   @if (isLoading()) {
     <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/50 rounded-lg">
@@ -118,7 +118,7 @@
                 <div
                   class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
                 >
-                  @for (event of profile.savedEvents; track event) {
+                  @for (event of profile.savedEvents; track event.eventId) {
                     <app-event-tile
                       [event]="event"
                       [showSavedIcon]="true"

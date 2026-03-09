@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges, signal, WritableSignal } from '@angular/core';
-import { EventsService } from '../../services/events.service';
+import { SavedEventsService } from '../../services/saved-events.service';
 import { IEvent } from '../../models/event';
 
 @Component({
@@ -13,7 +13,7 @@ export class DetailsHeaderComponent implements OnChanges {
   @Input() event: IEvent | null = null;
   isSaved: WritableSignal<boolean> = signal(false);
 
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(private readonly savedEventsService: SavedEventsService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['event']) {
@@ -31,8 +31,8 @@ export class DetailsHeaderComponent implements OnChanges {
     this.isSaved.set(this.event.isSaved);
 
     const request$ = this.event.isSaved
-      ? this.eventsService.addSavedEvent(this.event.eventId)
-      : this.eventsService.deleteSavedEvent(this.event.eventId);
+      ? this.savedEventsService.addSavedEvent(this.event.eventId)
+      : this.savedEventsService.deleteSavedEvent(this.event.eventId);
 
     request$.subscribe({
       next: (savedEvents) => {

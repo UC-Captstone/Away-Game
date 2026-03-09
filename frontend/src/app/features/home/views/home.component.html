@@ -1,5 +1,5 @@
 <div
-  class="h-[calc(100vh-3.5rem)] flex items-center justify-center text-center bg-gradient-to-b from-slate-800 to-slate-900 overflow-auto"
+  class="h-[calc(100vh-3.5rem)] flex items-center justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
 >
   <div class="bg-transparent h-[calc(100%-5rem)] w-full py-3 px-6 flex flex-col overflow-hidden">
     <app-search-bar></app-search-bar>
@@ -9,7 +9,7 @@
         class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight"
       >
         <span
-          class="bg-gradient-to-r from-sky-400 via-cyan-300 to-sky-500 bg-clip-text text-transparent drop-shadow-[0_4px_16px_rgba(14,165,233,0.3)]"
+          class="bg-linear-to-r from-sky-400 via-cyan-300 to-sky-500 bg-clip-text text-transparent drop-shadow-[0_4px_16px_rgba(14,165,233,0.3)]"
         >
           Find your fan community for your next away game
         </span>
@@ -23,7 +23,7 @@
           <span class="text-xs font-medium text-sky-400/60">TRENDING</span>
         </div>
         <div
-          class="relative w-full h-[340px] flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50"
+          class="relative w-full h-full p-12 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50"
         >
           @if (isFeaturedLoading()) {
             <!-- Skeleton while featured events load -->
@@ -85,7 +85,7 @@
           </div>
         } @else if (userLocation()) {
           <div
-            class="rounded-2xl overflow-hidden bg-gradient-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50 h-[340px]"
+            class="rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50 h-full p-2"
           >
             <app-map
               [center]="userLocation()!"
@@ -98,7 +98,7 @@
           </div>
         } @else {
           <div
-            class="w-full h-[340px] rounded-2xl ring-1 ring-slate-600/30 bg-gradient-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md flex items-center justify-center text-slate-400 shadow-2xl shadow-slate-900/50"
+            class="w-full h-85 rounded-2xl ring-1 ring-slate-600/30 bg-linear-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md flex items-center justify-center text-slate-400 shadow-2xl shadow-slate-900/50"
           >
             <div class="flex flex-col items-center gap-2">
               <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
