@@ -1,7 +1,7 @@
 {
-  "python.defaultInterpreterPath": "./backend/.venv/bin/python",
+  "python.defaultInterpreterPath": "C:/Users/Rudi/Away-Game/backend/.venv/Scripts/python.exe",
   "python.analysis.extraPaths": [
-    "./backend/.venv/lib/python3.13/site-packages"
+    "C:/Users/Rudi/Away-Game/backend/.venv/Lib/site-packages"
   ],
   "python.analysis.autoSearchPaths": true,
   "azureFunctions.deploySubpath": "backend/app",

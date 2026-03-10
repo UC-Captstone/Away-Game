@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/Users/Rudi/.pyenv/pyenv-win/versions/3.11.9/python.exe -m venv /c/Users/Rudi/Away-Game/backend/.venv)"
+    ]
+  }
+}

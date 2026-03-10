@@ -69,9 +69,112 @@
       </ul>
     </div>
 
-    <!-- Profile avatar + hamburger: right -->
+    <!-- Alert bell + Profile avatar + hamburger: right -->
     <div class="flex items-center gap-2 ml-auto shrink-0">
       @if (navBarInfo) {
+        <!-- Alert bell with dropdown -->
+        <div class="relative hidden md:block">
+          <button
+            type="button"
+            (click)="onBellClick()"
+            class="relative flex items-center justify-center w-10 h-10 rounded-full text-slate-300 hover:bg-slate-800/70 transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            @if (unacknowledgedCount > 0) {
+              <span class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                {{ unacknowledgedCount > 99 ? '99+' : unacknowledgedCount }}
+              </span>
+            }
+          </button>
+
+          <!-- Bell dropdown -->
+          @if (isBellOpen()) {
+            <div class="fixed inset-0 z-40" (click)="closeBell()"></div>
+            <div
+              class="absolute right-0 top-full mt-2 w-80 z-50 rounded-xl bg-gradient-to-b from-slate-900 to-slate-950 ring-1 ring-slate-700 shadow-2xl backdrop-blur-md overflow-hidden"
+            >
+              <div class="px-4 py-3 border-b border-slate-700/60 flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Alerts</span>
+                @if (unacknowledgedCount > 0) {
+                  <span class="text-[10px] text-slate-500">{{ unacknowledgedCount }} unread</span>
+                }
+              </div>
+              <div class="max-h-96 overflow-y-auto">
+                @if (unacknowledgedAlerts().length === 0) {
+                  <div class="px-4 py-4 text-center text-slate-500 text-sm">No new alerts</div>
+                }
+                @for (alert of unacknowledgedAlerts(); track alert.alertId) {
+                  <div
+                    class="px-4 py-3 border-b border-slate-800/60 last:border-0"
+                    [ngClass]="{ 'border-l-2 border-l-amber-400 bg-amber-500/5': alert.isOfficial }"
+                  >
+                    <!-- Title + official badge -->
+                    <div class="flex items-start gap-2 mb-1.5">
+                      @if (alert.isOfficial) {
+                        <span class="mt-0.5 shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          OFFICIAL
+                        </span>
+                      }
+                      <p class="text-sm font-semibold text-slate-100 leading-tight flex-1">{{ alert.title }}</p>
+                    </div>
+
+                    <!-- Type · severity · time -->
+                    <div class="flex items-center gap-2 mb-2">
+                      <span
+                        class="text-[10px] font-semibold px-1.5 py-0.5 rounded capitalize"
+                        [ngClass]="{
+                          'bg-green-500/20 text-green-300': alert.severity === 'low',
+                          'bg-yellow-500/20 text-yellow-300': alert.severity === 'medium',
+                          'bg-red-500/20 text-red-300': alert.severity === 'high',
+                        }"
+                      >{{ alert.severity }}</span>
+                      <span class="text-[10px] font-medium text-slate-400 capitalize">{{ alert.alertTypeId }}</span>
+                      <span class="ml-auto text-[10px] text-slate-600">{{ alert.createdAt | date:'M/d h:mm a' }}</span>
+                    </div>
+
+                    <!-- Description -->
+                    @if (alert.description) {
+                      <p class="text-xs text-slate-300 mb-2 leading-snug">{{ alert.description }}</p>
+                    }
+
+                    <!-- Reporter -->
+                    <p class="text-[10px] text-slate-500 mb-2">
+                      Reported by: {{ alert.isOfficial ? 'Away Game' : (alert.source === 'admin' ? 'Admin' : 'Community') }}
+                    </p>
+
+                    <!-- Official: explicit ack button -->
+                    @if (alert.isOfficial) {
+                      <button
+                        type="button"
+                        (click)="onAcknowledgeOfficial(alert.alertId)"
+                        class="w-full py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-colors"
+                      >
+                        I've been notified — Acknowledge
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+              <!-- Footer: view history -->
+              <div class="border-t border-slate-700/60">
+                <a
+                  href="/alerts"
+                  (click)="closeBell()"
+                  class="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-medium text-sky-400 hover:text-sky-300 hover:bg-slate-800/50 transition-colors"
+                >
+                  View alert history
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Profile avatar with dropdown -->
         <div class="relative group hidden md:block">
           <button
             class="flex items-center justify-center w-10 h-10 rounded-full ring-1 ring-slate-700 bg-slate-800/90 hover:bg-slate-800 transition-all shadow-sm"
