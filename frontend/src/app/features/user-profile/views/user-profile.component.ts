@@ -44,7 +44,7 @@ export class UserProfileComponent implements OnInit {
     this.isLoading.set(true);
     this.userProfileService.getUserProfile().subscribe({
       next: (profile) => {
-        console.log("profile", profile)
+        console.log('profile', profile);
         this.userProfile = profile;
         this.isLoading.set(false);
       },
