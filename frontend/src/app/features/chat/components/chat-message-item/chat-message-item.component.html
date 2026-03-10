@@ -1,41 +1,27 @@
-<div class="group flex items-start gap-3">
+<div class="group flex items-center gap-3 w-full" [class.flex-row-reverse]="isOwnMessage">
   @if (message.userAvatarUrl) {
     <img
       [src]="message.userAvatarUrl"
       [alt]="message.userName ?? 'User'"
-      class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600 shrink-0 mt-0.5"
+      class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600 shrink-0"
     />
   } @else {
     <div
-      class="h-8 w-8 rounded-full bg-sky-600 flex items-center justify-center text-white text-xs font-semibold shrink-0 ring-1 ring-slate-600 mt-0.5"
+      class="h-8 w-8 rounded-full bg-sky-600 flex items-center justify-center text-white text-xs font-semibold shrink-0 ring-1 ring-slate-600"
     >
       {{ getInitials(message.userName) }}
     </div>
   }
 
   <div class="flex flex-col min-w-0 flex-1">
-    <div class="flex items-baseline gap-2 mb-0.5">
-      <span class="text-xs font-semibold text-slate-200 truncate">
-        {{ message.userName ?? 'Anonymous' }}
-      </span>
-      <span class="text-[10px] text-slate-500 shrink-0">
-        {{ formatTime(message.timestamp) }}
-      </span>
-    </div>
-    <div class="flex items-end gap-1.5">
-      <div
-        class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tl-sm px-3 py-2 text-sm text-slate-200 wrap-break-word leading-relaxed flex-1"
-      >
-        {{ message.messageText }}
-      </div>
-
-      @if (message.userId === currentUserId) {
+    <div class="flex items-center gap-2 mb-0.5 w-full" [class.justify-end]="isOwnMessage">
+      @if (isOwnMessage) {
         <button
           type="button"
           (click)="onDelete()"
           [disabled]="deleting"
           title="Delete message"
-          class="opacity-0 group-hover:opacity-100 shrink-0 mb-1 p-1 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-900/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-150"
+          class="opacity-0 group-hover:opacity-100 shrink-0 p-1 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-900/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-150"
         >
           @if (deleting) {
             <svg
@@ -76,7 +62,33 @@
             </svg>
           }
         </button>
+
+        <span class="text-[10px] text-slate-500 shrink-0">
+          {{ formatTime(message.timestamp) }}
+        </span>
+        <span class="text-xs font-semibold text-slate-200 truncate">
+          {{ message.userName ?? 'Anonymous' }}
+        </span>
+      } @else {
+        <span class="text-xs font-semibold text-slate-200 truncate">
+          {{ message.userName ?? 'Anonymous' }}
+        </span>
+        <span class="text-[10px] text-slate-500 shrink-0">
+          {{ formatTime(message.timestamp) }}
+        </span>
       }
+    </div>
+    <div class="flex w-full">
+      <div
+        class="border rounded-2xl px-3 py-2 text-sm wrap-break-word leading-relaxed w-full"
+        [ngClass]="
+          isOwnMessage
+            ? 'rounded-tr-sm bg-sky-900/45 border-sky-700/70 text-slate-100'
+            : 'rounded-tl-sm bg-slate-800 border-slate-700 text-slate-200'
+        "
+      >
+        {{ message.messageText }}
+      </div>
     </div>
   </div>
 </div>
