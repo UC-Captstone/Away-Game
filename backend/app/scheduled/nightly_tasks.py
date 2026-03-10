@@ -7,7 +7,11 @@ from functools import partial
 
 from geopy.geocoders import Nominatim
 
+from sqlalchemy import update
+
 from db.session import AsyncSessionLocal
+from models.safety_alert import SafetyAlert
+from models.game import Game
 from repositories.league_repo import LeagueRepository
 from repositories.team_repo import TeamRepository
 from repositories.venue_repo import VenueRepository
@@ -218,6 +222,34 @@ async def scrape_schedule(
     logger.info(f"Processed {games_count} {league_code} games")
 
 
+async def deactivate_expired_alerts(session) -> int:
+    """Set is_active=False for alerts whose expires_at has passed or whose
+    associated game ended more than 4 hours ago."""
+    now = datetime.utcnow()
+    game_cutoff = now - timedelta(hours=4)
+
+    # Subquery: game IDs that have already ended
+    ended_game_ids = (
+        select(Game.game_id).where(Game.date_time < game_cutoff).scalar_subquery()
+    )
+
+    result = await session.execute(
+        update(SafetyAlert)
+        .where(
+            SafetyAlert.is_active == True,
+            (
+                (SafetyAlert.expires_at != None) & (SafetyAlert.expires_at < now)
+                | (SafetyAlert.game_id != None) & SafetyAlert.game_id.in_(ended_game_ids)
+            ),
+        )
+        .values(is_active=False)
+    )
+    count = result.rowcount or 0
+    if count:
+        logger.info(f"Deactivated {count} expired alert(s)")
+    return count
+
+
 async def run_nightly_task():
     logger.info("Starting nightly scraper")
 
@@ -250,6 +282,8 @@ async def run_nightly_task():
                     await session.rollback()
                     logger.exception(f"{league.league_code} scrape failed, skipping: {e}")
 
+            await deactivate_expired_alerts(session)
+            await session.commit()
             logger.info("Scraper ran successfully")
     except Exception as e:
         logger.exception(f"Scraper failed: {e}")

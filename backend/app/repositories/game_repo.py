@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional, Sequence, List
-from datetime import datetime
-from sqlalchemy import select, update, delete, or_
+from datetime import datetime, timedelta, timezone
+from sqlalchemy import select, update, delete, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
@@ -150,7 +150,13 @@ async def get_game_service(game_id: int, db: AsyncSession) -> Optional[Game]:
     return game
 
 
-async def list_games_service(league_id: Optional[str], limit: int, offset: int, db: AsyncSession):
+async def list_games_service(
+    league_id: Optional[str],
+    limit: int,
+    offset: int,
+    db: AsyncSession,
+    date: Optional[datetime] = None,
+):
     stmt = (
         select(Game)
         .options(
@@ -159,13 +165,18 @@ async def list_games_service(league_id: Optional[str], limit: int, offset: int, 
             selectinload(Game.away_team).selectinload(Team.league),
             selectinload(Game.venue),
         )
-        .order_by(Game.date_time.desc())
+        .order_by(Game.date_time.asc())
         .limit(limit)
         .offset(offset)
     )
 
     if league_id:
         stmt = stmt.where(Game.league_id == league_id)
+
+    if date is not None:
+        day_start = date.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day_start + timedelta(days=1)
+        stmt = stmt.where(and_(Game.date_time >= day_start, Game.date_time < day_end))
 
     result = await db.execute(stmt)
     games = result.scalars().all()
