@@ -98,6 +98,20 @@
                   Recent Chats
                 </a>
               </li>
+              <li>
+                <a
+                  (click)="selectTab('MyAlerts'); $event.preventDefault()"
+                  class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                  [ngClass]="
+                    selectedTab() === 'MyAlerts'
+                      ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                  "
+                  [attr.aria-current]="selectedTab() === 'MyAlerts' ? 'page' : null"
+                >
+                  My Alerts
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -158,6 +172,9 @@
                     </div>
                   }
                 </div>
+              }
+              @case ('MyAlerts') {
+                <app-my-alerts></app-my-alerts>
               }
               @default {
                 <div>

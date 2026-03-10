@@ -61,4 +61,8 @@ export class SafetyAlertService {
   getUnacknowledgedAlerts(): Observable<ISafetyAlert[]> {
     return this.http.get<ISafetyAlert[]>(`${this.apiUrl}/unacknowledged`);
   }
+
+  getMyAlerts(): Observable<ISafetyAlert[]> {
+    return this.http.get<ISafetyAlert[]>(`${this.apiUrl}/mine`);
+  }
 }

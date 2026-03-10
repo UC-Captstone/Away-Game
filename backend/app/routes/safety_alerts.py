@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import get_current_user, require_admin, require_verified_creator
+from core.content_filter import clean_message
 from db.session import get_session
 from models.safety_alert import SafetyAlert
 from models.user import User
@@ -58,6 +59,16 @@ async def list_alerts(
     )
 
 
+@router.get("/mine", response_model=List[SafetyAlertRead])
+async def get_my_alerts(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """Returns all alerts created by the current user."""
+    repo = SafetyAlertRepository(db)
+    return await repo.list(reporter_user_id=current_user.user_id)
+
+
 @router.get("/{alert_id}", response_model=SafetyAlertRead)
 async def get_alert(
     alert_id: UUID,
@@ -104,8 +115,8 @@ async def create_alert(
         alert_type_id=alert_data.alert_type_id,
         game_id=alert_data.game_id,
         venue_id=venue_id,
-        title=alert_data.title,
-        description=alert_data.description,
+        title=clean_message(alert_data.title),
+        description=clean_message(alert_data.description) if alert_data.description else alert_data.description,
         source=source,
         severity=alert_data.severity,
         is_official=is_official,
