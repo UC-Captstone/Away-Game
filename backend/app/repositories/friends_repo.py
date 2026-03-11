@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import and_, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -69,7 +70,14 @@ async def send_friend_request(
 
     req = FriendRequest(sender_id=sender_id, receiver_id=receiver_id, status="pending")
     db.add(req)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A pending friend request already exists between these users",
+        )
     await db.refresh(req, ["sender", "receiver"])
     return req
 
@@ -137,7 +145,14 @@ async def accept_friend_request(
     friendship = Friendship(user_id_1=uid1, user_id_2=uid2)
     db.add(friendship)
 
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="These users are already friends",
+        )
     await db.refresh(req, ["sender", "receiver"])
     return req
 

@@ -2,8 +2,9 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
+import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import ForeignKey, UniqueConstraint, func
+from sqlalchemy import ForeignKey, Index, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.base import Base
@@ -31,6 +32,13 @@ class FriendRequest(Base):
     receiver = relationship("User", foreign_keys=[receiver_id])
 
     __table_args__ = (
-        # A user can only have one pending/accepted request to any other user at a time
-        UniqueConstraint("sender_id", "receiver_id", name="uq_friend_request_pair"),
+        # Only one pending request per (sender_id, receiver_id) pair is allowed.
+        # Scoped to 'pending' so that re-sending after rejection/acceptance is possible.
+        Index(
+            "uq_friend_request_pair_pending",
+            "sender_id",
+            "receiver_id",
+            unique=True,
+            postgresql_where=sa.text("status = 'pending'"),
+        ),
     )
