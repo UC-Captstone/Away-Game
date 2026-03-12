@@ -35,6 +35,15 @@ class SafetyAlertRepository:
         res = await self.db.execute(stmt)
         return res.scalars().all()
 
+    async def list_by_reporter(self, reporter_user_id: UUID) -> Sequence[SafetyAlert]:
+        stmt = (
+            select(SafetyAlert)
+            .where(SafetyAlert.reporter_user_id == reporter_user_id)
+            .order_by(SafetyAlert.created_at.desc())
+        )
+        res = await self.db.execute(stmt)
+        return res.scalars().all()
+
     async def add(self, alert: SafetyAlert) -> SafetyAlert:
         self.db.add(alert)
         await self.db.flush()

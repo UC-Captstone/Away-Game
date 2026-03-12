@@ -31,20 +31,12 @@ class UserAlertAcknowledgmentRepository:
         return res.scalar_one()
 
     async def get_unacknowledged_alerts(self, user_id: UUID) -> Sequence[SafetyAlert]:
-        """
-        Returns active alerts for games the user has favorited,
-        excluding any the user has already acknowledged.
-        Only alerts with a game_id are returned — venue-only alerts
-        (game_id IS NULL) are excluded unless tied to a favorited game.
-        """
-        # Sub-select: game_ids this user has favorited directly (game_id column)
+
         favorited_game_ids_direct = (
             select(Favorite.game_id)
             .where(Favorite.user_id == user_id, Favorite.game_id.isnot(None))
         )
 
-        # Sub-select: game_ids from favorites saved by event_id (game_id=NULL in Favorite,
-        # but the Event row has a game_id — e.g. when the event existed in DB at save time)
         favorited_game_ids_via_event = (
             select(Event.game_id)
             .join(Favorite, Favorite.event_id == Event.event_id)
@@ -57,7 +49,6 @@ class UserAlertAcknowledgmentRepository:
 
         favorited_game_ids = union(favorited_game_ids_direct, favorited_game_ids_via_event).subquery()
 
-        # Sub-select: alerts already acknowledged by this user
         acknowledged_alert_ids = (
             select(UserAlertAcknowledgment.alert_id)
             .where(UserAlertAcknowledgment.user_id == user_id)
@@ -68,14 +59,8 @@ class UserAlertAcknowledgmentRepository:
             .where(
                 SafetyAlert.is_active == True,
                 SafetyAlert.alert_id.notin_(acknowledged_alert_ids),
-                # Official alerts go to everyone; community/admin alerts only for favorited games
-                (
-                    (SafetyAlert.is_official == True)
-                    | (
-                        SafetyAlert.game_id.isnot(None)
-                        & SafetyAlert.game_id.in_(favorited_game_ids)
-                    )
-                ),
+                SafetyAlert.game_id.isnot(None),
+                SafetyAlert.game_id.in_(favorited_game_ids),
             )
             .order_by(SafetyAlert.is_official.desc(), SafetyAlert.created_at.desc())
         )
@@ -89,7 +74,6 @@ class UserAlertAcknowledgmentRepository:
         limit: int = 50,
         offset: int = 0,
     ) -> Sequence[SafetyAlert]:
-        """Returns alerts the user has already acknowledged, newest first. Optionally filtered by title search."""
         acknowledged_alert_ids = (
             select(UserAlertAcknowledgment.alert_id)
             .where(UserAlertAcknowledgment.user_id == user_id)
