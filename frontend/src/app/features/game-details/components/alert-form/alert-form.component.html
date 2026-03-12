@@ -1,0 +1,115 @@
+<div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-4">
+  <h3 class="text-sm font-semibold text-slate-200 mb-4">New Alert</h3>
+
+  @if (errorMessage) {
+    <div class="mb-3 px-3 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-xs">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <form (ngSubmit)="onSubmit()" #alertForm="ngForm" class="flex flex-col gap-3">
+
+    <!-- Title -->
+    <div>
+      <label class="block text-xs font-medium text-slate-400 mb-1">Title <span class="text-red-400">*</span></label>
+      <input
+        type="text"
+        [(ngModel)]="title"
+        name="title"
+        required
+        placeholder="Brief alert title"
+        class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-600 text-slate-200 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+      />
+    </div>
+
+    <!-- Alert Type -->
+    <div>
+      <label class="block text-xs font-medium text-slate-400 mb-1">Alert Type <span class="text-red-400">*</span></label>
+      @if (isLoadingTypes) {
+        <div class="text-slate-500 text-xs py-2">Loading types...</div>
+      } @else {
+        <select
+          [(ngModel)]="alertTypeId"
+          name="alertTypeId"
+          required
+          class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-600 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+        >
+          <option value="" disabled>Select a type</option>
+          @for (type of alertTypes; track type.code) {
+            <option [value]="type.code">{{ type.typeName }}</option>
+          }
+        </select>
+      }
+    </div>
+
+    <!-- Severity -->
+    <div>
+      <label class="block text-xs font-medium text-slate-400 mb-1">Severity</label>
+      <div class="flex gap-2">
+        @for (s of severities; track s) {
+          <button
+            type="button"
+            (click)="severity = s"
+            [ngClass]="{
+              'bg-green-500/30 border-green-400 text-green-300': s === 'low' && severity === s,
+              'bg-yellow-500/30 border-yellow-400 text-yellow-300': s === 'medium' && severity === s,
+              'bg-red-500/30 border-red-400 text-red-300': s === 'high' && severity === s,
+              'bg-slate-700/50 border-slate-600 text-slate-400': severity !== s,
+            }"
+            class="flex-1 py-1.5 rounded-lg border text-xs font-medium capitalize transition-colors"
+          >
+            {{ s }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-xs font-medium text-slate-400 mb-1">Description</label>
+      <textarea
+        [(ngModel)]="description"
+        name="description"
+        rows="3"
+        placeholder="Optional additional details..."
+        class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-600 text-slate-200 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none"
+      ></textarea>
+    </div>
+
+    <!-- Admin-only: Official Alert -->
+    @if (isAdmin) {
+      <div class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="isOfficialAlert"
+          [(ngModel)]="isOfficialAlert"
+          name="isOfficialAlert"
+          class="w-4 h-4 rounded border-slate-600 bg-slate-900 text-sky-500 focus:ring-sky-500"
+        />
+        <label for="isOfficialAlert" class="text-xs font-medium text-slate-300 cursor-pointer">
+          Away Official Alert
+          <span class="text-slate-500 ml-1">(marks as verified/official source)</span>
+        </label>
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="flex gap-2 pt-1">
+      <button
+        type="submit"
+        [disabled]="isSubmitting || !title.trim() || !alertTypeId"
+        class="flex-1 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {{ isSubmitting ? 'Submitting...' : 'Submit Alert' }}
+      </button>
+      <button
+        type="button"
+        (click)="onCancel()"
+        class="flex-1 py-2 rounded-lg bg-slate-700 text-slate-300 text-xs font-medium hover:bg-slate-600 transition-colors"
+      >
+        Cancel
+      </button>
+    </div>
+
+  </form>
+</div>

@@ -78,12 +78,14 @@ export class GameMapPanelComponent {
 
     if (this.showSafetyOverlay()) {
       this.safetyAlerts.forEach((alert) => {
-        markers.push({
-          lat: alert.location.lat,
-          lng: alert.location.lng,
-          popup: `<b>Safety: ${alert.title}</b><br><small>${alert.severity}</small>`,
-          icon: this.safetyMarkerIcon,
-        });
+        if (alert.latitude != null && alert.longitude != null) {
+          markers.push({
+            lat: alert.latitude,
+            lng: alert.longitude,
+            popup: `<b>Safety: ${alert.title}</b><br><small>${alert.severity}</small>`,
+            icon: this.safetyMarkerIcon,
+          });
+        }
       });
     }
 

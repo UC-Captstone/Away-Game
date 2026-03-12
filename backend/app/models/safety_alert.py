@@ -33,6 +33,7 @@ class SafetyAlert(Base):
     longitude: Mapped[float | None]
     expires_at: Mapped[datetime | None]
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true", nullable=False)
+    is_official: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false", nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
     reporter = relationship("User", back_populates="safety_alerts")
