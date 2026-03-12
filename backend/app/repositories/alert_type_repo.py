@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional, Sequence
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, case
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.alert_type import AlertType
 
@@ -19,7 +19,13 @@ class AlertTypeRepository:
 
     async def list(self, *, limit: int = 100, offset: int = 0) -> Sequence[AlertType]:
         res = await self.db.execute(
-            select(AlertType).order_by(AlertType.type_name.asc()).limit(limit).offset(offset)
+            select(AlertType)
+            .order_by(
+                case((AlertType.code == 'other', 1), else_=0),
+                AlertType.type_name.asc(),
+            )
+            .limit(limit)
+            .offset(offset)
         )
         return res.scalars().all()
 
