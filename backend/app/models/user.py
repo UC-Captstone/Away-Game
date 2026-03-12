@@ -39,3 +39,4 @@ class User(Base):
     event_chats = relationship("EventChat", back_populates="user", cascade="all, delete-orphan")
     favorites = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
     user_favorite_teams = relationship("UserFavoriteTeams", back_populates="user", cascade="all, delete-orphan")
+    alert_acknowledgments = relationship("UserAlertAcknowledgment", back_populates="user", cascade="all, delete-orphan")

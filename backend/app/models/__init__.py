@@ -11,6 +11,7 @@ from .favorite import Favorite
 from .user import User
 from .event_type import EventType
 from .alert_type import AlertType
+from .user_alert_acknowledgment import UserAlertAcknowledgment
 
 __all__ = [
     "League",
@@ -26,4 +27,5 @@ __all__ = [
     "User",
     "EventType",
     "AlertType",
+    "UserAlertAcknowledgment",
 ]
