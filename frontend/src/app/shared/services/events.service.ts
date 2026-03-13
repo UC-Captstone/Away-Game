@@ -86,8 +86,8 @@ export class EventsService {
 			},
 			{
 				eventId: '3',
-				eventType: EventTypeEnum.Pregame,
-				eventName: 'NFL Pregame Meetup',
+				eventType: EventTypeEnum.Postgame,
+				eventName: 'NFL Postgame Meetup',
 				dateTime: new Date('2026-09-20T11:00:00'),
 				location: { lat: 33.9535, lng: -118.3392 },
 				venueName: 'Hollywood Park Plaza',

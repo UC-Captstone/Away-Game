@@ -363,7 +363,6 @@ def _map_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
     event_type_map = {
         "GAME": EventTypeEnum.GAME,
         "TAILGATE": EventTypeEnum.TAILGATE,
-        "PREGAME": EventTypeEnum.PREGAME,
         "POSTGAME": EventTypeEnum.POSTGAME,
         "WATCH": EventTypeEnum.WATCH,
     }
