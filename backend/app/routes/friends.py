@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import get_current_user
@@ -14,11 +14,34 @@ from repositories.friends_repo import (
     list_friends,
     reject_friend_request,
     remove_friend,
+    search_users_by_username,
     send_friend_request,
 )
-from schemas.friends import FriendRequestCreate, FriendRequestRead, FriendshipRead
+from schemas.friends import FriendRequestCreate, FriendRequestRead, FriendshipRead, UserSearchResult
 
 router = APIRouter(prefix="/friends", tags=["friends"])
+
+
+# ---------------------------------------------------------------------------
+# User search
+# ---------------------------------------------------------------------------
+
+@router.get("/search", response_model=List[UserSearchResult])
+async def search_users(
+    q: str = Query(..., min_length=1, max_length=50, description="Username search query"),
+    limit: int = Query(10, ge=1, le=20),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+) -> List[UserSearchResult]:
+    users = await search_users_by_username(q, current_user.user_id, db, limit=limit)
+    return [
+        UserSearchResult(
+            user_id=u.user_id,
+            username=u.username,
+            avatar_url=u.profile_picture_url,
+        )
+        for u in users
+    ]
 
 
 # ---------------------------------------------------------------------------

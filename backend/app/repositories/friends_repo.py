@@ -12,6 +12,29 @@ from models.user import User
 
 
 # ---------------------------------------------------------------------------
+# User Search
+# ---------------------------------------------------------------------------
+
+async def search_users_by_username(
+    query: str,
+    current_user_id: UUID,
+    db: AsyncSession,
+    limit: int = 10,
+) -> Sequence[User]:
+    """Search for users by username prefix/substring, excluding the current user."""
+    result = await db.execute(
+        select(User)
+        .where(
+            User.username.ilike(f"%{query}%"),
+            User.user_id != current_user_id,
+        )
+        .order_by(User.username)
+        .limit(limit)
+    )
+    return result.scalars().all()
+
+
+# ---------------------------------------------------------------------------
 # Friend Requests
 # ---------------------------------------------------------------------------
 

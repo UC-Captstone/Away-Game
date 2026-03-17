@@ -56,6 +56,14 @@ class FriendRequestRead(BaseModel):
         )
 
 
+class UserSearchResult(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    user_id: UUID
+    username: str
+    avatar_url: Optional[str] = None
+
+
 class FriendshipRead(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel,
