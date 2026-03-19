@@ -14,9 +14,19 @@ export class ChatMessageItemComponent {
   @Input() deleting = false;
 
   @Output() deleteClicked = new EventEmitter<string>();
+  @Output() avatarClicked = new EventEmitter<{ userId: string; userName: string }>();
 
   onDelete(): void {
     this.deleteClicked.emit(this.message.messageId);
+  }
+
+  onAvatarClick(): void {
+    if (this.message.userId && this.message.userId !== this.currentUserId) {
+      this.avatarClicked.emit({
+        userId: this.message.userId,
+        userName: this.message.userName || 'Anonymous',
+      });
+    }
   }
 
   getInitials(name: string | null): string {

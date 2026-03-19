@@ -70,8 +70,26 @@ import { IDirectMessage } from '../../../shared/models/direct-message';
                 <div
                   [class.justify-end]="msg.senderId === currentUserId"
                   [class.justify-start]="msg.senderId !== currentUserId"
-                  class="flex group mb-1"
+                  class="flex items-end gap-2 group mb-1"
                 >
+                  <!-- Delete button (visible on hover, or always on mobile) -->
+                  @if (msg.senderId === currentUserId) {
+                    <button
+                      (click)="onDeleteMessage(msg.messageId)"
+                      [disabled]="deletingId() === msg.messageId"
+                      title="Delete message"
+                      class="opacity-60 md:opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-400 p-1 mb-1 rounded flex-shrink-0"
+                    >
+                      @if (deletingId() === msg.messageId) {
+                        <span class="inline-block animate-spin text-xs">⟳</span>
+                      } @else {
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      }
+                    </button>
+                  }
+
                   <div
                     [class.bg-sky-600]="msg.senderId === currentUserId"
                     [class.bg-slate-700]="msg.senderId !== currentUserId"
@@ -79,24 +97,12 @@ import { IDirectMessage } from '../../../shared/models/direct-message';
                     [class.rounded-bl-none]="msg.senderId !== currentUserId"
                     [class.max-w-xs]="true"
                     [class.max-w-sm]="true"
-                    class="text-slate-100 p-2 md:p-3 rounded-lg relative break-words"
+                    class="text-slate-100 p-2 md:p-3 rounded-lg break-words"
                   >
                     <p class="text-sm whitespace-pre-wrap">{{ msg.messageText }}</p>
                     <div class="text-xs text-slate-300 mt-1 opacity-70">
                       {{ msg.createdAt | date: 'short' }}
                     </div>
-
-                    <!-- Delete button (only for own messages) -->
-                    @if (msg.senderId === currentUserId) {
-                      <button
-                        (click)="onDeleteMessage(msg.messageId)"
-                        [disabled]="deletingId() === msg.messageId"
-                        title="Delete message"
-                        class="absolute -right-6 md:-right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 text-xs font-medium"
-                      >
-                        ✕
-                      </button>
-                    }
                   </div>
                 </div>
               }

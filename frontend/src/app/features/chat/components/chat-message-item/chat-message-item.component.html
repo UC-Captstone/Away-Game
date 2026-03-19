@@ -1,16 +1,30 @@
 <div class="group flex items-start gap-3">
   @if (message.userAvatarUrl) {
-    <img
-      [src]="message.userAvatarUrl"
-      [alt]="message.userName ?? 'User'"
-      class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600 shrink-0 mt-0.5"
-    />
+    <button
+      type="button"
+      (click)="onAvatarClick()"
+      [class.cursor-pointer]="message.userId !== currentUserId"
+      [class.hover:ring-sky-400]="message.userId !== currentUserId"
+      class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600 shrink-0 mt-0.5 transition-shadow p-0 overflow-hidden border-none bg-transparent"
+      title="{{ message.userId !== currentUserId ? 'Send Friend Request' : '' }}"
+    >
+      <img
+        [src]="message.userAvatarUrl"
+        [alt]="message.userName ?? 'User'"
+        class="w-full h-full object-cover"
+      />
+    </button>
   } @else {
-    <div
-      class="h-8 w-8 rounded-full bg-sky-600 flex items-center justify-center text-white text-xs font-semibold shrink-0 ring-1 ring-slate-600 mt-0.5"
+    <button
+      type="button"
+      (click)="onAvatarClick()"
+      [class.cursor-pointer]="message.userId !== currentUserId"
+      [class.hover:ring-sky-400]="message.userId !== currentUserId"
+      class="h-8 w-8 rounded-full bg-sky-600 flex items-center justify-center text-white text-xs font-semibold shrink-0 ring-1 ring-slate-600 mt-0.5 transition-shadow border-none p-0"
+      title="{{ message.userId !== currentUserId ? 'Send Friend Request' : '' }}"
     >
       {{ getInitials(message.userName) }}
-    </div>
+    </button>
   }
 
   <div class="flex flex-col min-w-0 flex-1">
