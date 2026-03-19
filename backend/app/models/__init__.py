@@ -11,6 +11,9 @@ from .favorite import Favorite
 from .user import User
 from .event_type import EventType
 from .alert_type import AlertType
+from .friend_request import FriendRequest
+from .friendship import Friendship
+from .direct_message import DirectMessage
 
 __all__ = [
     "League",
@@ -26,4 +29,7 @@ __all__ = [
     "User",
     "EventType",
     "AlertType",
+    "FriendRequest",
+    "Friendship",
+    "DirectMessage",
 ]
