@@ -137,9 +137,7 @@ async def update_account_settings_service(
 
 
 async def submit_verification_service(current_user: User, db: AsyncSession) -> None:
-    current_user.is_verified = True
-    current_user.pending_verification = False
-    current_user.role = "verified_creator"
+    current_user.pending_verification = True
     await db.commit()
     await db.refresh(current_user)
 

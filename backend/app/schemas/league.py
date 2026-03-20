@@ -45,3 +45,13 @@ class LeagueRead(BaseModel):
             league_code=league.league_code,
             league_name=league.league_name
         )
+
+
+class AdminLeagueRead(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+    league_code: str
+    league_name: str
+    espn_sport: Optional[str] = None
+    espn_league: Optional[str] = None
+    is_active: bool
