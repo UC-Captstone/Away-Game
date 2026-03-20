@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, signal, WritableSignal } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, signal, SimpleChanges, WritableSignal } from '@angular/core';
 import { EventTileComponent } from '../../../../shared/components/event-tile/event-tile.component';
 import { SafetyAlertTileComponent } from '../../../../shared/components/safety-alert-tile/safety-alert-tile.component';
 import { ChatPanelComponent } from '../../../chat/chat-panel.component';
+import { AlertFormComponent } from '../alert-form/alert-form.component';
 import { ISafetyAlert } from '../../../../shared/models/safety-alert';
 import { IEvent } from '../../../../shared/models/event';
+import { AuthService } from '../../../auth/services/auth.service';
 
 type GameDetailsTab = 'Events' | 'SafetyAlerts' | 'Chat';
 
@@ -12,21 +14,31 @@ type GameDetailsTab = 'Events' | 'SafetyAlerts' | 'Chat';
   selector: 'app-game-details-panel',
   templateUrl: './game-details-panel.component.html',
   standalone: true,
-  imports: [CommonModule, EventTileComponent, SafetyAlertTileComponent, ChatPanelComponent],
+  imports: [CommonModule, EventTileComponent, SafetyAlertTileComponent, ChatPanelComponent, AlertFormComponent],
   host: {
     class: 'block h-full min-h-0',
   },
 })
-export class GameDetailsPanelComponent {
+export class GameDetailsPanelComponent implements OnChanges {
   @Input() eventId: string = '';
   @Input() gameId: number | undefined = undefined;
   @Input() gameEvents: IEvent[] = [];
   @Input() safetyAlerts: ISafetyAlert[] = [];
 
   @Output() addEventClicked = new EventEmitter<void>();
-  @Output() addSafetyAlertClicked = new EventEmitter<void>();
+  @Output() alertsChanged = new EventEmitter<void>();
 
   selectedTab: WritableSignal<GameDetailsTab> = signal('Events');
+  showAlertForm: WritableSignal<boolean> = signal(false);
+
+  isAdmin: boolean;
+  canCreateAlert: boolean;
+
+  constructor(private authService: AuthService) {
+    this.isAdmin = authService.isAdmin();
+    const role = authService.getUserRole();
+    this.canCreateAlert = this.isAdmin || role === 'verified_creator';
+  }
 
   onTabChange(tab: GameDetailsTab): void {
     this.selectedTab.set(tab);
@@ -36,7 +48,25 @@ export class GameDetailsPanelComponent {
     this.addEventClicked.emit();
   }
 
-  onAddSafetyAlertClicked(): void {
-    this.addSafetyAlertClicked.emit();
+  ngOnChanges(changes: SimpleChanges): void {
+    // Auto-switch to Alerts tab when alerts first arrive and user hasn't manually switched tabs
+    if (changes['safetyAlerts'] && changes['safetyAlerts'].firstChange === false) {
+      const alerts: ISafetyAlert[] = changes['safetyAlerts'].currentValue ?? [];
+      if (alerts.length > 0 && this.selectedTab() === 'Events') {
+        this.selectedTab.set('SafetyAlerts');
+      }
+    }
+  }
+
+  get sortedAlerts(): ISafetyAlert[] {
+    return [...this.safetyAlerts].sort((a, b) => {
+      if (a.isOfficial === b.isOfficial) return 0;
+      return a.isOfficial ? -1 : 1;
+    });
+  }
+
+  onAlertCreated(): void {
+    this.showAlertForm.set(false);
+    this.alertsChanged.emit();
   }
 }

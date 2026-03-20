@@ -36,21 +36,23 @@ export class GameDetailsComponent implements OnInit {
           this.game.set(game);
 
           if (game.gameId) {
-            this.gameDetailsService.getGameChatEventId(game.gameId).subscribe({
-              next: (id) => this.chatEventId.set(id),
-              error: () => this.chatEventId.set(game.eventId), // fallback
+            this._afterGameIdResolved(game);
+          } else if (game.eventId) {
+            // gameId missing from URL — recover it from the backend using the eventId
+            this.gameDetailsService.getGameIdByEventId(game.eventId).subscribe((gameId) => {
+              if (gameId) {
+                const patched = { ...game, gameId };
+                this.game.set(patched);
+                this._afterGameIdResolved(patched);
+              } else {
+                this._afterGameIdResolved(game);
+              }
+              this.isLoading.set(false);
             });
+            return;
           } else {
-            this.chatEventId.set(game.eventId);
+            this._afterGameIdResolved(game);
           }
-
-          this.gameDetailsService.getGameEvents(game).subscribe((events) => {
-            this.gameEvents.set(events);
-          });
-
-          this.gameDetailsService.getSafetyAlerts(game).subscribe((alerts) => {
-            this.safetyAlerts.set(alerts);
-          });
 
           this.isLoading.set(false);
         },
@@ -61,11 +63,35 @@ export class GameDetailsComponent implements OnInit {
     });
   }
 
+  private _afterGameIdResolved(game: IEvent): void {
+    if (game.gameId) {
+      this.gameDetailsService.getGameChatEventId(game.gameId).subscribe({
+        next: (id) => this.chatEventId.set(id),
+        error: () => this.chatEventId.set(game.eventId),
+      });
+    } else {
+      this.chatEventId.set(game.eventId);
+    }
+
+    this.gameDetailsService.getGameEvents(game).subscribe((events) => {
+      this.gameEvents.set(events);
+    });
+
+    this.gameDetailsService.getSafetyAlerts(game).subscribe((alerts) => {
+      this.safetyAlerts.set(alerts);
+    });
+  }
+
   onAddEventClicked(): void {
     console.log('Add Event clicked');
   }
 
-  onAddSafetyAlertClicked(): void {
-    console.log('Add Safety Alert clicked');
+  onAlertsChanged(): void {
+    const currentGame = this.game();
+    if (currentGame) {
+      this.gameDetailsService.getSafetyAlerts(currentGame).subscribe((alerts) => {
+        this.safetyAlerts.set(alerts);
+      });
+    }
   }
 }
