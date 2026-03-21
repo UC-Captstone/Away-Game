@@ -180,21 +180,10 @@ export class AdminSettingsComponent implements OnInit {
 
   deactivateUser(user: AdminUser): void {
     this.adminService.deactivateUser(user.userId).subscribe({
-      next: (updated) => {
-        const idx = this.allUsers.findIndex((u) => u.userId === updated.userId);
-        if (idx !== -1) this.allUsers[idx] = updated;
+      next: () => {
+        this.allUsers = this.allUsers.filter((u) => u.userId !== user.userId);
       },
       error: (err) => console.error('Failed to deactivate user', err),
-    });
-  }
-
-  reactivateUser(user: AdminUser): void {
-    this.adminService.reactivateUser(user.userId).subscribe({
-      next: (updated) => {
-        const idx = this.allUsers.findIndex((u) => u.userId === updated.userId);
-        if (idx !== -1) this.allUsers[idx] = updated;
-      },
-      error: (err) => console.error('Failed to reactivate user', err),
     });
   }
 

@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Sequence
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
 
@@ -148,22 +148,19 @@ async def list_all_users_service(
 
 
 async def deactivate_user_service(user_id: UUID, db: AsyncSession) -> User:
+    """Returns the user object (with clerk_id) before deleting from DB."""
     result = await db.execute(select(User).where(User.user_id == user_id))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    user.role = "deactivated"
-    await db.commit()
-    await db.refresh(user)
     return user
 
 
-async def reactivate_user_service(user_id: UUID, db: AsyncSession) -> User:
-    result = await db.execute(select(User).where(User.user_id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    user.role = "user"
+async def clear_clerk_id_service(user_id: UUID, db: AsyncSession) -> None:
+    await db.execute(update(User).where(User.user_id == user_id).values(clerk_id=None))
     await db.commit()
-    await db.refresh(user)
-    return user
+
+
+async def delete_user_service(user_id: UUID, db: AsyncSession) -> None:
+    await db.execute(delete(User).where(User.user_id == user_id))
+    await db.commit()

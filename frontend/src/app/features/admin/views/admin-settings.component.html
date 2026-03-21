@@ -312,7 +312,7 @@
 
             @case ('UserManagement') {
               <h2 class="text-xl font-semibold text-white mb-1">User Management</h2>
-              <p class="text-slate-400 text-xs mb-4">Deactivate accounts or reset passwords via Clerk.</p>
+              <p class="text-slate-400 text-xs mb-4">Delete accounts or reset passwords via Clerk.</p>
               <input
                 type="text"
                 [(ngModel)]="userSearchQuery"
@@ -359,29 +359,18 @@
                               @if (user.role === 'verified_creator') {
                                 <span class="ml-1 px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 text-[10px] font-semibold">Creator</span>
                               }
-                              @if (user.role === 'deactivated') {
-                                <span class="ml-1 px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 text-[10px] font-semibold">Deactivated</span>
-                              }
                             </p>
                             <p class="text-slate-400 text-xs truncate">&#64;{{ user.username }} · {{ user.email }}</p>
                           </div>
                         </div>
                         <div class="shrink-0">
-                          @if (user.role === 'deactivated') {
-                            <button
-                              type="button"
-                              (click)="reactivateUser(user)"
-                              class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors"
-                            >
-                              Reactivate
-                            </button>
-                          } @else if (user.role !== 'admin') {
+                          @if (user.role !== 'admin') {
                             <button
                               type="button"
                               (click)="deactivateUser(user)"
                               class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-red-600/70 text-slate-300 hover:text-white text-xs font-medium transition-colors"
                             >
-                              Deactivate
+                              Delete
                             </button>
                           }
                         </div>

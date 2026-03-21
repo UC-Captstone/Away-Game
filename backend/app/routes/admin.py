@@ -36,7 +36,7 @@ from repositories.admin_repo import (
     revoke_creator_status_service,
     list_all_users_service,
     deactivate_user_service,
-    reactivate_user_service,
+    delete_user_service,
 )
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -122,22 +122,17 @@ async def list_users(
     return await list_all_users_service(db, limit=limit, offset=offset)
 
 
-@router.post("/users/{user_id}/deactivate", response_model=UserRead)
+@router.post("/users/{user_id}/deactivate", status_code=204)
 async def deactivate_user(
     user_id: UUID,
     _admin: User = Depends(require_admin),
     db: AsyncSession = Depends(get_session),
 ):
-    return await deactivate_user_service(user_id, db)
-
-
-@router.post("/users/{user_id}/reactivate", response_model=UserRead)
-async def reactivate_user(
-    user_id: UUID,
-    _admin: User = Depends(require_admin),
-    db: AsyncSession = Depends(get_session),
-):
-    return await reactivate_user_service(user_id, db)
+    user = await deactivate_user_service(user_id, db)
+    if user.clerk_id:
+        clerk_client.users.delete(user_id=user.clerk_id)
+    await delete_user_service(user_id, db)
+    return None
 
 
 @router.post("/users/{user_id}/reset-password", status_code=204)

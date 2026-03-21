@@ -51,12 +51,8 @@ export class AdminService {
     return this.http.get<AdminUser[]>(`${API_URL}/users?limit=${limit}&offset=${offset}`);
   }
 
-  deactivateUser(userId: string): Observable<AdminUser> {
-    return this.http.post<AdminUser>(`${API_URL}/users/${userId}/deactivate`, {});
-  }
-
-  reactivateUser(userId: string): Observable<AdminUser> {
-    return this.http.post<AdminUser>(`${API_URL}/users/${userId}/reactivate`, {});
+  deactivateUser(userId: string): Observable<void> {
+    return this.http.post<void>(`${API_URL}/users/${userId}/deactivate`, {});
   }
 
   resetPassword(userId: string, newPassword: string): Observable<void> {
