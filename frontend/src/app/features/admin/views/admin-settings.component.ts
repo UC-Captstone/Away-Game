@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminService } from '../services/admin.service';
 import { AdminLeague, AdminOverview, AdminUser } from '../models/admin';
+import { PopupModalComponent } from '../../../shared/components/popup-modal/popup-modal.component';
 
 @Component({
   selector: 'app-admin-settings',
   templateUrl: './admin-settings.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, PopupModalComponent],
 })
 export class AdminSettingsComponent implements OnInit {
   selectedTab: WritableSignal<string> = signal('Overview');
@@ -19,6 +20,8 @@ export class AdminSettingsComponent implements OnInit {
 
   leagues: AdminLeague[] = [];
   leaguesLoading = signal(false);
+  showSyncModal = false;
+  syncTriggered = signal(false);
 
   pendingUsers: AdminUser[] = [];
   pendingLoading = signal(false);
@@ -85,6 +88,17 @@ export class AdminSettingsComponent implements OnInit {
         console.error('Failed to load leagues', err);
         this.leaguesLoading.set(false);
       },
+    });
+  }
+
+  triggerSync(): void {
+    this.adminService.triggerLeagueSync().subscribe({
+      next: () => {
+        this.showSyncModal = false;
+        this.syncTriggered.set(true);
+        setTimeout(() => this.syncTriggered.set(false), 5000);
+      },
+      error: (err) => console.error('Failed to trigger sync', err),
     });
   }
 

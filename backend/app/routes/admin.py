@@ -59,6 +59,16 @@ async def list_leagues(
     return await list_all_leagues_service(db)
 
 
+@router.post("/leagues/sync", status_code=204)
+async def trigger_league_sync(
+    _admin: User = Depends(require_admin),
+):
+    from scheduled.nightly_tasks import run_nightly_task
+    import asyncio
+    asyncio.create_task(run_nightly_task())
+    return None
+
+
 @router.patch("/leagues/{league_code}/active", response_model=AdminLeagueRead)
 async def set_league_active(
     league_code: str,

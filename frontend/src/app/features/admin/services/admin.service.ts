@@ -20,6 +20,10 @@ export class AdminService {
     return this.http.get<AdminLeague[]>(`${API_URL}/leagues`);
   }
 
+  triggerLeagueSync(): Observable<void> {
+    return this.http.post<void>(`${API_URL}/leagues/sync`, {});
+  }
+
   setLeagueActive(leagueCode: string, isActive: boolean): Observable<AdminLeague> {
     return this.http.patch<AdminLeague>(
       `${API_URL}/leagues/${leagueCode}/active?is_active=${isActive}`,
