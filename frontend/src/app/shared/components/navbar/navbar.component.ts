@@ -2,13 +2,17 @@ import { CommonModule } from '@angular/common';
 import { Component, effect, EventEmitter, OnDestroy, Output, WritableSignal, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ClerkService } from '@jsrob/ngx-clerk';
+import { Subscription, timer } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
 import { AuthService } from '../../../features/auth/services/auth.service';
+import { AdminService } from '../../../features/admin/services/admin.service';
 import { INavBar } from '../../models/navbar';
 import { UserService } from '../../services/user.service';
 import { SafetyAlertService } from '../../services/safety-alert.service';
 import { ISafetyAlert } from '../../models/safety-alert';
 
-const POLL_INTERVAL_MS = 30_000;
+const ALERT_POLL_INTERVAL_MS = 30_000;
 
 @Component({
   selector: 'app-navbar',
@@ -23,14 +27,17 @@ export class NavBarComponent implements OnDestroy {
   isMenuOpen: WritableSignal<boolean> = signal(false);
   unacknowledgedAlerts: WritableSignal<ISafetyAlert[]> = signal([]);
   isBellOpen: WritableSignal<boolean> = signal(false);
-  isAdmin = false;
 
   private navBarLoaded = false;
-  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private alertPollTimer: ReturnType<typeof setInterval> | null = null;
+  private pendingPollSub: Subscription | null = null;
+  private readonly PENDING_POLL_INTERVAL_MS = 60_000;
+  private readonly PENDING_ALERT_ID = '__pending_approvals__';
 
   constructor(
     private userService: UserService,
     private authService: AuthService,
+    private adminService: AdminService,
     private clerkService: ClerkService,
     private safetyAlertService: SafetyAlertService,
     private router: Router,
@@ -43,12 +50,14 @@ export class NavBarComponent implements OnDestroy {
 
       this.navBarLoaded = true;
       this.isLoading.emit(true);
-      this.isAdmin = this.authService.isAdmin();
 
       this.userService.getNavBarInfo().subscribe({
         next: (navBarInfo: INavBar) => {
           this.navBarInfo = navBarInfo;
           this.isLoading.emit(false);
+          if (this.authService.isAdmin()) {
+            this.startPendingPoll();
+          }
         },
         error: (error) => {
           console.error('Error fetching navbar info:', error);
@@ -57,14 +66,12 @@ export class NavBarComponent implements OnDestroy {
       });
 
       this.loadUnacknowledgedAlerts();
-      this.pollTimer = setInterval(() => this.loadUnacknowledgedAlerts(), POLL_INTERVAL_MS);
+      this.alertPollTimer = setInterval(() => this.loadUnacknowledgedAlerts(), ALERT_POLL_INTERVAL_MS);
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.pollTimer) {
-      clearInterval(this.pollTimer);
-    }
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 
   get unacknowledgedCount(): number {
@@ -82,7 +89,6 @@ export class NavBarComponent implements OnDestroy {
     const wasOpen = this.isBellOpen();
     this.isBellOpen.set(!wasOpen);
 
-    // When closing: auto-ack all non-official alerts (user has had a chance to read them)
     if (wasOpen && this.unacknowledgedAlerts().some(a => !a.isOfficial)) {
       this.safetyAlertService.acknowledgeAll().subscribe({
         next: () => {
@@ -106,7 +112,6 @@ export class NavBarComponent implements OnDestroy {
 
   closeBell(): void {
     this.isBellOpen.set(false);
-    // Auto-ack non-official alerts when closing via backdrop click
     if (this.unacknowledgedAlerts().some(a => !a.isOfficial)) {
       this.safetyAlertService.acknowledgeAll().subscribe({
         next: () => {
@@ -115,6 +120,35 @@ export class NavBarComponent implements OnDestroy {
         error: () => { /* silently ignore */ },
       });
     }
+  }
+
+  private startPendingPoll(): void {
+    this.pendingPollSub = timer(0, this.PENDING_POLL_INTERVAL_MS)
+      .pipe(
+        switchMap(() =>
+          this.adminService.getPendingApprovals().pipe(catchError(() => EMPTY)),
+        ),
+      )
+      .subscribe((users) => {
+        const others = this.unacknowledgedAlerts().filter(a => a.alertId !== this.PENDING_ALERT_ID);
+        if (users.length > 0) {
+          const pendingAlert: ISafetyAlert = {
+            alertId: this.PENDING_ALERT_ID,
+            reporterUserId: '',
+            alertTypeId: 'admin',
+            title: `${users.length} pending verification request${users.length === 1 ? '' : 's'}`,
+            description: 'Review and approve or deny in Admin Settings.',
+            source: 'admin',
+            severity: 'medium',
+            isActive: true,
+            isOfficial: true,
+            createdAt: new Date().toISOString(),
+          };
+          this.unacknowledgedAlerts.set([pendingAlert, ...others]);
+        } else {
+          this.unacknowledgedAlerts.set(others);
+        }
+      });
   }
 
   async onSignOut(): Promise<void> {
@@ -127,5 +161,12 @@ export class NavBarComponent implements OnDestroy {
       this.authService.clearInternalToken();
       this.router.navigate(['/login']);
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.alertPollTimer) {
+      clearInterval(this.alertPollTimer);
+    }
+    this.pendingPollSub?.unsubscribe();
   }
 }

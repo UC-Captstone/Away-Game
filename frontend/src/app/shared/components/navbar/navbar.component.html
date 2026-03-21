@@ -3,12 +3,10 @@
 >
   <div class="max-w-screen-xl mx-auto px-4 py-2 flex items-center gap-4">
 
-    <!-- Logo: left -->
     <a class="flex items-center gap-3 shrink-0">
       <img src="/assets/text-logo.png" class="h-10 w-auto" alt="Away Game Logo" />
     </a>
 
-    <!-- Nav links: center, fills remaining space -->
     <div
       id="navbar-user"
       class="flex-1 items-center justify-center gap-4 w-full md:w-auto md:flex"
@@ -72,7 +70,6 @@
     <!-- Alert bell + Profile avatar + hamburger: right -->
     <div class="flex items-center gap-2 ml-auto shrink-0">
       @if (navBarInfo) {
-        <!-- Alert bell with dropdown -->
         <div class="relative hidden md:block">
           <button
             type="button"
@@ -110,7 +107,6 @@
                     class="px-4 py-3 border-b border-slate-800/60 last:border-0"
                     [ngClass]="{ 'border-l-2 border-l-amber-400 bg-amber-500/5': alert.isOfficial }"
                   >
-                    <!-- Title + official badge -->
                     <div class="flex items-start gap-2 mb-1.5">
                       @if (alert.isOfficial) {
                         <span class="mt-0.5 shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
@@ -120,44 +116,49 @@
                       <p class="text-sm font-semibold text-slate-100 leading-tight flex-1">{{ alert.title }}</p>
                     </div>
 
-                    <!-- Type · severity · time -->
-                    <div class="flex items-center gap-2 mb-2">
-                      <span
-                        class="text-[10px] font-semibold px-1.5 py-0.5 rounded capitalize"
-                        [ngClass]="{
-                          'bg-green-500/20 text-green-300': alert.severity === 'low',
-                          'bg-yellow-500/20 text-yellow-300': alert.severity === 'medium',
-                          'bg-red-500/20 text-red-300': alert.severity === 'high',
-                        }"
-                      >{{ alert.severity }}</span>
-                      <span class="text-[10px] font-medium text-slate-400 capitalize">{{ alert.alertTypeId }}</span>
-                      <span class="ml-auto text-[10px] text-slate-600">{{ alert.createdAt | date:'M/d h:mm a' }}</span>
-                    </div>
-
-                    <!-- Description -->
-                    @if (alert.description) {
-                      <p class="text-xs text-slate-300 mb-2 leading-snug">{{ alert.description }}</p>
+                    @if (alert.alertId !== '__pending_approvals__') {
+                      <div class="flex items-center gap-2 mb-2">
+                        <span
+                          class="text-[10px] font-semibold px-1.5 py-0.5 rounded capitalize"
+                          [ngClass]="{
+                            'bg-green-500/20 text-green-300': alert.severity === 'low',
+                            'bg-yellow-500/20 text-yellow-300': alert.severity === 'medium',
+                            'bg-red-500/20 text-red-300': alert.severity === 'high',
+                          }"
+                        >{{ alert.severity }}</span>
+                        <span class="text-[10px] font-medium text-slate-400 capitalize">{{ alert.alertTypeId }}</span>
+                        <span class="ml-auto text-[10px] text-slate-600">{{ alert.createdAt | date:'M/d h:mm a' }}</span>
+                      </div>
+                      @if (alert.description) {
+                        <p class="text-xs text-slate-300 mb-2 leading-snug">{{ alert.description }}</p>
+                      }
+                      <p class="text-[10px] text-slate-500 mb-2">
+                        Reported by: {{ alert.isOfficial ? 'Away Game' : (alert.source === 'admin' ? 'Admin' : 'Community') }}
+                      </p>
                     }
 
-                    <!-- Reporter -->
-                    <p class="text-[10px] text-slate-500 mb-2">
-                      Reported by: {{ alert.isOfficial ? 'Away Game' : (alert.source === 'admin' ? 'Admin' : 'Community') }}
-                    </p>
-
-                    <!-- Official: explicit ack button -->
                     @if (alert.isOfficial) {
-                      <button
-                        type="button"
-                        (click)="onAcknowledgeOfficial(alert.alertId)"
-                        class="w-full py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-colors"
-                      >
-                        Acknowledge
-                      </button>
+                      @if (alert.alertId === '__pending_approvals__') {
+                        <a
+                          href="/admin"
+                          (click)="closeBell()"
+                          class="block w-full py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-colors text-center"
+                        >
+                          Review in Admin Settings
+                        </a>
+                      } @else {
+                        <button
+                          type="button"
+                          (click)="onAcknowledgeOfficial(alert.alertId)"
+                          class="w-full py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500/30 transition-colors"
+                        >
+                          Acknowledge
+                        </button>
+                      }
                     }
                   </div>
                 }
               </div>
-              <!-- Footer: view history -->
               <div class="border-t border-slate-700/60">
                 <a
                   href="/alerts"
@@ -174,7 +175,6 @@
           }
         </div>
 
-        <!-- Profile avatar with dropdown -->
         <div class="relative group hidden md:block">
           <button
             class="flex items-center justify-center w-10 h-10 rounded-full ring-1 ring-slate-700 bg-slate-800/90 hover:bg-slate-800 transition-all shadow-sm"
@@ -200,6 +200,13 @@
               class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/70 transition-colors"
               >Profile</a
             >
+            @if (isAdmin) {
+              <div class="h-px bg-slate-700/60 my-1"></div>
+              <a
+                href="/admin"
+                class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/70 transition-colors"
+              >Admin Settings</a>
+            }
             <button
               type="button"
               (click)="onSignOut()"
