@@ -24,6 +24,7 @@ from app.models import (
     Event, SafetyAlert, TeamChat, EventChat, UserFavoriteTeams, Favorite,
     FriendRequest, Friendship, DirectMessage
 )
+from app.models import *  # noqa: F403 
 
 target_metadata = Base.metadata
 

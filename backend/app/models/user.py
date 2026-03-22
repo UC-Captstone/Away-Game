@@ -52,3 +52,4 @@ class User(Base):
     received_direct_messages = relationship(
         "DirectMessage", foreign_keys="DirectMessage.receiver_id", cascade="all, delete-orphan"
     )
+    alert_acknowledgments = relationship("UserAlertAcknowledgment", back_populates="user", cascade="all, delete-orphan")

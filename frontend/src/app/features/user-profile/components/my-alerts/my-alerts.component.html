@@ -1,0 +1,146 @@
+@if (isLoading()) {
+  <div class="flex items-center justify-center py-12">
+    <svg class="animate-spin h-8 w-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+  </div>
+} @else if (alerts().length === 0) {
+  <div class="text-center py-12">
+    <h3 class="text-xl font-semibold text-sky-400 mb-2">No Alerts Created</h3>
+    <p class="text-slate-400 text-sm">You haven't created any alerts yet.</p>
+  </div>
+} @else {
+  <div class="flex flex-col gap-3 p-2">
+    @for (alert of alerts(); track alert.alertId) {
+      <div
+        class="rounded-xl border p-4"
+        [ngClass]="alert.isOfficial
+          ? 'border-amber-500/40 bg-amber-500/5'
+          : alert.isActive
+            ? 'border-slate-700 bg-slate-800/60'
+            : 'border-slate-800 bg-slate-900/40 opacity-60'"
+      >
+        @if (editingAlertId() === alert.alertId) {
+          <!-- Edit form -->
+          <div class="flex flex-col gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Title</label>
+              <input
+                type="text"
+                [(ngModel)]="editTitle"
+                class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Description</label>
+              <textarea
+                [(ngModel)]="editDescription"
+                rows="2"
+                class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 resize-none"
+              ></textarea>
+            </div>
+            <div class="flex gap-3">
+              <div class="flex-1">
+                <label class="block text-xs text-slate-400 mb-1">Type</label>
+                <select
+                  [(ngModel)]="editAlertTypeId"
+                  class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                >
+                  @for (t of alertTypes; track t.code) {
+                    <option [value]="t.code">{{ t.typeName }}</option>
+                  }
+                </select>
+              </div>
+              <div class="flex-1">
+                <label class="block text-xs text-slate-400 mb-1">Severity</label>
+                <select
+                  [(ngModel)]="editSeverity"
+                  class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                >
+                  @for (s of severities; track s) {
+                    <option [value]="s">{{ s | titlecase }}</option>
+                  }
+                </select>
+              </div>
+              <div class="flex items-end pb-0.5">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" [(ngModel)]="editIsActive" class="rounded border-slate-600 accent-sky-500" />
+                  <span class="text-xs text-slate-400">Active</span>
+                </label>
+              </div>
+            </div>
+            @if (saveError) {
+              <p class="text-xs text-red-400">{{ saveError }}</p>
+            }
+            <div class="flex gap-2 justify-end">
+              <button
+                type="button"
+                (click)="cancelEdit()"
+                class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-700 transition-colors"
+              >Cancel</button>
+              <button
+                type="button"
+                [disabled]="isSaving || !editTitle.trim()"
+                (click)="saveEdit(alert.alertId)"
+                class="px-3 py-1.5 rounded-lg text-xs font-medium bg-sky-600 text-white hover:bg-sky-500 disabled:opacity-50 transition-colors"
+              >{{ isSaving ? 'Saving…' : 'Save' }}</button>
+            </div>
+          </div>
+        } @else {
+          <!-- Read view -->
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                @if (alert.isOfficial) {
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">OFFICIAL</span>
+                }
+                @if (!alert.isActive) {
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-700 text-slate-400 shrink-0">INACTIVE</span>
+                }
+                <p class="text-sm font-semibold text-slate-100 truncate">{{ alert.title }}</p>
+              </div>
+              <div class="flex items-center gap-2 mb-1">
+                <span
+                  class="text-[10px] font-semibold px-1.5 py-0.5 rounded capitalize"
+                  [ngClass]="{
+                    'bg-green-500/20 text-green-300': alert.severity === 'low',
+                    'bg-yellow-500/20 text-yellow-300': alert.severity === 'medium',
+                    'bg-red-500/20 text-red-300': alert.severity === 'high'
+                  }"
+                >{{ alert.severity }}</span>
+                <span class="text-[10px] text-slate-400 capitalize">{{ alert.alertTypeId }}</span>
+                <span class="ml-auto text-[10px] text-slate-600">{{ alert.createdAt | date:'M/d/yy h:mm a' }}</span>
+              </div>
+              @if (alert.description) {
+                <p class="text-xs text-slate-400 leading-snug">{{ alert.description }}</p>
+              }
+            </div>
+            <div class="flex gap-1 shrink-0">
+              <button
+                type="button"
+                (click)="startEdit(alert)"
+                class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-slate-200 transition-colors"
+                title="Edit"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                (click)="deleteAlert(alert.alertId)"
+                class="p-1.5 rounded-lg text-slate-400 hover:bg-red-600/30 hover:text-red-400 transition-colors"
+                title="Delete"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

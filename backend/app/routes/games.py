@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
+from datetime import datetime
 
 from db.session import get_session
 from schemas.game import GameRead
@@ -31,8 +32,9 @@ async def get_game(game_id: int, db: AsyncSession = Depends(get_session)):
 @router.get("/", response_model=List[GameRead])
 async def list_games(
     league_id: Optional[str] = Query(default=None, description="Filter by league code"),
+    date: Optional[datetime] = Query(default=None, description="Filter to games on this date (ISO 8601)"),
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_session),
 ):
-    return await list_games_service(league_id=league_id, limit=limit, offset=offset, db=db)
+    return await list_games_service(league_id=league_id, limit=limit, offset=offset, db=db, date=date)

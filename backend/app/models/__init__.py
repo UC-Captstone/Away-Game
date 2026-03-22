@@ -14,6 +14,7 @@ from .alert_type import AlertType
 from .friend_request import FriendRequest
 from .friendship import Friendship
 from .direct_message import DirectMessage
+from .user_alert_acknowledgment import UserAlertAcknowledgment
 
 __all__ = [
     "League",
@@ -32,4 +33,5 @@ __all__ = [
     "FriendRequest",
     "Friendship",
     "DirectMessage",
+    "UserAlertAcknowledgment",
 ]
