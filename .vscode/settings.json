@@ -11,6 +11,5 @@
   "azureFunctions.projectRuntime": "~4",
   "debug.internalConsoleOptions": "neverOpen",
   "azureFunctions.projectLanguageModel": 2,
-  "azureFunctions.projectSubpath": "backend/app",
-  "python-envs.defaultEnvManager": "ms-python.python:pyenv"
+  "azureFunctions.projectSubpath": "backend/app"
 }
