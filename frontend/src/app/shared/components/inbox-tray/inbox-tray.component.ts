@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, WritableSignal, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subscription, forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { FriendsService } from '../../../shared/services/friends.service';
@@ -137,6 +138,7 @@ export class InboxTrayComponent implements OnInit, OnDestroy {
   constructor(
     private friendsService: FriendsService,
     private elementRef: ElementRef,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -167,8 +169,7 @@ export class InboxTrayComponent implements OnInit, OnDestroy {
   }
 
   onSelectConversation(conv: IConversationPreview): void {
-    // Navigate to community with selected friend
-    window.location.href = `/community?friend=${conv.otherUserId}`;
+    this.router.navigate(['/community'], { queryParams: { friend: conv.otherUserId } });
     this.isOpen.set(false);
   }
 
