@@ -31,6 +31,7 @@ class DirectMessageRead(BaseModel):
     receiver_id: UUID
     message_text: str
     is_deleted: bool
+    is_read: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -53,6 +54,7 @@ class DirectMessageRead(BaseModel):
             receiver_id=obj.receiver_id,
             message_text=obj.message_text,
             is_deleted=obj.is_deleted,
+            is_read=obj.is_read,
             created_at=obj.created_at,
             updated_at=obj.updated_at,
             sender_username=obj.sender.username if obj.sender else None,

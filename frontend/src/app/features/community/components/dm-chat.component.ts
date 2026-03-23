@@ -147,7 +147,9 @@ import { IDirectMessage } from '../../../shared/models/direct-message';
       </div>
     }
   `,
-
+  host: {
+    class: 'block h-full min-h-0',
+  },
 })
 export class DMChatComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
   @Input() otherUserId: string | null = null;
