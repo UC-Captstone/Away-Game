@@ -4,7 +4,11 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
 from models.safety_alert import SafetyAlert
+from schemas.common import Location
+from schemas.safety_alert import SafetyAlertFeedRead, SafetyAlertSeverity
 
 class SafetyAlertRepository:
     def __init__(self, db: AsyncSession):
@@ -40,7 +44,6 @@ class SafetyAlertRepository:
         game_id: Optional[UUID] = None,
         venue_id: Optional[UUID] = None,
         description: Optional[str] = None,
-        game_date: Optional[datetime] = None,
         latitude: Optional[float] = None,
         longitude: Optional[float] = None,
     ) -> Optional[SafetyAlert]:
@@ -49,7 +52,6 @@ class SafetyAlertRepository:
             "game_id": game_id,
             "venue_id": venue_id,
             "description": description,
-            "game_date": game_date,
             "latitude": latitude,
             "longitude": longitude,
         }.items() if v is not None}
@@ -61,3 +63,82 @@ class SafetyAlertRepository:
     async def remove(self, alert_id: UUID) -> int:
         res = await self.db.execute(delete(SafetyAlert).where(SafetyAlert.alert_id == alert_id))
         return res.rowcount or 0
+
+
+def _derive_alert_severity(alert_type_code: Optional[str], alert_type_name: Optional[str]) -> SafetyAlertSeverity:
+    combined = f"{alert_type_code or ''} {alert_type_name or ''}".lower()
+
+    if any(token in combined for token in ["high", "critical", "severe", "danger", "emergency"]):
+        return SafetyAlertSeverity.HIGH
+    if any(token in combined for token in ["low", "info", "advisory"]):
+        return SafetyAlertSeverity.LOW
+    return SafetyAlertSeverity.MEDIUM
+
+
+def _map_alert_to_feed(alert: SafetyAlert) -> Optional[SafetyAlertFeedRead]:
+    lat = alert.latitude
+    lng = alert.longitude
+
+    if (lat is None or lng is None) and alert.venue is not None:
+        lat = alert.venue.latitude
+        lng = alert.venue.longitude
+
+    if lat is None or lng is None:
+        return None
+
+    title = "Safety Alert"
+    if alert.alert_type is not None and alert.alert_type.type_name:
+        title = alert.alert_type.type_name
+
+    date_time = alert.created_at
+    if date_time is None:
+        date_time = datetime.utcnow()
+
+    description = alert.description or "Reported safety issue in the area."
+
+    return SafetyAlertFeedRead(
+        alert_id=alert.alert_id,
+        reporter_user_id=alert.reporter_user_id,
+        alert_type_id=alert.alert_type_id,
+        game_id=alert.game_id,
+        venue_id=alert.venue_id,
+        latitude=lat,
+        longitude=lng,
+        created_at=alert.created_at,
+        severity=_derive_alert_severity(
+            alert.alert_type_id,
+            alert.alert_type.type_name if alert.alert_type is not None else None,
+        ),
+        title=title,
+        description=description,
+        date_time=date_time,
+        location=Location(lat=lat, lng=lng),
+    )
+
+
+async def get_game_safety_alerts_service(
+    game_id: int,
+    db: AsyncSession,
+    *,
+    limit: int = 50,
+) -> list[SafetyAlertFeedRead]:
+    stmt = (
+        select(SafetyAlert)
+        .where(SafetyAlert.game_id == game_id)
+        .options(
+            selectinload(SafetyAlert.alert_type),
+            selectinload(SafetyAlert.venue),
+        )
+        .order_by(SafetyAlert.created_at.desc())
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    alerts = result.unique().scalars().all()
+
+    mapped_alerts: list[SafetyAlertFeedRead] = []
+    for alert in alerts:
+        mapped = _map_alert_to_feed(alert)
+        if mapped is not None:
+            mapped_alerts.append(mapped)
+
+    return mapped_alerts
