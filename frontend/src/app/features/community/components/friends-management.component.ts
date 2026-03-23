@@ -298,7 +298,10 @@ export class FriendsManagementComponent implements OnInit, OnDestroy {
   }
 
   isPending(userId: string): boolean {
-    return this.sentRequests().some((r) => r.receiverId === userId);
+    return (
+      this.sentRequests().some((r) => r.receiverId === userId) ||
+      this.receivedRequests().some((r) => r.senderId === userId)
+    );
   }
 
   alreadyFriendOrPending(userId: string): boolean {

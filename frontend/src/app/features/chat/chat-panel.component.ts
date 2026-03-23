@@ -110,7 +110,6 @@ export class ChatPanelComponent implements OnInit, OnChanges, OnDestroy, AfterVi
 
   onAvatarClick(event: { userId: string; userName: string }): void {
     if (!event.userId || event.userId === this.currentUserId) return;
-    
     this.friendRequestTarget = event;
     this.friendRequestStatus = 'idle';
     this.friendRequestMessage = '';
@@ -118,23 +117,23 @@ export class ChatPanelComponent implements OnInit, OnChanges, OnDestroy, AfterVi
 
   confirmFriendRequest(): void {
     if (!this.friendRequestTarget) return;
-    
+    const target = this.friendRequestTarget;
     this.friendRequestStatus = 'loading';
     this.subs.add(
-      this.friendsService.sendFriendRequest(this.friendRequestTarget.userId).subscribe({
+      this.friendsService.sendFriendRequest(target.userId).subscribe({
         next: () => {
           this.friendRequestStatus = 'success';
-          this.friendRequestMessage = `Friend request sent to ${this.friendRequestTarget!.userName}!`;
+          this.friendRequestMessage = `Friend request sent to ${target.userName}!`;
         },
         error: (err) => {
           this.friendRequestStatus = 'error';
           if (err.status === 409) {
-            this.friendRequestMessage = `You're already friends or have a pending request with ${this.friendRequestTarget!.userName}.`;
+            this.friendRequestMessage = `You're already friends or have a pending request with ${target.userName}.`;
           } else {
-            this.friendRequestMessage = `Failed to send a friend request to ${this.friendRequestTarget!.userName}.`;
+            this.friendRequestMessage = `Failed to send a friend request to ${target.userName}.`;
           }
-        }
-      })
+        },
+      }),
     );
   }
 

@@ -68,8 +68,8 @@ async def send_friend_request(
             detail="You are already friends with this user",
         )
 
-    # Check for an existing request in either direction
-    existing_req = await db.execute(
+    # Check for an existing request from sender to receiver (any status)
+    existing_req_result = await db.execute(
         select(FriendRequest).where(
             or_(
                 and_(
@@ -81,14 +81,22 @@ async def send_friend_request(
                     FriendRequest.receiver_id == sender_id,
                 ),
             ),
-            FriendRequest.status == "pending",
         )
     )
-    if existing_req.scalar_one_or_none() is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="A pending friend request already exists between these users",
-        )
+    existing_req = existing_req_result.scalar_one_or_none()
+    if existing_req is not None:
+        if existing_req.status == "pending":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A pending friend request already exists between these users",
+            )
+        # A rejected request exists — reuse the row by updating it back to pending
+        existing_req.status = "pending"
+        existing_req.sender_id = sender_id
+        existing_req.receiver_id = receiver_id
+        await db.commit()
+        await db.refresh(existing_req, ["sender", "receiver"])
+        return existing_req
 
     req = FriendRequest(sender_id=sender_id, receiver_id=receiver_id, status="pending")
     db.add(req)
