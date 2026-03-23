@@ -1,22 +1,31 @@
 from __future__ import annotations
 from typing import Optional, Sequence
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 import math
 import time
 import uuid
 
-from sqlalchemy import select, update, delete, and_, func
+from sqlalchemy import select, update, delete, and_, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
 from models.event import Event
 from models.favorite import Favorite
 from models.game import Game
+from models.team import Team
 from models.venue import Venue
 from schemas.common import Location
-from schemas.event import EventRead, TeamLogos
+from schemas.event import EventRead, EventSearchFilters, TeamLogos
 from schemas.types import EventTypeEnum
+
+
+def _normalize_sort_datetime(dt: datetime | None) -> datetime:
+    if dt is None:
+        return datetime.min
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
 
 
 class EventRepository:
@@ -70,6 +79,255 @@ class EventRepository:
     async def remove(self, event_id: UUID) -> int:
         res = await self.db.execute(delete(Event).where(Event.event_id == event_id))
         return res.rowcount or 0
+
+
+async def search_events_with_filters_service(
+    filters: EventSearchFilters,
+    db: AsyncSession,
+    *,
+    current_user_id: Optional[UUID] = None,
+    limit: int = 100,
+) -> list[EventRead]:
+    if filters.saved_only and current_user_id is None:
+        return []
+
+    keyword = filters.keyword.strip()
+    keyword_like = f"%{keyword}%" if keyword else None
+    location_query = filters.location_query.strip()
+    location_like = f"%{location_query}%" if location_query else None
+
+    league_codes = [league.value for league in filters.leagues]
+    team_ids = [team_id for team_id in filters.team_ids if team_id > 0]
+    event_type_codes = {event_type.value.upper() for event_type in filters.event_types}
+    include_games = not event_type_codes or "GAME" in event_type_codes
+
+    start_dt = (
+        datetime.combine(filters.start_date, datetime.min.time())
+        if filters.start_date
+        else None
+    )
+    end_dt = (
+        datetime.combine(filters.end_date, datetime.max.time())
+        if filters.end_date
+        else None
+    )
+
+    saved_event_ids: set[UUID] = set()
+    saved_game_ids: set[int] = set()
+
+    if current_user_id is not None:
+        saved_result = await db.execute(
+            select(Favorite.event_id, Favorite.game_id).where(Favorite.user_id == current_user_id)
+        )
+        for favorite_event_id, favorite_game_id in saved_result.all():
+            if favorite_event_id is not None:
+                saved_event_ids.add(favorite_event_id)
+            if favorite_game_id is not None:
+                saved_game_ids.add(favorite_game_id)
+
+        if saved_event_ids:
+            saved_events_game_result = await db.execute(
+                select(Event.game_id)
+                .where(Event.event_id.in_(saved_event_ids))
+                .where(Event.game_id.isnot(None))
+            )
+            saved_game_ids.update(
+                game_id for game_id in saved_events_game_result.scalars().all() if game_id is not None
+            )
+
+    event_conditions = []
+    if keyword_like:
+        # Search Events bar should only match event names.
+        event_conditions.append(Event.title.ilike(keyword_like))
+
+    if league_codes:
+        event_conditions.append(Event.game.has(Game.league_id.in_(league_codes)))
+
+    if team_ids:
+        event_conditions.append(
+            Event.game.has(
+                or_(
+                    Game.home_team_id.in_(team_ids),
+                    Game.away_team_id.in_(team_ids),
+                )
+            )
+        )
+
+    if start_dt:
+        event_conditions.append(Event.game_date >= start_dt)
+
+    if end_dt:
+        event_conditions.append(Event.game_date <= end_dt)
+
+    if location_like:
+        # Location filter should only match venue city.
+        event_conditions.append(Event.venue.has(Venue.city.ilike(location_like)))
+
+    if event_type_codes:
+        event_conditions.append(Event.event_type_id.in_(event_type_codes))
+
+    should_run_event_query = True
+    if filters.saved_only and not saved_event_ids:
+        should_run_event_query = False
+
+    if filters.saved_only and saved_event_ids:
+        event_conditions.append(Event.event_id.in_(saved_event_ids))
+
+    mapped_events: list[EventRead] = []
+    represented_game_ids: set[int] = set()
+
+    if should_run_event_query:
+        event_stmt = (
+            select(Event)
+            .options(
+                selectinload(Event.venue),
+                selectinload(Event.event_type),
+                selectinload(Event.game).selectinload(Game.home_team),
+                selectinload(Event.game).selectinload(Game.away_team),
+                selectinload(Event.game).selectinload(Game.league),
+            )
+            .order_by(Event.game_date.asc())
+            .limit(limit)
+        )
+        if event_conditions:
+            event_stmt = event_stmt.where(and_(*event_conditions))
+
+        event_result = await db.execute(event_stmt)
+        events = event_result.unique().scalars().all()
+        mapped_events = [
+            _map_event_to_read(event, is_saved=event.event_id in saved_event_ids)
+            for event in events
+        ]
+        represented_game_ids = {
+            event.game_id
+            for event in events
+            if event.game_id is not None and event.event_type_id.upper() == "GAME"
+        }
+
+    mapped_games: list[EventRead] = []
+    if include_games:
+        game_conditions = []
+
+        if keyword_like:
+            game_conditions.append(
+                or_(
+                    Game.home_team.has(
+                        or_(
+                            Team.display_name.ilike(keyword_like),
+                            Team.team_name.ilike(keyword_like),
+                        )
+                    ),
+                    Game.away_team.has(
+                        or_(
+                            Team.display_name.ilike(keyword_like),
+                            Team.team_name.ilike(keyword_like),
+                        )
+                    ),
+                    Game.venue.has(
+                        or_(
+                            Venue.name.ilike(keyword_like),
+                            Venue.city.ilike(keyword_like),
+                            Venue.state_region.ilike(keyword_like),
+                        )
+                    ),
+                )
+            )
+
+        if league_codes:
+            game_conditions.append(Game.league_id.in_(league_codes))
+
+        if team_ids:
+            game_conditions.append(
+                or_(
+                    Game.home_team_id.in_(team_ids),
+                    Game.away_team_id.in_(team_ids),
+                )
+            )
+
+        if start_dt:
+            game_conditions.append(Game.date_time >= start_dt)
+
+        if end_dt:
+            game_conditions.append(Game.date_time <= end_dt)
+
+        if location_like:
+            # Location filter should only match venue city.
+            game_conditions.append(Game.venue.has(Venue.city.ilike(location_like)))
+
+        if filters.saved_only:
+            if not saved_game_ids:
+                game_conditions.append(Game.game_id.in_([-1]))
+            else:
+                game_conditions.append(Game.game_id.in_(saved_game_ids))
+
+        game_stmt = (
+            select(Game)
+            .options(
+                selectinload(Game.home_team),
+                selectinload(Game.away_team),
+                selectinload(Game.league),
+                selectinload(Game.venue),
+            )
+            .order_by(Game.date_time.asc())
+            .limit(limit)
+        )
+
+        if game_conditions:
+            game_stmt = game_stmt.where(and_(*game_conditions))
+
+        game_result = await db.execute(game_stmt)
+        games = game_result.unique().scalars().all()
+        mapped_games = [
+            _map_game_to_read(game, is_saved=game.game_id in saved_game_ids)
+            for game in games
+            if game.game_id not in represented_game_ids
+        ]
+
+    merged = mapped_events + mapped_games
+    merged.sort(key=lambda event: _normalize_sort_datetime(event.date_time))
+    return merged[:limit]
+
+
+async def get_game_events_service(
+    game_id: int,
+    db: AsyncSession,
+    *,
+    current_user_id: Optional[UUID] = None,
+    limit: int = 50,
+) -> list[EventRead]:
+    stmt = (
+        select(Event)
+        .where(Event.game_id == game_id)
+        .where(Event.event_type_id != "GAME")
+        .options(
+            selectinload(Event.venue),
+            selectinload(Event.event_type),
+            selectinload(Event.game).selectinload(Game.home_team),
+            selectinload(Event.game).selectinload(Game.away_team),
+            selectinload(Event.game).selectinload(Game.league),
+        )
+        .order_by(Event.game_date.asc())
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    events = result.unique().scalars().all()
+
+    saved_event_ids: set[UUID] = set()
+    if current_user_id is not None and events:
+        event_ids = [event.event_id for event in events]
+        saved_result = await db.execute(
+            select(Favorite.event_id)
+            .where(Favorite.user_id == current_user_id)
+            .where(Favorite.event_id.in_(event_ids))
+        )
+        saved_event_ids = {
+            event_id for event_id in saved_result.scalars().all() if event_id is not None
+        }
+
+    return [
+        _map_event_to_read(event, is_saved=event.event_id in saved_event_ids)
+        for event in events
+    ]
 
 
 # ---------------------------------------------------------------------------
@@ -335,7 +593,7 @@ async def get_nearby_events_service(
         if dist <= radius_miles:
             filtered_items.append((game.date_time, dist, "game", game))
 
-    filtered_items.sort(key=lambda item: (item[0], item[1]))
+    filtered_items.sort(key=lambda item: (_normalize_sort_datetime(item[0]), item[1]))
     filtered_items = filtered_items[:limit]
 
     result = [
