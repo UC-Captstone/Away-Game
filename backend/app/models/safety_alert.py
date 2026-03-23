@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import ForeignKey, Index, CheckConstraint, func
+from sqlalchemy import ForeignKey, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.base import Base
@@ -26,7 +26,6 @@ class SafetyAlert(Base):
         ForeignKey("venues.venue_id")
     )
     description: Mapped[Optional[str]]
-    game_date: Mapped[Optional[datetime]]
     latitude: Mapped[float | None]
     longitude: Mapped[float | None]
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
@@ -37,7 +36,6 @@ class SafetyAlert(Base):
     venue = relationship("Venue", back_populates="alerts")
 
     __table_args__ = (
-        Index("ix_alerts_game_date", "game_date"),
         CheckConstraint("latitude IS NULL OR (latitude BETWEEN -90 AND 90)", name="chk_alert_lat_range"),
         CheckConstraint("longitude IS NULL OR (longitude BETWEEN -180 AND 180)", name="chk_alert_lon_range"),
     )

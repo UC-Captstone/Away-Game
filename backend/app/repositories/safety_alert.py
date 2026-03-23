@@ -35,7 +35,6 @@ class SafetyAlertRepository:
         game_id: Optional[UUID] = None,
         venue_id: Optional[UUID] = None,
         description: Optional[str] = None,
-        game_date: Optional[datetime] = None,
         latitude: Optional[float] = None,
         longitude: Optional[float] = None,
     ) -> Optional[SafetyAlert]:
@@ -44,7 +43,6 @@ class SafetyAlertRepository:
             "game_id": game_id,
             "venue_id": venue_id,
             "description": description,
-            "game_date": game_date,
             "latitude": latitude,
             "longitude": longitude,
         }.items() if v is not None}
