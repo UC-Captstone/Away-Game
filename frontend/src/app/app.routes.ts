@@ -51,6 +51,9 @@ export const routes: Routes = [
       import('./features/community/views/community.component').then(
         (m) => m.CommunityComponent,
       ),
+    canActivate: [protectedGuard],
+  },
+  {
     path: 'alerts',
     loadComponent: () =>
       import('./features/alerts/views/alerts.component').then((m) => m.AlertsComponent),
