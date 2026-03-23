@@ -54,7 +54,7 @@ class DirectMessageRead(BaseModel):
             receiver_id=obj.receiver_id,
             message_text=obj.message_text,
             is_deleted=obj.is_deleted,
-            is_read=obj.is_read,
+            is_read=getattr(obj, "is_read", False),
             created_at=obj.created_at,
             updated_at=obj.updated_at,
             sender_username=obj.sender.username if obj.sender else None,
