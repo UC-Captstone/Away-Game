@@ -101,10 +101,11 @@ export class SearchBarComponent {
     }
 
     if (result.type === SearchTypeEnum.City) {
+      const cityOnly = (result.title ?? '').split(',')[0]?.trim() ?? '';
       this.router.navigate(['/events'], {
         queryParams: {
           mode: 'city',
-          city: result.title,
+          city: cityOnly || result.title,
         },
       });
       this.closeDropdown();
