@@ -16,12 +16,14 @@ import { IChatMessage } from './models/chat';
 import { AuthService } from '../auth/services/auth.service';
 import { ChatMessageItemComponent } from './components/chat-message-item/chat-message-item.component';
 import { ChatTypingBarComponent } from './components/chat-typing-bar/chat-typing-bar.component';
+import { FriendsService } from '../../shared/services/friends.service';
+import { PopupModalComponent } from '../../shared/components/popup-modal/popup-modal.component';
 
 @Component({
   selector: 'app-chat-panel',
   templateUrl: './chat-panel.component.html',
   standalone: true,
-  imports: [CommonModule, ChatMessageItemComponent, ChatTypingBarComponent],
+  imports: [CommonModule, ChatMessageItemComponent, ChatTypingBarComponent, PopupModalComponent],
 })
 export class ChatPanelComponent implements OnInit, OnChanges, OnDestroy, AfterViewChecked {
   @Input() eventId: string = '';
@@ -36,12 +38,17 @@ export class ChatPanelComponent implements OnInit, OnChanges, OnDestroy, AfterVi
   deletingId: string | null = null;
   currentUserId: string | null = null;
 
+  friendRequestTarget: { userId: string; userName: string } | null = null;
+  friendRequestStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  friendRequestMessage: string = '';
+
   private shouldScrollToBottom = false;
   private subs = new Subscription();
 
   constructor(
     private readonly chatService: ChatService,
     private readonly authService: AuthService,
+    private readonly friendsService: FriendsService,
   ) {}
 
   ngOnInit(): void {
@@ -99,6 +106,41 @@ export class ChatPanelComponent implements OnInit, OnChanges, OnDestroy, AfterVi
     this.chatService.deleteMessage(messageId).finally(() => {
       this.deletingId = null;
     });
+  }
+
+  onAvatarClick(event: { userId: string; userName: string }): void {
+    if (!event.userId || event.userId === this.currentUserId) return;
+    this.friendRequestTarget = event;
+    this.friendRequestStatus = 'idle';
+    this.friendRequestMessage = '';
+  }
+
+  confirmFriendRequest(): void {
+    if (!this.friendRequestTarget) return;
+    const target = this.friendRequestTarget;
+    this.friendRequestStatus = 'loading';
+    this.subs.add(
+      this.friendsService.sendFriendRequest(target.userId).subscribe({
+        next: () => {
+          this.friendRequestStatus = 'success';
+          this.friendRequestMessage = `Friend request sent to ${target.userName}!`;
+        },
+        error: (err) => {
+          this.friendRequestStatus = 'error';
+          if (err.status === 409) {
+            this.friendRequestMessage = `You're already friends or have a pending request with ${target.userName}.`;
+          } else {
+            this.friendRequestMessage = `Failed to send a friend request to ${target.userName}.`;
+          }
+        },
+      }),
+    );
+  }
+
+  closeFriendRequestModal(): void {
+    this.friendRequestTarget = null;
+    this.friendRequestStatus = 'idle';
+    this.friendRequestMessage = '';
   }
 
   private isNearBottom(): boolean {

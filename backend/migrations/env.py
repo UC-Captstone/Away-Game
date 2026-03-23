@@ -19,6 +19,11 @@ if config.config_file_name is not None:
 
 from app.db.base import Base
 
+from app.models import (
+    User, League, AlertType, EventType, Venue, Team, Game,
+    Event, SafetyAlert, TeamChat, EventChat, UserFavoriteTeams, Favorite,
+    FriendRequest, Friendship, DirectMessage
+)
 from app.models import *  # noqa: F403 
 
 target_metadata = Base.metadata
