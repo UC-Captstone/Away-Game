@@ -62,76 +62,19 @@ export class GameDetailsService {
   }
 
   getGameEvents(game: IEvent): Observable<IEvent[]> {
-    const dateTime = game.dateTime ?? new Date();
+    if (!game.gameId) {
+      return of([]);
+    }
 
-    return of([
-      {
-        eventId: `${game.eventId || 'game'}-tailgate`,
-        gameId: game.gameId,
-        eventType: EventTypeEnum.Tailgate,
-        eventName: `${game.eventName} Tailgate`,
-        dateTime: new Date(dateTime.getTime() - 2 * 60 * 60 * 1000),
-        location: { lat: game.location.lat + 0.005, lng: game.location.lng - 0.004 },
-        venueName: `${game.venueName} - Lot A`,
-        imageUrl: '/assets/tailgate.png',
-        league: game.league,
-        isUserCreated: false,
-        isSaved: false,
-      },
-      {
-        eventId: `${game.eventId || 'game'}-watch`,
-        gameId: game.gameId,
-        eventType: EventTypeEnum.Watch,
-        eventName: `${game.eventName} Watch Party`,
-        dateTime: new Date(dateTime.getTime() - 90 * 60 * 1000),
-        location: { lat: game.location.lat - 0.006, lng: game.location.lng + 0.003 },
-        venueName: `${game.venueName} - Fan Zone`,
-        imageUrl: '/assets/tailgate.png',
-        league: game.league,
-        isUserCreated: true,
-        isSaved: true,
-      },
-      {
-        eventId: `${game.eventId || 'game'}-postgame`,
-        gameId: game.gameId,
-        eventType: EventTypeEnum.Postgame,
-        eventName: `${game.eventName} Postgame Meetup`,
-        dateTime: new Date(dateTime.getTime() + 3 * 60 * 60 * 1000),
-        location: { lat: game.location.lat + 0.004, lng: game.location.lng + 0.005 },
-        venueName: `${game.venueName} - Downtown`,
-        imageUrl: '/assets/tailgate.png',
-        league: game.league,
-        isUserCreated: false,
-        isSaved: false,
-      },
-    ]);
+    return this.http.get<IEvent[]>(`${environment.apiUrl}/events/game/${game.gameId}/events`);
   }
 
   getSafetyAlerts(game: IEvent): Observable<ISafetyAlert[]> {
-    return of([
-      {
-        alertId: `${game.eventId || 'game'}-alert-1`,
-        severity: 'Medium',
-        title: 'Heavy Traffic Near Main Entrance',
-        description: 'Allow extra time. Rideshare drop-off is moved 2 blocks east.',
-        dateTime: new Date(),
-        location: { lat: game.location.lat + 0.003, lng: game.location.lng - 0.002 },
-        gameDate: game.dateTime,
-        latitude: game.location.lat + 0.003,
-        longitude: game.location.lng - 0.002,
-      },
-      {
-        alertId: `${game.eventId || 'game'}-alert-2`,
-        severity: 'Low',
-        title: 'Large Pedestrian Crowds',
-        description: 'Use designated crosswalks around Gate C and stay in lit areas.',
-        dateTime: new Date(),
-        location: { lat: game.location.lat - 0.004, lng: game.location.lng + 0.004 },
-        gameDate: game.dateTime,
-        latitude: game.location.lat - 0.004,
-        longitude: game.location.lng + 0.004,
-      },
-    ]);
+    if (!game.gameId) {
+      return of([]);
+    }
+
+    return this.http.get<ISafetyAlert[]>(`${environment.apiUrl}/events/game/${game.gameId}/safety-alerts`);
   }
 
 }
