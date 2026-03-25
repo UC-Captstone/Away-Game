@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ParamMap } from '@angular/router';
-import { map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { EventTypeEnum } from '../../../shared/models/event-type-enum';
 import { ISafetyAlert } from '../../../shared/models/safety-alert';
 import { IEvent } from '../../../shared/models/event';
 import { environment } from '../../../../environments/environment';
+import { SafetyAlertService } from '../../../shared/services/safety-alert.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,12 +14,25 @@ import { environment } from '../../../../environments/environment';
 export class GameDetailsService {
   private readonly defaultCenter = { lat: 39.8283, lng: -98.5795 };
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly safetyAlertService: SafetyAlertService,
+  ) {}
 
   getGameChatEventId(gameId: number): Observable<string> {
     return this.http
       .get<{ eventId: string }>(`${environment.apiUrl}/events/game-channel/${gameId}`)
       .pipe(map((res) => res.eventId));
+  }
+
+  /** Looks up the gameId for a given event UUID (fallback when gameId is missing from URL). */
+  getGameIdByEventId(eventId: string): Observable<number | undefined> {
+    return this.http
+      .get<{ gameId?: number }>(`${environment.apiUrl}/events/by-event-id/${eventId}`)
+      .pipe(
+        map((res) => res.gameId ?? undefined),
+        catchError(() => of(undefined)),
+      );
   }
 
   getGameFromQuery(params: ParamMap): Observable<IEvent> {

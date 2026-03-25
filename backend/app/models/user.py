@@ -39,3 +39,17 @@ class User(Base):
     event_chats = relationship("EventChat", back_populates="user", cascade="all, delete-orphan")
     favorites = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
     user_favorite_teams = relationship("UserFavoriteTeams", back_populates="user", cascade="all, delete-orphan")
+
+    sent_friend_requests = relationship(
+        "FriendRequest", foreign_keys="FriendRequest.sender_id", cascade="all, delete-orphan"
+    )
+    received_friend_requests = relationship(
+        "FriendRequest", foreign_keys="FriendRequest.receiver_id", cascade="all, delete-orphan"
+    )
+    sent_direct_messages = relationship(
+        "DirectMessage", foreign_keys="DirectMessage.sender_id", cascade="all, delete-orphan"
+    )
+    received_direct_messages = relationship(
+        "DirectMessage", foreign_keys="DirectMessage.receiver_id", cascade="all, delete-orphan"
+    )
+    alert_acknowledgments = relationship("UserAlertAcknowledgment", back_populates="user", cascade="all, delete-orphan")

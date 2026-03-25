@@ -1,22 +1,46 @@
-import { ILocation } from './location';
-
-export type SafetyAlertSeverity = 'Low' | 'Medium' | 'High';
+export type SafetyAlertSeverity = 'low' | 'medium' | 'high';
+export type SafetyAlertSource = 'admin' | 'user';
 
 export interface ISafetyAlert {
-	alertId: string;
+  alertId: string;
+  reporterUserId: string;
+  alertTypeId: string;
+  gameId?: number | null;
+  venueId?: number | null;
+  title: string;
+  description?: string | null;
+  source: SafetyAlertSource;
+  severity: SafetyAlertSeverity;
+  latitude?: number | null;
+  longitude?: number | null;
+  expiresAt?: string | null;
+  isActive: boolean;
+  isOfficial: boolean;
+  createdAt: string;
+}
 
-	reporterUserId?: string;
-	alertTypeId?: string;
-	gameId?: number | null;
-	venueId?: number | null;
-	gameDate?: Date | null;
-	latitude?: number | null;
-	longitude?: number | null;
-	createdAt?: Date;
+export interface ISafetyAlertCreate {
+  alertTypeId: string;
+  gameId?: number | null;
+  venueId?: number | null;
+  title: string;
+  description?: string | null;
+  severity?: SafetyAlertSeverity;
+  isOfficial?: boolean;
+  latitude?: number | null;
+  longitude?: number | null;
+  expiresAt?: string | null;
+}
 
-	severity: SafetyAlertSeverity;
-	title: string;
-	description: string;
-	dateTime: Date;
-	location: ILocation;
+export interface ISafetyAlertUpdate {
+  alertTypeId?: string;
+  gameId?: number | null;
+  venueId?: number | null;
+  title?: string;
+  description?: string | null;
+  severity?: SafetyAlertSeverity;
+  latitude?: number | null;
+  longitude?: number | null;
+  expiresAt?: string | null;
+  isActive?: boolean;
 }

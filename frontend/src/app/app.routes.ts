@@ -45,4 +45,18 @@ export const routes: Routes = [
       ),
     canActivate: [protectedGuard],
   },
+  {
+    path: 'community',
+    loadComponent: () =>
+      import('./features/community/views/community.component').then(
+        (m) => m.CommunityComponent,
+      ),
+    canActivate: [protectedGuard],
+  },
+  {
+    path: 'alerts',
+    loadComponent: () =>
+      import('./features/alerts/views/alerts.component').then((m) => m.AlertsComponent),
+    canActivate: [protectedGuard],
+  },
 ];

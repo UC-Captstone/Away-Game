@@ -1,0 +1,153 @@
+<div class="min-h-[calc(100vh-3.5rem)] bg-gradient-to-b from-slate-800 to-slate-900 px-4 py-8">
+  <div class="max-w-3xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-100">Alert History</h1>
+      <p class="text-sm text-slate-400 mt-1">Alerts you've previously acknowledged</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="mb-5 flex flex-col gap-3">
+
+      <!-- Search -->
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+        </svg>
+        <input
+          type="text"
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+          placeholder="Search by title…"
+          class="w-full pl-9 pr-4 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+        />
+      </div>
+
+      <!-- Filter row -->
+      <div class="flex flex-wrap gap-2 items-center">
+
+        <!-- Severity -->
+        <select
+          [value]="filterSeverity()"
+          (change)="filterSeverity.set($any($event.target).value)"
+          class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-sky-500"
+        >
+          <option value="">All severities</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+
+        <!-- Type -->
+        <select
+          [value]="filterType()"
+          (change)="filterType.set($any($event.target).value)"
+          class="px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-sky-500"
+        >
+          <option value="">All types</option>
+          @for (t of alertTypes(); track t.code) {
+            <option [value]="t.code">{{ t.typeName }}</option>
+          }
+        </select>
+
+        <!-- Official toggle -->
+        <div class="flex rounded-lg overflow-hidden border border-slate-700 text-xs">
+          @for (opt of [['all','All'],['official','Official'],['community','Community']]; track opt[0]) {
+            <button
+              type="button"
+              (click)="filterOfficial.set($any(opt[0]))"
+              class="px-3 py-2 transition-colors"
+              [ngClass]="filterOfficial() === opt[0]
+                ? 'bg-sky-500 text-white font-medium'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'"
+            >{{ opt[1] }}</button>
+          }
+        </div>
+
+        <!-- Clear -->
+        @if (hasActiveFilters()) {
+          <button
+            type="button"
+            (click)="clearFilters()"
+            class="px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors"
+          >
+            Clear filters
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Count -->
+    @if (!isLoading() && allAlerts().length > 0) {
+      <p class="text-xs text-slate-500 mb-4">
+        Showing {{ filteredAlerts().length }} of {{ allAlerts().length }} alerts
+      </p>
+    }
+
+    <!-- Loading -->
+    @if (isLoading()) {
+      <div class="flex justify-center py-16">
+        <svg class="animate-spin h-8 w-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (!isLoading() && filteredAlerts().length === 0) {
+      <div class="text-center py-16 text-slate-500">
+        <svg class="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        <p class="text-sm">
+          {{ hasActiveFilters() ? 'No alerts match the current filters.' : 'No acknowledged alerts yet.' }}
+        </p>
+      </div>
+    }
+
+    <!-- Alert list -->
+    @if (!isLoading() && filteredAlerts().length > 0) {
+      <div class="flex flex-col gap-3">
+        @for (alert of filteredAlerts(); track alert.alertId) {
+          <div
+            class="rounded-xl bg-slate-900 border p-4"
+            [ngClass]="alert.isOfficial ? 'border-amber-400/40 bg-amber-500/5' : 'border-slate-700'"
+          >
+            <!-- Top row: badges + time -->
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                @if (alert.isOfficial) {
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    OFFICIAL
+                  </span>
+                }
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded-full border capitalize"
+                  [ngClass]="severityClass(alert.severity)"
+                >{{ alert.severity }}</span>
+                <span class="text-[10px] text-slate-400 capitalize">{{ alert.alertTypeId }}</span>
+              </div>
+              <span class="shrink-0 text-[11px] text-slate-500">{{ alert.createdAt | date:'M/d/yy h:mm a' }}</span>
+            </div>
+
+            <!-- Title -->
+            <p class="text-sm font-semibold text-slate-100 mb-1">{{ alert.title }}</p>
+
+            <!-- Description -->
+            @if (alert.description) {
+              <p class="text-xs text-slate-300 mb-2 leading-snug">{{ alert.description }}</p>
+            }
+
+            <!-- Footer -->
+            <p class="text-[10px] text-slate-500">
+              Reported by: {{ alert.isOfficial ? 'Away Game' : (alert.source === 'admin' ? 'Admin' : 'Community') }}
+            </p>
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

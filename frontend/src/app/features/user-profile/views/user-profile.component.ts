@@ -7,6 +7,7 @@ import { BackButtonComponent } from '../../../shared/components/back-button/back
 import { UserAccountSettingsComponent } from '../components/user-account-settings/user-account-settings.component';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
 import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
+import { MyAlertsComponent } from '../components/my-alerts/my-alerts.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -19,6 +20,7 @@ import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
     UserAccountSettingsComponent,
     EventTileComponent,
     ChatTileComponent,
+    MyAlertsComponent,
   ],
 })
 export class UserProfileComponent implements OnInit {

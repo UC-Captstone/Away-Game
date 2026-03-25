@@ -45,6 +45,7 @@
           [currentUserId]="currentUserId"
           [deleting]="deletingId === msg.messageId"
           (deleteClicked)="onDelete($event)"
+          (avatarClicked)="onAvatarClick($event)"
         ></app-chat-message-item>
       }
     </div>
@@ -74,3 +75,61 @@
 
   <app-chat-typing-bar [sending]="sending" (sendClicked)="onSend($event)"></app-chat-typing-bar>
 </div>
+
+<!-- Friend Request Modal -->
+<app-popup-modal
+  [open]="!!friendRequestTarget"
+  (closed)="closeFriendRequestModal()"
+  title="Send Friend Request"
+  size="sm"
+>
+  @if (friendRequestTarget) {
+    <div class="space-y-4 pt-2">
+      <p class="text-slate-200">
+        Would you like to send a friend request to <span class="font-semibold text-white">{{ friendRequestTarget.userName }}</span>?
+      </p>
+
+      @if (friendRequestStatus === 'error') {
+        <div class="px-3 py-2 rounded-lg bg-red-900/60 border border-red-700 text-red-300 text-sm">
+          {{ friendRequestMessage }}
+        </div>
+      }
+
+      @if (friendRequestStatus === 'success') {
+        <div class="px-3 py-2 rounded-lg bg-emerald-900/60 border border-emerald-700 text-emerald-300 text-sm">
+          {{ friendRequestMessage }}
+        </div>
+      }
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          (click)="closeFriendRequestModal()"
+          class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
+        >
+          @if (friendRequestStatus === 'success') {
+            Close
+          } @else {
+            Cancel
+          }
+        </button>
+        
+        @if (friendRequestStatus !== 'success') {
+          <button
+            (click)="confirmFriendRequest()"
+            [disabled]="friendRequestStatus === 'loading'"
+            class="px-4 py-2 text-sm font-medium bg-sky-600 hover:bg-sky-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[80px]"
+          >
+            @if (friendRequestStatus === 'loading') {
+              <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+            } @else {
+              Send
+            }
+          </button>
+        }
+      </div>
+    </div>
+  }
+</app-popup-modal>
