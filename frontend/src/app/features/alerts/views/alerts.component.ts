@@ -3,7 +3,7 @@ import { Component, computed, OnInit, signal, WritableSignal } from '@angular/co
 import { FormsModule } from '@angular/forms';
 import { IAlertType } from '../../../shared/models/alert-type';
 import { ISafetyAlert, SafetyAlertSeverity } from '../../../shared/models/safety-alert';
-import { AlertService } from '../../../shared/services/alert.service';
+import { SafetyAlertService } from '../../../shared/services/safety-alert.service';
 
 @Component({
   selector: 'app-alerts',
@@ -44,10 +44,10 @@ export class AlertsComponent implements OnInit {
       !!this.searchTerm().trim(),
   );
 
-  constructor(private alertService: AlertService) {}
+  constructor(private safetyAlertService: SafetyAlertService) {}
 
   ngOnInit(): void {
-    this.alertService.getAlertTypes().subscribe({
+    this.safetyAlertService.getAlertTypes().subscribe({
       next: (types) => this.alertTypes.set(types),
     });
     this.load();
@@ -55,7 +55,7 @@ export class AlertsComponent implements OnInit {
 
   load(): void {
     this.isLoading.set(true);
-    this.alertService.getAlertHistory(200).subscribe({
+    this.safetyAlertService.getAlertHistory(200).subscribe({
       next: (alerts) => {
         this.allAlerts.set(alerts);
         this.isLoading.set(false);

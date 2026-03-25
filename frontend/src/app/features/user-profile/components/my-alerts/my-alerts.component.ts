@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SafetyAlertService } from '../../../../shared/services/safety-alert.service';
-import { AlertService } from '../../../../shared/services/alert.service';
 import { IAlertType } from '../../../../shared/models/alert-type';
 import {
   ISafetyAlert,
@@ -33,13 +32,10 @@ export class MyAlertsComponent implements OnInit {
   severities: SafetyAlertSeverity[] = ['low', 'medium', 'high'];
   alertTypes: IAlertType[] = [];
 
-  constructor(
-    private safetyAlertService: SafetyAlertService,
-    private alertService: AlertService,
-  ) {}
+  constructor(private safetyAlertService: SafetyAlertService) {}
 
   ngOnInit(): void {
-    this.alertService.getAlertTypes().subscribe({
+    this.safetyAlertService.getAlertTypes().subscribe({
       next: (types) => {
         this.alertTypes = types;
       },

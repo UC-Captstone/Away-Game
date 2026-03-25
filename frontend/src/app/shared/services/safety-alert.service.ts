@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { IAlertType } from '../models/alert-type';
 import { ISafetyAlert, ISafetyAlertCreate, ISafetyAlertUpdate } from '../models/safety-alert';
 
 @Injectable({
@@ -11,6 +12,16 @@ export class SafetyAlertService {
   private apiUrl = `${environment.apiUrl}/safety-alerts`;
 
   constructor(private http: HttpClient) {}
+
+  getAlertTypes(): Observable<IAlertType[]> {
+    return this.http.get<IAlertType[]>(`${environment.apiUrl}/alert-types`);
+  }
+
+  getAlertHistory(limit: number = 200): Observable<ISafetyAlert[]> {
+    return this.http.get<ISafetyAlert[]>(`${this.apiUrl}/history`, {
+      params: new HttpParams().set('limit', limit.toString()),
+    });
+  }
 
   listAlerts(
     gameId?: number,
