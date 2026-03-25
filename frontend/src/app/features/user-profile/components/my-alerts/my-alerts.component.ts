@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SafetyAlertService } from '../../../../shared/services/safety-alert.service';
-import { ISafetyAlert, ISafetyAlertUpdate, SafetyAlertSeverity } from '../../../../shared/models/safety-alert';
-import { environment } from '../../../../../environments/environment';
-
-interface IAlertType {
-  code: string;
-  typeName: string;
-}
+import { AlertService } from '../../../../shared/services/alert.service';
+import { IAlertType } from '../../../../shared/models/alert-type';
+import {
+  ISafetyAlert,
+  ISafetyAlertUpdate,
+  SafetyAlertSeverity,
+} from '../../../../shared/models/safety-alert';
 
 @Component({
   selector: 'app-my-alerts',
@@ -34,11 +33,16 @@ export class MyAlertsComponent implements OnInit {
   severities: SafetyAlertSeverity[] = ['low', 'medium', 'high'];
   alertTypes: IAlertType[] = [];
 
-  constructor(private safetyAlertService: SafetyAlertService, private http: HttpClient) {}
+  constructor(
+    private safetyAlertService: SafetyAlertService,
+    private alertService: AlertService,
+  ) {}
 
   ngOnInit(): void {
-    this.http.get<IAlertType[]>(`${environment.apiUrl}/alert-types`).subscribe({
-      next: (types) => { this.alertTypes = types; },
+    this.alertService.getAlertTypes().subscribe({
+      next: (types) => {
+        this.alertTypes = types;
+      },
       error: () => {},
     });
     this.loadMyAlerts();
@@ -107,7 +111,9 @@ export class MyAlertsComponent implements OnInit {
       next: () => {
         this.alerts.set(this.alerts().filter((a) => a.alertId !== alertId));
       },
-      error: () => { /* silently ignore */ },
+      error: () => {
+        /* silently ignore */
+      },
     });
   }
 }
