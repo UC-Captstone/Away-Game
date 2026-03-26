@@ -1,15 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SafetyAlertService } from '../../../../shared/services/safety-alert.service';
+import { IAlertType } from '../../../../shared/models/alert-type';
 import { ISafetyAlertCreate, SafetyAlertSeverity } from '../../../../shared/models/safety-alert';
-import { environment } from '../../../../../environments/environment';
-
-interface IAlertType {
-  code: string;
-  typeName: string;
-}
 
 @Component({
   selector: 'app-alert-form',
@@ -37,13 +31,10 @@ export class AlertFormComponent implements OnInit {
 
   severities: SafetyAlertSeverity[] = ['low', 'medium', 'high'];
 
-  constructor(
-    private http: HttpClient,
-    private safetyAlertService: SafetyAlertService,
-  ) {}
+  constructor(private safetyAlertService: SafetyAlertService) {}
 
   ngOnInit(): void {
-    this.http.get<IAlertType[]>(`${environment.apiUrl}/alert-types`).subscribe({
+    this.safetyAlertService.getAlertTypes().subscribe({
       next: (types) => {
         this.alertTypes = types;
         if (types.length > 0) {

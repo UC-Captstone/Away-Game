@@ -1,4 +1,13 @@
-import { Component, OnInit, OnDestroy, Output, Input, EventEmitter, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  Output,
+  Input,
+  EventEmitter,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, Subscription, forkJoin, of } from 'rxjs';
@@ -10,179 +19,7 @@ import { IFriendRequest, IFriendship, IUserSearchResult } from '../../../shared/
   selector: 'app-friends-management',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="space-y-4">
-      <!-- Add Friend by Username Search -->
-      <div class="bg-slate-900 border border-slate-700 rounded-lg p-4">
-        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Add Friend</h3>
-        <div class="flex gap-2">
-          <input
-            [(ngModel)]="searchQuery"
-            (ngModelChange)="onSearchQueryChange($event)"
-            (keyup.enter)="onSearchNow()"
-            placeholder="Search by username…"
-            class="flex-1 min-w-0 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-slate-100 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-sm"
-          />
-          <button
-            (click)="onSearchNow()"
-            [disabled]="searching() || !searchQuery.trim()"
-            class="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white px-3 py-2 rounded text-sm transition-colors flex-shrink-0"
-          >
-            @if (searching()) {
-              <span class="inline-block animate-spin">⟳</span>
-            } @else {
-              🔍
-            }
-          </button>
-        </div>
-
-        <!-- Search Results -->
-        @if (searchResults().length > 0) {
-          <div class="mt-3 space-y-2">
-            @for (user of searchResults(); track user.userId) {
-              <div class="flex items-center justify-between bg-slate-700 rounded-lg px-3 py-2 gap-2">
-                <div class="flex items-center gap-2 min-w-0">
-                  @if (user.avatarUrl) {
-                    <img [src]="user.avatarUrl" [alt]="user.username" class="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                  } @else {
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 flex-shrink-0"></div>
-                  }
-                  <span class="text-slate-100 text-sm truncate">{{ user.username }}</span>
-                </div>
-                <button
-                  (click)="onSendRequestToUser(user.userId)"
-                  [disabled]="sendingToUserId() === user.userId || alreadyFriendOrPending(user.userId)"
-                  class="text-xs px-2 py-1 rounded transition-colors flex-shrink-0"
-                  [class.bg-sky-600]="!alreadyFriendOrPending(user.userId)"
-                  [class.hover:bg-sky-700]="!alreadyFriendOrPending(user.userId)"
-                  [class.text-white]="!alreadyFriendOrPending(user.userId)"
-                  [class.bg-slate-600]="alreadyFriendOrPending(user.userId)"
-                  [class.text-slate-400]="alreadyFriendOrPending(user.userId)"
-                  [class.cursor-not-allowed]="alreadyFriendOrPending(user.userId)"
-                >
-                  @if (sendingToUserId() === user.userId) {
-                    …
-                  } @else if (isFriend(user.userId)) {
-                    Friends ✓
-                  } @else if (isPending(user.userId)) {
-                    Pending
-                  } @else {
-                    + Add
-                  }
-                </button>
-              </div>
-            }
-          </div>
-        } @else if (searchQuery.trim() && !searching() && hasSearched) {
-          <p class="mt-2 text-slate-400 text-xs text-center">No users found</p>
-        }
-
-        @if (requestError()) {
-          <div class="mt-2 text-red-400 text-xs px-2 py-1 bg-red-950/30 rounded">{{ requestError() }}</div>
-        }
-      </div>
-
-      <!-- Incoming Requests -->
-      @if (receivedRequests().length > 0) {
-        <div class="bg-slate-900 border border-slate-700 rounded-lg p-4">
-          <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">
-            Requests ({{ receivedRequests().length }})
-          </h3>
-          <div class="space-y-2">
-            @for (req of receivedRequests(); track req.requestId) {
-              <div class="flex items-center gap-2 bg-slate-700 rounded-lg px-3 py-2">
-                @if (req.senderAvatarUrl) {
-                  <img [src]="req.senderAvatarUrl" [alt]="req.senderUsername || 'User'" class="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                } @else {
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex-shrink-0"></div>
-                }
-                <div class="flex-1 min-w-0">
-                  <div class="text-slate-100 text-sm font-medium truncate">{{ req.senderUsername || 'Unknown' }}</div>
-                </div>
-                <div class="flex gap-1 flex-shrink-0">
-                  <button
-                    (click)="onAcceptRequest(req.requestId)"
-                    [disabled]="processingRequestId() === req.requestId"
-                    class="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-2 py-1 rounded text-xs transition-colors"
-                  >✓</button>
-                  <button
-                    (click)="onRejectRequest(req.requestId)"
-                    [disabled]="processingRequestId() === req.requestId"
-                    class="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-2 py-1 rounded text-xs transition-colors"
-                  >✕</button>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-      }
-
-      <!-- Friends List -->
-      <div class="bg-slate-900 border border-slate-700 rounded-lg p-4">
-        <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">
-          Friends{{ friends().length ? ' (' + friends().length + ')' : '' }}
-        </h3>
-
-        @if (loading()) {
-          <div class="flex justify-center py-6">
-            <div class="animate-spin h-5 w-5 border-2 border-sky-500 border-t-transparent rounded-full"></div>
-          </div>
-        } @else if (friends().length === 0) {
-          <p class="text-slate-500 text-sm text-center py-4">No friends yet. Search for someone above!</p>
-        } @else {
-          <div class="space-y-1">
-            @for (friend of friends(); track friend.friendshipId) {
-              <div
-                class="flex items-center gap-3 rounded-lg px-3 py-2 cursor-pointer transition-colors group"
-                [class.bg-sky-600]="selectedFriendId === friend.friendUserId"
-                [class.hover:bg-slate-700]="selectedFriendId !== friend.friendUserId"
-                (click)="onSelectFriend(friend)"
-              >
-                @if (friend.friendAvatarUrl) {
-                  <img [src]="friend.friendAvatarUrl" [alt]="friend.friendUsername" class="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-                } @else {
-                  <div
-                    class="w-9 h-9 rounded-full flex-shrink-0"
-                    [class.bg-gradient-to-br]="true"
-                    [class.from-cyan-500]="true"
-                    [class.to-cyan-600]="true"
-                  ></div>
-                }
-                <div class="flex-1 min-w-0">
-                  <div class="text-sm font-medium truncate"
-                    [class.text-white]="selectedFriendId === friend.friendUserId"
-                    [class.text-slate-100]="selectedFriendId !== friend.friendUserId"
-                  >{{ friend.friendUsername }}</div>
-                </div>
-                <button
-                  (click)="$event.stopPropagation(); onRemoveFriend(friend.friendUserId)"
-                  [disabled]="removingFriendId() === friend.friendUserId"
-                  title="Remove friend"
-                  class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 disabled:opacity-30 text-xs transition-opacity flex-shrink-0 p-1"
-                >✕</button>
-              </div>
-            }
-          </div>
-        }
-      </div>
-
-      <!-- Sent Requests (collapsed) -->
-      @if (sentRequests().length > 0) {
-        <div class="bg-slate-900 border border-slate-700 rounded-lg p-4">
-          <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-2">Sent ({{ sentRequests().length }})</h3>
-          <div class="space-y-1">
-            @for (req of sentRequests(); track req.requestId) {
-              <div class="flex items-center gap-2 px-2 py-1">
-                <div class="w-6 h-6 rounded-full bg-slate-600 flex-shrink-0"></div>
-                <span class="text-slate-400 text-xs truncate">{{ req.receiverUsername || 'Unknown' }}</span>
-                <span class="text-xs text-slate-500 ml-auto">⏳</span>
-              </div>
-            }
-          </div>
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './friends-management.component.html',
 })
 export class FriendsManagementComponent implements OnInit, OnDestroy {
   @Input() selectedFriendId: string | null = null;
@@ -214,29 +51,31 @@ export class FriendsManagementComponent implements OnInit, OnDestroy {
     this.loadData(true);
     this.startPolling();
     this.subs.add(
-      this.searchSubject.pipe(
-        debounceTime(350),
-        distinctUntilChanged(),
-        switchMap((q) => {
-          if (!q.trim()) {
+      this.searchSubject
+        .pipe(
+          debounceTime(350),
+          distinctUntilChanged(),
+          switchMap((q) => {
+            if (!q.trim()) {
+              this.searchResults.set([]);
+              this.searching.set(false);
+              return of([] as IUserSearchResult[]);
+            }
+            this.searching.set(true);
+            return this.friendsService.searchUsers(q.trim());
+          }),
+        )
+        .subscribe({
+          next: (results) => {
+            this.searchResults.set(results);
+            this.searching.set(false);
+            this.hasSearched = true;
+          },
+          error: () => {
             this.searchResults.set([]);
             this.searching.set(false);
-            return of([] as IUserSearchResult[]);
-          }
-          this.searching.set(true);
-          return this.friendsService.searchUsers(q.trim());
+          },
         }),
-      ).subscribe({
-        next: (results) => {
-          this.searchResults.set(results);
-          this.searching.set(false);
-          this.hasSearched = true;
-        },
-        error: () => {
-          this.searchResults.set([]);
-          this.searching.set(false);
-        },
-      }),
     );
   }
 
@@ -323,9 +162,26 @@ export class FriendsManagementComponent implements OnInit, OnDestroy {
       }).subscribe({
         next: (data) => {
           const signature = JSON.stringify({
-            friends: data.friends.map((f) => [f.friendshipId, f.friendUserId, f.friendUsername, f.createdAt]),
-            sent: data.sentRequests.map((r) => [r.requestId, r.receiverId, r.status, r.updatedAt, r.createdAt]),
-            received: data.receivedRequests.map((r) => [r.requestId, r.senderId, r.status, r.updatedAt, r.createdAt]),
+            friends: data.friends.map((f) => [
+              f.friendshipId,
+              f.friendUserId,
+              f.friendUsername,
+              f.createdAt,
+            ]),
+            sent: data.sentRequests.map((r) => [
+              r.requestId,
+              r.receiverId,
+              r.status,
+              r.updatedAt,
+              r.createdAt,
+            ]),
+            received: data.receivedRequests.map((r) => [
+              r.requestId,
+              r.senderId,
+              r.status,
+              r.updatedAt,
+              r.createdAt,
+            ]),
           });
 
           if (force || signature !== this.lastDataSignature) {
@@ -359,7 +215,9 @@ export class FriendsManagementComponent implements OnInit, OnDestroy {
     this.subs.add(
       this.friendsService.acceptFriendRequest(requestId).subscribe({
         next: () => {
-          this.receivedRequests.set(this.receivedRequests().filter((r) => r.requestId !== requestId));
+          this.receivedRequests.set(
+            this.receivedRequests().filter((r) => r.requestId !== requestId),
+          );
           this.loadData(true);
           this.processingRequestId.set(null);
         },
@@ -376,7 +234,9 @@ export class FriendsManagementComponent implements OnInit, OnDestroy {
     this.subs.add(
       this.friendsService.rejectFriendRequest(requestId).subscribe({
         next: () => {
-          this.receivedRequests.set(this.receivedRequests().filter((r) => r.requestId !== requestId));
+          this.receivedRequests.set(
+            this.receivedRequests().filter((r) => r.requestId !== requestId),
+          );
           this.loadData(true);
           this.processingRequestId.set(null);
         },

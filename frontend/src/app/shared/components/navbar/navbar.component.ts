@@ -1,29 +1,42 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, EventEmitter, OnDestroy, Output, WritableSignal, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  EventEmitter,
+  OnDestroy,
+  Output,
+  WritableSignal,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ClerkService } from '@jsrob/ngx-clerk';
 import { AuthService } from '../../../features/auth/services/auth.service';
+import { NotificationBellButtonComponent } from './notification-bell-button/notification-bell-button.component';
+import { NotificationsDropdownComponent } from './notifications-dropdown/notifications-dropdown.component';
+import { IDMNotification } from '../../models/dm-notification';
 import { INavBar } from '../../models/navbar';
 import { UserService } from '../../services/user.service';
 import { SafetyAlertService } from '../../services/safety-alert.service';
 import { ISafetyAlert } from '../../models/safety-alert';
 import { FriendsService } from '../../services/friends.service';
-import { IConversationPreview, IDirectMessage } from '../../models/direct-message';
+import { IDirectMessage } from '../../models/direct-message';
 import { catchError, forkJoin, map, of } from 'rxjs';
 
 const POLL_INTERVAL_MS = 30_000;
 const DM_SEEN_STORAGE_KEY = 'away-game:dm-seen-at-by-friend';
 const DM_BASELINE_INITIALIZED_KEY = 'away-game:dm-baseline-initialized';
 
-interface IDMNotification extends IConversationPreview {
-  lastMessageId: string;
-}
-
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    CommonModule,
+    NotificationBellButtonComponent,
+    NotificationsDropdownComponent,
+  ],
 })
 export class NavBarComponent implements OnDestroy {
   @Output() isLoading: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -34,6 +47,7 @@ export class NavBarComponent implements OnDestroy {
   dmNotifications: WritableSignal<IDMNotification[]> = signal([]);
   isBellOpen: WritableSignal<boolean> = signal(false);
   isAdmin = false;
+  readonly relativeTimeFormatter = (dateString: string): string => this.getRelativeTime(dateString);
 
   private navBarLoaded = false;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
@@ -113,9 +127,7 @@ export class NavBarComponent implements OnDestroy {
 
         forkJoin(requests).subscribe({
           next: (results) => {
-            const incomingLatest = results.filter(
-              (item): item is IDMNotification => item !== null,
-            );
+            const incomingLatest = results.filter((item): item is IDMNotification => item !== null);
 
             if (!this.isDmBaselineInitialized()) {
               incomingLatest.forEach((item) => {
@@ -199,12 +211,14 @@ export class NavBarComponent implements OnDestroy {
     this.isBellOpen.set(!wasOpen);
 
     // When closing: auto-ack all non-official alerts (user has had a chance to read them)
-    if (wasOpen && this.unacknowledgedAlerts().some(a => !a.isOfficial)) {
+    if (wasOpen && this.unacknowledgedAlerts().some((a) => !a.isOfficial)) {
       this.safetyAlertService.acknowledgeAll().subscribe({
         next: () => {
-          this.unacknowledgedAlerts.set(this.unacknowledgedAlerts().filter(a => a.isOfficial));
+          this.unacknowledgedAlerts.set(this.unacknowledgedAlerts().filter((a) => a.isOfficial));
         },
-        error: () => { /* silently ignore */ },
+        error: () => {
+          /* silently ignore */
+        },
       });
     }
   }
@@ -213,27 +227,34 @@ export class NavBarComponent implements OnDestroy {
     this.safetyAlertService.acknowledgeAlert(alertId).subscribe({
       next: () => {
         this.unacknowledgedAlerts.set(
-          this.unacknowledgedAlerts().filter(a => a.alertId !== alertId)
+          this.unacknowledgedAlerts().filter((a) => a.alertId !== alertId),
         );
       },
-      error: () => { /* silently ignore */ },
+      error: () => {
+        /* silently ignore */
+      },
     });
   }
 
   closeBell(): void {
     this.isBellOpen.set(false);
     // Auto-ack non-official alerts when closing via backdrop click
-    if (this.unacknowledgedAlerts().some(a => !a.isOfficial)) {
+    if (this.unacknowledgedAlerts().some((a) => !a.isOfficial)) {
       this.safetyAlertService.acknowledgeAll().subscribe({
         next: () => {
-          this.unacknowledgedAlerts.set(this.unacknowledgedAlerts().filter(a => a.isOfficial));
+          this.unacknowledgedAlerts.set(this.unacknowledgedAlerts().filter((a) => a.isOfficial));
         },
-        error: () => { /* silently ignore */ },
+        error: () => {
+          /* silently ignore */
+        },
       });
     }
   }
 
-  private buildDmNotification(friend: { friendUserId: string; friendUsername: string; friendAvatarUrl?: string | null }, lastMessage: IDirectMessage | null): IDMNotification | null {
+  private buildDmNotification(
+    friend: { friendUserId: string; friendUsername: string; friendAvatarUrl?: string | null },
+    lastMessage: IDirectMessage | null,
+  ): IDMNotification | null {
     if (!lastMessage) {
       return null;
     }

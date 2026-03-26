@@ -7,6 +7,9 @@ import { IChatMessage } from '../../models/chat';
   templateUrl: './chat-message-item.component.html',
   standalone: true,
   imports: [CommonModule],
+  host: {
+    class: 'block w-full',
+  },
 })
 export class ChatMessageItemComponent {
   @Input() message!: IChatMessage;
@@ -18,6 +21,10 @@ export class ChatMessageItemComponent {
 
   onDelete(): void {
     this.deleteClicked.emit(this.message.messageId);
+  }
+
+  get isOwnMessage(): boolean {
+    return this.message?.userId === this.currentUserId;
   }
 
   onAvatarClick(): void {
