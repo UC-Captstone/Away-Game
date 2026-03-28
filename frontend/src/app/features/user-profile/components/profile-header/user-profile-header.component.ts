@@ -15,10 +15,12 @@ export class UserProfileHeaderComponent {
   @Input() availableTeams: ITeam[] = [];
   @Input() isSavingPicture = false;
   @Output() profilePictureSelected = new EventEmitter<string | null>();
+  @Output() pickerOpening = new EventEmitter<void>();
 
   isPickerOpen = false;
 
   openPicker(): void {
+    this.pickerOpening.emit();
     this.isPickerOpen = true;
   }
 

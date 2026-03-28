@@ -28,6 +28,7 @@ import { ITeam } from '../../../shared/models/team';
 export class UserProfileComponent implements OnInit, OnDestroy {
   userProfile: IUserProfile | null = null;
   availableTeams: ITeam[] = [];
+  private teamsLoaded = false;
   selectedTab: WritableSignal<string> = signal('profile');
   isLoading: WritableSignal<boolean> = signal(false);
   isSavingProfilePicture: WritableSignal<boolean> = signal(false);
@@ -43,7 +44,6 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadUserProfile();
-    this.loadTeamChoices();
   }
 
   ngOnDestroy(): void {
@@ -59,6 +59,12 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   selectTab(tab: string) {
     this.selectedTab.set(tab);
+  }
+
+  onPickerOpening(): void {
+    if (!this.teamsLoaded) {
+      this.loadTeamChoices();
+    }
   }
 
   onProfilePictureSelected(profilePictureUrl: string | null): void {
@@ -133,6 +139,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
         }
 
         this.availableTeams = deduped;
+        this.teamsLoaded = true;
       },
       error: (error) => {
         console.error('Error loading teams for profile pictures:', error);

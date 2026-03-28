@@ -59,6 +59,7 @@
         [profileHeaderInfo]="profile.headerInfo"
         [availableTeams]="availableTeams"
         [isSavingPicture]="isSavingProfilePicture()"
+        (pickerOpening)="onPickerOpening()"
         (profilePictureSelected)="onProfilePictureSelected($event)"
       ></app-user-profile-header>
 
