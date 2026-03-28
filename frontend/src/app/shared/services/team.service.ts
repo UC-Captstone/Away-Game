@@ -32,4 +32,9 @@ export class TeamService {
   getTeamById(teamId: number): Observable<ITeam> {
     return this.http.get<ITeam>(`${this.apiUrl}/${teamId}`);
   }
+
+  getAllTeams(limit: number = 500): Observable<ITeam[]> {
+    const params = new HttpParams().set('limit', limit.toString());
+    return this.http.get<ITeam[]>(this.apiUrl, { params });
+  }
 }

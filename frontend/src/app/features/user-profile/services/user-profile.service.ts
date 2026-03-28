@@ -47,4 +47,10 @@ export class UserProfileService {
       .pipe(catchError(handleError));
   }
 
+  updateProfilePicture(profilePictureUrl: string | null): Observable<null> {
+    return this.http
+      .patch<null>(`${this.apiUrl}/profile-picture`, { profilePictureUrl })
+      .pipe(catchError(handleError));
+  }
+
 }

@@ -52,6 +52,16 @@ export class NavBarComponent implements OnDestroy {
   private navBarLoaded = false;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private dmSeenAtByFriend: Record<string, string> = {};
+  private readonly onProfilePictureUpdated = (event: Event) => {
+    const customEvent = event as CustomEvent<{ profilePictureUrl: string | null }>;
+    if (!this.navBarInfo) {
+      return;
+    }
+    this.navBarInfo = {
+      ...this.navBarInfo,
+      profilePictureUrl: customEvent.detail?.profilePictureUrl || undefined,
+    };
+  };
 
   constructor(
     private userService: UserService,
@@ -62,6 +72,7 @@ export class NavBarComponent implements OnDestroy {
     private router: Router,
   ) {
     this.dmSeenAtByFriend = this.getStoredDmSeenMap();
+    window.addEventListener('away-game:profile-picture-updated', this.onProfilePictureUpdated);
 
     effect(() => {
       const clerk = this.clerkService.clerk();
@@ -97,6 +108,7 @@ export class NavBarComponent implements OnDestroy {
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
     }
+    window.removeEventListener('away-game:profile-picture-updated', this.onProfilePictureUpdated);
   }
 
   get unacknowledgedCount(): number {
