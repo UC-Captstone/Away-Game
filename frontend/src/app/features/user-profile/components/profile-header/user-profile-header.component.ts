@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IHeaderInfo } from '../../models/header';
+import { ITeam } from '../../../../shared/models/team';
 
 @Component({
   selector: 'app-user-profile-header',
@@ -11,11 +12,37 @@ import { IHeaderInfo } from '../../models/header';
 })
 export class UserProfileHeaderComponent {
   @Input() profileHeaderInfo!: IHeaderInfo;
+  @Input() availableTeams: ITeam[] = [];
+  @Input() isSavingPicture = false;
+  @Output() profilePictureSelected = new EventEmitter<string | null>();
+  @Output() pickerOpening = new EventEmitter<void>();
 
-  // Nathan
-  // placeholder for handling avatar change event
-  // implement actual upload logic later
-  onAvatarChange(event: Event): void {
-    console.log('new image uploaded');
+  isPickerOpen = false;
+
+  openPicker(): void {
+    this.pickerOpening.emit();
+    this.isPickerOpen = true;
+  }
+
+  closePicker(): void {
+    this.isPickerOpen = false;
+  }
+
+  onSelectProfilePicture(logoUrl: string): void {
+    this.profilePictureSelected.emit(logoUrl);
+    this.closePicker();
+  }
+
+  onResetProfilePicture(): void {
+    this.profilePictureSelected.emit(null);
+    this.closePicker();
+  }
+
+  isCurrentPicture(logoUrl: string): boolean {
+    return (this.profileHeaderInfo?.profilePictureUrl || '') === logoUrl;
+  }
+
+  trackByTeamId(_: number, team: ITeam): number {
+    return team.teamId;
   }
 }

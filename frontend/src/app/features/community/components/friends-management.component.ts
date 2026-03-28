@@ -166,11 +166,13 @@ export class FriendsManagementComponent implements OnInit, OnDestroy {
               f.friendshipId,
               f.friendUserId,
               f.friendUsername,
+              f.friendAvatarUrl,
               f.createdAt,
             ]),
             sent: data.sentRequests.map((r) => [
               r.requestId,
               r.receiverId,
+              r.receiverAvatarUrl,
               r.status,
               r.updatedAt,
               r.createdAt,
@@ -178,6 +180,7 @@ export class FriendsManagementComponent implements OnInit, OnDestroy {
             received: data.receivedRequests.map((r) => [
               r.requestId,
               r.senderId,
+              r.senderAvatarUrl,
               r.status,
               r.updatedAt,
               r.createdAt,
@@ -189,6 +192,13 @@ export class FriendsManagementComponent implements OnInit, OnDestroy {
             this.sentRequests.set(data.sentRequests);
             this.receivedRequests.set(data.receivedRequests);
             this.lastDataSignature = signature;
+
+            if (this.selectedFriendId) {
+              const updatedSelected = data.friends.find((f) => f.friendUserId === this.selectedFriendId);
+              if (updatedSelected) {
+                this.selectedFriendChange.emit(updatedSelected);
+              }
+            }
           }
 
           this.loading.set(false);

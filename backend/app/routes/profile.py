@@ -6,6 +6,7 @@ from uuid import UUID
 from repositories.profile_repo import (
     get_user_profile_service,
     update_account_settings_service,
+    update_profile_picture_service,
     update_favorite_teams_service,
     delete_account_service,
     add_saved_event_service,
@@ -16,7 +17,7 @@ from repositories.profile_repo import (
 from db.session import get_session
 from auth import get_current_user
 from models.user import User
-from schemas.user import NavBarInfo, UserProfile, AccountSettings
+from schemas.user import NavBarInfo, UserProfile, AccountSettings, ProfilePictureUpdate
 from schemas.user_favorite_team import FavoriteTeamsUpdate
 from schemas.event import EventRead
 
@@ -37,6 +38,16 @@ async def update_account_settings(
     db: AsyncSession = Depends(get_session)
 ):
     await update_account_settings_service(current_user, db, account_settings)
+    return None
+
+
+@router.patch("/profile-picture", status_code=status.HTTP_204_NO_CONTENT)
+async def update_profile_picture(
+    payload: ProfilePictureUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session)
+):
+    await update_profile_picture_service(current_user, db, payload.profile_picture_url)
     return None
 
 

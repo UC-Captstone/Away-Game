@@ -277,6 +277,36 @@ async def get_navbar_info_service(current_user: User, db: AsyncSession) -> NavBa
     )
 
 
+async def update_profile_picture_service(
+    current_user: User,
+    db: AsyncSession,
+    profile_picture_url: str | None,
+) -> None:
+    normalized_url = profile_picture_url.strip() if profile_picture_url is not None else None
+    if normalized_url == "":
+        normalized_url = None
+
+    if normalized_url is not None:
+        team_logo_exists_stmt = (
+            select(Team.team_id)
+            .where(Team.logo_url == normalized_url)
+            .limit(1)
+        )
+        team_logo_exists_result = await db.execute(team_logo_exists_stmt)
+        if team_logo_exists_result.scalar_one_or_none() is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Selected profile picture is not a valid team logo",
+            )
+
+    if current_user.profile_picture_url == normalized_url:
+        return
+
+    current_user.profile_picture_url = normalized_url
+    await db.commit()
+    await db.refresh(current_user)
+
+
 def _convert_game_to_read(game: Game, is_saved: bool = False) -> EventRead:
     home_team_name = (
         game.home_team.display_name
