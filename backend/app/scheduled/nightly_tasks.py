@@ -321,7 +321,7 @@ async def run_nightly_task():
             await session.commit()
             logger.info("Scraper ran successfully")
     except Exception as e:
-        logger.exception(f"Scraper failed: {e}")
+        logger.exception(f"Scraper run failed: {e}")
         raise
     finally:
         await client.close()
