@@ -6,8 +6,9 @@ from enum import Enum
 
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
-from .common import Location, ConfigDict
-from pydantic.alias_generators import to_camel
+from .common import Location
+from .game import GameRead
+from .venue import VenueRead
 
 
 class SafetyAlertBase(BaseModel):
@@ -71,6 +72,9 @@ class SafetyAlertRead(SafetyAlertBase):
 
     class Config:
         from_attributes = True
+
+
+SafetyAlertRead.model_rebuild()
 
 
 class SafetyAlertSeverity(str, Enum):

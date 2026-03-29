@@ -60,7 +60,7 @@ class UserAlertAcknowledgmentRepository:
                 SafetyAlert.is_active == True,
                 SafetyAlert.alert_id.notin_(acknowledged_alert_ids),
                 SafetyAlert.game_id.isnot(None),
-                SafetyAlert.game_id.in_(favorited_game_ids),
+                SafetyAlert.game_id.in_(select(favorited_game_ids.c.game_id)),
             )
             .order_by(SafetyAlert.is_official.desc(), SafetyAlert.created_at.desc())
         )
