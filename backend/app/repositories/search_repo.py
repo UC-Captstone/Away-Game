@@ -152,6 +152,7 @@ async def search_games(
 async def search_events(query: str, db: AsyncSession, limit: int) -> List[SearchResult]:
     stmt = (
         select(Event)
+        .where(Event.event_type_id != "GAME")
         .where(
             or_(
                 Event.title.ilike(f"%{query}%"),

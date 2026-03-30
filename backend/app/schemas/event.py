@@ -1,10 +1,10 @@
 # app/schemas/event.py
 from __future__ import annotations
 from uuid import UUID
-from datetime import datetime
+from datetime import date, datetime, time
 from typing import Optional
 from schemas.common import Location
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic.alias_generators import to_camel
 from .venue import VenueRead
 from .game import GameRead
@@ -65,3 +65,32 @@ class EventRead(BaseModel):
     
     game: Optional[GameRead] = Field(None, exclude=True)
     venue: Optional[VenueRead] = Field(None, exclude=True)
+
+
+class EventSearchFilters(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    keyword: str = ""
+    leagues: list[LeagueEnum] = Field(default_factory=list)
+    team_ids: list[int] = Field(default_factory=list)
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    location_query: str = ""
+    saved_only: bool = False
+    event_types: list[EventTypeEnum] = Field(default_factory=list)
+
+    @field_validator("start_date", "end_date", mode="before")
+    @classmethod
+    def _empty_string_to_none(cls, value):
+        if value == "":
+            return None
+        return value
+
+    @model_validator(mode="after")
+    def _validate_date_range(self) -> "EventSearchFilters":
+        if self.start_date and self.end_date:
+            start_dt = datetime.combine(self.start_date, time.min)
+            end_dt = datetime.combine(self.end_date, time.max)
+            if start_dt > end_dt:
+                raise ValueError("startDate must be less than or equal to endDate")
+        return self

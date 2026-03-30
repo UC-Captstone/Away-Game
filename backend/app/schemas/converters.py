@@ -39,11 +39,8 @@ def convert_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
         type_map = {
             "GAME": EventTypeEnum.GAME,
             "TAILGATE": EventTypeEnum.TAILGATE,
-            "PREGAME": EventTypeEnum.PREGAME,
             "POSTGAME": EventTypeEnum.POSTGAME,
             "WATCH": EventTypeEnum.WATCH,
-            "WATCH_PARTY": EventTypeEnum.WATCH_PARTY,
-            "MEETUP": EventTypeEnum.MEETUP,
             "OTHER": EventTypeEnum.OTHER,
         }
         event_type = type_map.get(event.event_type_id.upper(), EventTypeEnum.GAME)

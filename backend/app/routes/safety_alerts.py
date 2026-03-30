@@ -127,8 +127,7 @@ async def create_alert(
     repo = SafetyAlertRepository(db)
     created = await repo.add(alert)
     await db.commit()
-    await db.refresh(created)
-    return created
+    return await repo.get(created.alert_id)
 
 
 @router.patch("/{alert_id}", response_model=SafetyAlertRead)
@@ -143,13 +142,12 @@ async def update_alert(
     if not alert:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Alert not found")
 
-    updated = await repo.update_fields(
+    await repo.update_fields(
         alert_id,
         **alert_data.model_dump(exclude_unset=True),
     )
     await db.commit()
-    await db.refresh(updated)
-    return updated
+    return await repo.get(alert_id)
 
 
 @router.delete("/{alert_id}", status_code=status.HTTP_204_NO_CONTENT)
