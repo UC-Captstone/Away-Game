@@ -2,7 +2,7 @@ from .league import LeagueCreate, LeagueUpdate, LeagueRead
 from .team import TeamCreate, TeamUpdate, TeamRead
 from .venue import VenueCreate, VenueUpdate, VenueRead
 from .game import GameCreate, GameUpdate, GameRead
-from .event import EventCreate, EventUpdate, EventRead
+from .event import EventCreate, EventCreateRequest, EventUpdate, EventRead
 from .safety_alert import SafetyAlertCreate, SafetyAlertCreateRequest, SafetyAlertUpdate, SafetyAlertRead
 from .team_chat import TeamChatCreate, TeamChatUpdate, TeamChatRead
 from .user_favorite_team import UserFavoriteTeamsCreate, UserFavoriteTeamsRead
@@ -17,7 +17,7 @@ __all__ = [
     "VenueCreate", "VenueUpdate", "VenueRead",
     "TeamVenueCreate", "TeamVenueUpdate", "TeamVenueRead",
     "GameCreate", "GameUpdate", "GameRead",
-    "EventCreate", "EventUpdate", "EventRead",
+    "EventCreate", "EventCreateRequest", "EventUpdate", "EventRead",
     "SafetyAlertCreate", "SafetyAlertCreateRequest", "SafetyAlertUpdate", "SafetyAlertRead",
     "TeamChatCreate", "TeamChatUpdate", "TeamChatRead",
     "UserFavoriteTeamsCreate", "UserFavoriteTeamsRead",
