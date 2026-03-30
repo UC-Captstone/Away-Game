@@ -7,8 +7,6 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from .common import Location
-from .game import GameRead
-from .venue import VenueRead
 
 
 class SafetyAlertBase(BaseModel):
@@ -67,8 +65,6 @@ class SafetyAlertRead(SafetyAlertBase):
     is_active: bool
     is_official: bool
     created_at: datetime
-    game: Optional[GameRead] = None
-    venue: Optional[VenueRead] = None
 
     class Config:
         from_attributes = True
