@@ -6,17 +6,19 @@ import math
 import time
 import uuid
 
+from fastapi import HTTPException, status
 from sqlalchemy import select, update, delete, and_, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
+from core.content_filter import clean_message
 from models.event import Event
 from models.favorite import Favorite
 from models.game import Game
 from models.team import Team
 from models.venue import Venue
 from schemas.common import Location
-from schemas.event import EventRead, EventSearchFilters, TeamLogos
+from schemas.event import EventCreateRequest, EventRead, EventSearchFilters, TeamLogos
 from schemas.types import EventTypeEnum
 
 
@@ -79,6 +81,71 @@ class EventRepository:
     async def remove(self, event_id: UUID) -> int:
         res = await self.db.execute(delete(Event).where(Event.event_id == event_id))
         return res.rowcount or 0
+
+
+async def create_event_service(
+    event_data: EventCreateRequest,
+    creator_user_id: UUID,
+    db: AsyncSession,
+) -> EventRead:
+    event_type_code_map = {
+        EventTypeEnum.GAME: "GAME",
+        EventTypeEnum.TAILGATE: "TAILGATE",
+        EventTypeEnum.POSTGAME: "POSTGAME",
+        EventTypeEnum.WATCH: "WATCH",
+        EventTypeEnum.OTHER: "OTHER",
+    }
+
+    event_type_code = event_type_code_map[event_data.event_type]
+    if event_type_code == "GAME":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Game type cannot be user-created")
+
+    venue_id = event_data.venue_id
+    latitude = event_data.latitude
+    longitude = event_data.longitude
+
+    if event_data.game_id is not None:
+        game_result = await db.execute(select(Game).where(Game.game_id == event_data.game_id))
+        game = game_result.scalar_one_or_none()
+        if game is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
+
+        if venue_id is None and game.venue_id is not None:
+            venue_id = game.venue_id
+
+        if (latitude is None or longitude is None) and game.venue_id is not None:
+            venue_result = await db.execute(select(Venue).where(Venue.venue_id == game.venue_id))
+            venue = venue_result.scalar_one_or_none()
+            if venue is not None:
+                if latitude is None:
+                    latitude = venue.latitude
+                if longitude is None:
+                    longitude = venue.longitude
+
+    event = Event(
+        creator_user_id=creator_user_id,
+        event_type_id=event_type_code,
+        game_id=event_data.game_id,
+        venue_id=venue_id,
+        title=clean_message(event_data.title),
+        description=clean_message(event_data.description) if event_data.description else None,
+        game_date=event_data.date_time,
+        latitude=latitude,
+        longitude=longitude,
+    )
+    db.add(event)
+    await db.commit()
+
+    opts = [
+        joinedload(Event.venue),
+        joinedload(Event.event_type),
+        joinedload(Event.game).joinedload(Game.home_team),
+        joinedload(Event.game).joinedload(Game.away_team),
+        joinedload(Event.game).joinedload(Game.league),
+    ]
+    result = await db.execute(select(Event).where(Event.event_id == event.event_id).options(*opts))
+    created_event = result.unique().scalar_one()
+    return _map_event_to_read(created_event)
 
 
 async def search_events_with_filters_service(

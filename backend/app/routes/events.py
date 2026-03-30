@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
 from repositories.event_repo import (
+    create_event_service,
     get_featured_events_service,
     get_game_events_service,
     get_nearby_events_service,
@@ -16,16 +17,25 @@ from repositories.event_repo import (
 from repositories.game_channel_repo import get_or_create_game_channel_event
 from repositories.safety_alert_repo import get_game_safety_alerts_service
 from db.session import get_session
-from auth import get_optional_current_user, get_current_user
+from auth import get_optional_current_user, get_current_user, require_verified_creator
 from models.event import Event
 from models.game import Game
 from models.user import User
-from schemas.event import EventRead, EventSearchFilters
+from schemas.event import EventCreateRequest, EventRead, EventSearchFilters
 from schemas.safety_alert import SafetyAlertFeedRead
 from schemas.common import Location
 
 
 router = APIRouter(prefix="/events", tags=["events"])
+
+
+@router.post("/", response_model=EventRead, status_code=201)
+async def create_event(
+    event_data: EventCreateRequest,
+    current_user: User = Depends(require_verified_creator),
+    db: AsyncSession = Depends(get_session),
+) -> EventRead:
+    return await create_event_service(event_data, current_user.user_id, db)
 
 @router.get("/featured", response_model=List[EventRead])
 async def get_featured_events(
@@ -46,10 +56,11 @@ async def get_nearby_events(
     lng: float = Query(..., ge=-180, le=180, description="User longitude"),
     radius: float = Query(50, ge=1, le=500, description="Search radius in miles"),
     limit: int = Query(20, ge=1, le=100, description="Maximum number of results"),
+    include_past_hours: int = Query(0, ge=0, le=168, description="Include events/games this many hours in the past"),
     db: AsyncSession = Depends(get_session),
 ):
     location = Location(lat=lat, lng=lng)
-    result = await get_nearby_events_service(location, radius, db, limit)
+    result = await get_nearby_events_service(location, radius, db, limit, include_past_hours)
     # Allow browsers and CDN to cache nearby-events for 60 seconds.
     response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
     return result
