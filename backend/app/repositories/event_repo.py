@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional, Sequence
 from uuid import UUID
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import math
 import time
 import uuid
@@ -511,6 +511,7 @@ async def get_nearby_events_service(
     radius_miles: float = 50,
     db: AsyncSession = None,
     limit: int = 20,
+    include_past_hours: int = 0,
 ) -> list[EventRead]:
     # Check in-process cache first (rounded to ~1 km precision).
     cache_key = (round(location.lat, 2), round(location.lng, 2), radius_miles, limit)
@@ -525,18 +526,22 @@ async def get_nearby_events_service(
     cos_lat = max(cos_lat, 1e-6)  # avoid division by zero near the poles
     lng_degrees = radius_miles / (69.0 * cos_lat)
     now = datetime.utcnow()
+    cutoff = now - timedelta(hours=include_past_hours)
     fetch_limit = limit * 3  # over-fetch so haversine filtering still yields `limit` results
+    event_lat = func.coalesce(Event.latitude, Venue.latitude)
+    event_lng = func.coalesce(Event.longitude, Venue.longitude)
 
     events_stmt = (
         select(Event)
+        .outerjoin(Venue, Event.venue_id == Venue.venue_id)
         .where(
             and_(
-                Event.latitude.isnot(None),
-                Event.longitude.isnot(None),
+                event_lat.isnot(None),
+                event_lng.isnot(None),
                 Event.game_date.isnot(None),
-                Event.game_date >= now,
-                Event.latitude.between(location.lat - lat_degrees, location.lat + lat_degrees),
-                Event.longitude.between(location.lng - lng_degrees, location.lng + lng_degrees),
+                Event.game_date >= cutoff,
+                event_lat.between(location.lat - lat_degrees, location.lat + lat_degrees),
+                event_lng.between(location.lng - lng_degrees, location.lng + lng_degrees),
             )
         )
         .options(
@@ -556,7 +561,7 @@ async def get_nearby_events_service(
         .where(
             and_(
                 Game.date_time.isnot(None),
-                Game.date_time >= now,
+                Game.date_time >= cutoff,
                 Venue.latitude.isnot(None),
                 Venue.longitude.isnot(None),
                 Venue.latitude.between(location.lat - lat_degrees, location.lat + lat_degrees),
@@ -582,7 +587,12 @@ async def get_nearby_events_service(
     # Compute haversine once per item — not twice.
     filtered_items: list[tuple] = []
     for event in events:
-        dist = _haversine_distance(location.lat, location.lng, event.latitude, event.longitude)
+        event_lat_value = event.latitude if event.latitude is not None else (event.venue.latitude if event.venue else None)
+        event_lng_value = event.longitude if event.longitude is not None else (event.venue.longitude if event.venue else None)
+        if event_lat_value is None or event_lng_value is None:
+            continue
+
+        dist = _haversine_distance(location.lat, location.lng, event_lat_value, event_lng_value)
         if dist <= radius_miles:
             filtered_items.append((event.game_date, dist, "event", event))
 
@@ -614,25 +624,35 @@ async def get_nearby_events_service(
 
 
 def _map_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
-    type_code = event.event_type if isinstance(event.event_type, str) else (
-        event.event_type.code if hasattr(event.event_type, "code") else str(event.event_type)
-    )
+    if isinstance(event.event_type, str):
+        type_code = event.event_type
+    elif getattr(event, "event_type", None) is not None and hasattr(event.event_type, "code"):
+        type_code = event.event_type.code
+    else:
+        type_code = event.event_type_id
+
+    normalized_type_code = (type_code or "").upper()
 
     event_type_map = {
         "GAME": EventTypeEnum.GAME,
         "TAILGATE": EventTypeEnum.TAILGATE,
         "POSTGAME": EventTypeEnum.POSTGAME,
         "WATCH": EventTypeEnum.WATCH,
+        "OTHER": EventTypeEnum.OTHER,
     }
-    event_type_value = event_type_map.get(type_code, EventTypeEnum.GAME)
+    event_type_value = event_type_map.get(normalized_type_code, EventTypeEnum.OTHER)
+
+    event_lat_value = event.latitude if event.latitude is not None else (event.venue.latitude if event.venue else None)
+    event_lng_value = event.longitude if event.longitude is not None else (event.venue.longitude if event.venue else None)
 
     return EventRead(
         event_id=event.event_id,
         game_id=event.game_id,
         event_type=event_type_value,
         event_name=event.title,
+        description=event.description,
         date_time=event.game_date,
-        location=Location(lat=event.latitude, lng=event.longitude),
+        location=Location(lat=event_lat_value, lng=event_lng_value) if event_lat_value is not None and event_lng_value is not None else None,
         venue_name=event.venue.name if event.venue else "",
         image_url=event.picture_url,
         team_logos=TeamLogos(
