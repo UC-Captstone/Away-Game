@@ -29,6 +29,19 @@ class EventCreate(EventBase):
     pass
 
 
+class EventCreateRequest(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    event_type: EventTypeEnum
+    game_id: Optional[int] = None
+    venue_id: Optional[int] = None
+    title: str
+    description: Optional[str] = None
+    date_time: datetime
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+
 class EventUpdate(BaseModel):
     event_type_id: Optional[str] = None
     game_id: Optional[int] = None
@@ -54,6 +67,7 @@ class EventRead(BaseModel):
     game_id: Optional[int] = None
     event_type: EventTypeEnum
     event_name: str
+    description: Optional[str] = None
     date_time: datetime
     location: Optional[Location] = None
     venue_name: str
