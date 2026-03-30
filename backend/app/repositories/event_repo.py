@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Optional, Sequence
 from uuid import UUID
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import math
 import time
 import uuid
@@ -578,7 +578,6 @@ async def get_nearby_events_service(
     radius_miles: float = 50,
     db: AsyncSession = None,
     limit: int = 20,
-    include_past_hours: int = 0,
 ) -> list[EventRead]:
     # Check in-process cache first (rounded to ~1 km precision).
     cache_key = (round(location.lat, 2), round(location.lng, 2), radius_miles, limit)
@@ -592,8 +591,7 @@ async def get_nearby_events_service(
     cos_lat = math.cos(math.radians(location.lat))
     cos_lat = max(cos_lat, 1e-6)  # avoid division by zero near the poles
     lng_degrees = radius_miles / (69.0 * cos_lat)
-    now = datetime.utcnow()
-    cutoff = now - timedelta(hours=include_past_hours)
+    cutoff = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     fetch_limit = limit * 3  # over-fetch so haversine filtering still yields `limit` results
     event_lat = func.coalesce(Event.latitude, Venue.latitude)
     event_lng = func.coalesce(Event.longitude, Venue.longitude)

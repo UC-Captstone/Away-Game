@@ -56,11 +56,10 @@ async def get_nearby_events(
     lng: float = Query(..., ge=-180, le=180, description="User longitude"),
     radius: float = Query(50, ge=1, le=500, description="Search radius in miles"),
     limit: int = Query(20, ge=1, le=100, description="Maximum number of results"),
-    include_past_hours: int = Query(0, ge=0, le=168, description="Include events/games this many hours in the past"),
     db: AsyncSession = Depends(get_session),
 ):
     location = Location(lat=lat, lng=lng)
-    result = await get_nearby_events_service(location, radius, db, limit, include_past_hours)
+    result = await get_nearby_events_service(location, radius, db, limit)
     # Allow browsers and CDN to cache nearby-events for 60 seconds.
     response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=30"
     return result
