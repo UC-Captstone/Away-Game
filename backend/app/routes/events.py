@@ -1,4 +1,5 @@
 from uuid import UUID
+import uuid as _uuid
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
 from sqlalchemy import select
@@ -22,8 +23,10 @@ from models.event import Event
 from models.game import Game
 from models.user import User
 from schemas.event import EventCreateRequest, EventRead, EventSearchFilters
+from schemas.event import TeamLogos
 from schemas.safety_alert import SafetyAlertFeedRead
 from schemas.common import Location
+from schemas.types import EventTypeEnum
 
 
 router = APIRouter(prefix="/events", tags=["events"])
@@ -129,9 +132,11 @@ async def get_event_by_event_id(
     _current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ) -> EventRead:
-    """Fetch a single event by its UUID — used to recover gameId when it's missing from the URL.
-    If the event row doesn't exist yet (synthetic uuid5 for a game), uses get_or_create
-    after resolving game_id from the events table via game_id column lookup."""
+    """Fetch a single event by its UUID.
+
+    For synthetic game UUIDs (uuid5(NAMESPACE_DNS, f"game:{game_id}")), resolve and
+    return game metadata without creating a GAME row in events.
+    """
     opts = [
         joinedload(Event.venue),
         joinedload(Event.event_type),
@@ -143,10 +148,7 @@ async def get_event_by_event_id(
     event = res.unique().scalar_one_or_none()
 
     if event is None:
-        # Synthetic uuid5 event — look for a GAME event row with matching uuid5.
-        # The uuid5 formula is: uuid5(NAMESPACE_DNS, f"game:{game_id}").
-        # Query all GAME-type events that have a game_id and find the match.
-        import uuid as _uuid
+        # Synthetic uuid5 event — look for an existing GAME event row with matching game_id.
         game_events_res = await db.execute(
             select(Event.game_id).where(
                 Event.event_type_id == "GAME", Event.game_id.isnot(None)
@@ -161,14 +163,64 @@ async def get_event_by_event_id(
                 break
 
     if event is None:
-        # No GAME event row exists yet — scan games table to find which game this uuid5 belongs to,
-        # then create the game channel event on the fly.
         games_res = await db.execute(select(Game.game_id))
+        matched_game_id = None
         for (gid,) in games_res.all():
             if _uuid.uuid5(_uuid.NAMESPACE_DNS, f"game:{gid}") == event_id:
-                event = await get_or_create_game_channel_event(gid, _current_user, db)
-                await db.commit()
+                matched_game_id = gid
                 break
+
+        if matched_game_id is not None:
+            game_res = await db.execute(
+                select(Game)
+                .where(Game.game_id == matched_game_id)
+                .options(
+                    joinedload(Game.home_team),
+                    joinedload(Game.away_team),
+                    joinedload(Game.league),
+                    joinedload(Game.venue),
+                )
+            )
+            game = game_res.unique().scalar_one_or_none()
+            if game is None:
+                raise HTTPException(status_code=404, detail="Event not found")
+
+            home_team_name = (
+                game.home_team.display_name
+                if game.home_team and game.home_team.display_name
+                else (game.home_team.team_name if game.home_team and game.home_team.team_name else "Home")
+            )
+            away_team_name = (
+                game.away_team.display_name
+                if game.away_team and game.away_team.display_name
+                else (game.away_team.team_name if game.away_team and game.away_team.team_name else "Away")
+            )
+
+            league_value = game.league.league_code if game.league and game.league.league_code else None
+            location = None
+            venue_name = ""
+            if game.venue:
+                venue_name = game.venue.name or ""
+                if game.venue.latitude is not None and game.venue.longitude is not None:
+                    location = Location(lat=game.venue.latitude, lng=game.venue.longitude)
+
+            return EventRead(
+                event_id=event_id,
+                game_id=game.game_id,
+                event_type=EventTypeEnum.GAME,
+                event_name=f"{away_team_name} @ {home_team_name}",
+                date_time=game.date_time,
+                location=location,
+                venue_name=venue_name,
+                image_url=game.home_team.logo_url if game.home_team else None,
+                team_logos=TeamLogos(
+                    home=game.home_team.logo_url if game.home_team else None,
+                    away=game.away_team.logo_url if game.away_team else None,
+                ),
+                league=league_value,
+                is_user_created=False,
+                is_saved=False,
+            )
 
     if event is None:
         raise HTTPException(status_code=404, detail="Event not found")
