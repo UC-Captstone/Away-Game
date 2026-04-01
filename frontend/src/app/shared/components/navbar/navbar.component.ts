@@ -50,12 +50,26 @@ export class NavBarComponent implements OnDestroy {
   isBellOpen: WritableSignal<boolean> = signal(false);
   readonly relativeTimeFormatter = (dateString: string): string => this.getRelativeTime(dateString);
 
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
   private navBarLoaded = false;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private pendingPollSub: Subscription | null = null;
   private readonly PENDING_POLL_INTERVAL_MS = 60_000;
   private readonly PENDING_ALERT_ID = '__pending_approvals__';
   private dmSeenAtByFriend: Record<string, string> = {};
+  private readonly onProfilePictureUpdated = (event: Event) => {
+    const customEvent = event as CustomEvent<{ profilePictureUrl: string | null }>;
+    if (!this.navBarInfo) {
+      return;
+    }
+    this.navBarInfo = {
+      ...this.navBarInfo,
+      profilePictureUrl: customEvent.detail?.profilePictureUrl || undefined,
+    };
+  };
 
   constructor(
     private userService: UserService,
@@ -67,6 +81,7 @@ export class NavBarComponent implements OnDestroy {
     private router: Router,
   ) {
     this.dmSeenAtByFriend = this.getStoredDmSeenMap();
+    window.addEventListener('away-game:profile-picture-updated', this.onProfilePictureUpdated);
 
     effect(() => {
       const clerk = this.clerkService.clerk();
@@ -98,10 +113,6 @@ export class NavBarComponent implements OnDestroy {
         this.loadDmNotifications();
       }, POLL_INTERVAL_MS);
     });
-  }
-
-  get isAdmin(): boolean {
-    return this.authService.isAdmin();
   }
 
   get unacknowledgedCount(): number {

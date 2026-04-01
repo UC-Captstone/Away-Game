@@ -1,6 +1,29 @@
 <div
   class="h-screen flex items-center justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
 >
+  @if (toastMessage(); as message) {
+    <div class="fixed top-20 right-5 z-[70] max-w-sm w-[calc(100%-2.5rem)] md:w-auto">
+      <div
+        class="rounded-lg border px-4 py-3 shadow-lg backdrop-blur-sm text-left flex items-start gap-3"
+        [ngClass]="
+          toastType() === 'success'
+            ? 'bg-emerald-900/80 border-emerald-500/60 text-emerald-100'
+            : 'bg-red-900/80 border-red-500/60 text-red-100'
+        "
+      >
+        <div class="text-sm leading-5 flex-1">{{ message }}</div>
+        <button
+          type="button"
+          class="text-sm opacity-80 hover:opacity-100"
+          aria-label="Dismiss notification"
+          (click)="dismissToast()"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  }
+
   @if (isLoading()) {
     <div class="absolute inset-0 z-50 flex items-center justify-center bg-black/50 rounded-lg">
       <div class="flex flex-col items-center gap-2">
@@ -31,18 +54,14 @@
   }
   @if (userProfile; as profile) {
     <div class="bg-transparent h-[calc(100%-2rem)] w-full px-6 flex flex-col overflow-hidden">
-      <div class="flex items-center pt-4 pb-3">
-        <a
-          routerLink="/home"
-          class="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Home
-        </a>
-      </div>
-      <app-user-profile-header [profileHeaderInfo]="profile.headerInfo"></app-user-profile-header>
+      <app-back-button routerLink="/" label="Back"></app-back-button>
+      <app-user-profile-header
+        [profileHeaderInfo]="profile.headerInfo"
+        [availableTeams]="availableTeams"
+        [isSavingPicture]="isSavingProfilePicture()"
+        (pickerOpening)="onPickerOpening()"
+        (profilePictureSelected)="onProfilePictureSelected($event)"
+      ></app-user-profile-header>
 
       <div class="md:flex mt-5 flex-1">
         <div
