@@ -12,6 +12,7 @@ import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
 import { MyAlertsComponent } from '../components/my-alerts/my-alerts.component';
 import { TeamService } from '../../../shared/services/team.service';
 import { ITeam } from '../../../shared/models/team';
+import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
 
 @Component({
   selector: 'app-user-profile',
@@ -26,6 +27,7 @@ import { ITeam } from '../../../shared/models/team';
     EventTileComponent,
     ChatTileComponent,
     MyAlertsComponent,
+    BackButtonComponent,
   ],
 })
 export class UserProfileComponent implements OnInit, OnDestroy {
