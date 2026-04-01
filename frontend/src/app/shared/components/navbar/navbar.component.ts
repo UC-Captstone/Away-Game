@@ -48,6 +48,7 @@ export class NavBarComponent implements OnDestroy {
   unacknowledgedAlerts: WritableSignal<ISafetyAlert[]> = signal([]);
   dmNotifications: WritableSignal<IDMNotification[]> = signal([]);
   isBellOpen: WritableSignal<boolean> = signal(false);
+  isAdmin: WritableSignal<boolean> = signal(false);
   readonly relativeTimeFormatter = (dateString: string): string => this.getRelativeTime(dateString);
 
   private navBarLoaded = false;
@@ -92,7 +93,9 @@ export class NavBarComponent implements OnDestroy {
         next: (navBarInfo: INavBar) => {
           this.navBarInfo = navBarInfo;
           this.isLoading.emit(false);
-          if (this.authService.isAdmin()) {
+          const isAdminUser = this.authService.isAdmin();
+          this.isAdmin.set(isAdminUser);
+          if (isAdminUser) {
             this.startPendingPoll();
           }
         },
