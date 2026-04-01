@@ -88,7 +88,7 @@ export class GameDetailsService {
       return of([]);
     }
 
-    return this.http.get<ISafetyAlert[]>(`${environment.apiUrl}/events/game/${game.gameId}/safety-alerts`);
+    return this.safetyAlertService.listAlerts(game.gameId, undefined, true);
   }
 
 }

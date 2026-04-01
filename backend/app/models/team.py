@@ -26,7 +26,6 @@ class Team(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime | None] = mapped_column(onupdate=func.now())
     logo_url: Mapped[str | None]
-    espn_team_id: Mapped[str | None] = mapped_column(String(50))
 
     league = relationship("League", back_populates="teams")
     home_venue = relationship("Venue", foreign_keys=[home_venue_id])

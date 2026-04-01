@@ -90,10 +90,15 @@
           <p class="text-xs text-slate-300 mb-2 leading-snug">{{ alert.description }}</p>
         }
 
-        <p class="text-[10px] text-slate-500 mb-2">
-          Reported by:
-          {{ alert.isOfficial ? 'Away Game' : alert.source === 'admin' ? 'Admin' : 'Community' }}
-        </p>
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <p class="text-[10px] text-slate-500">
+            Reported by:
+            {{ alert.isOfficial ? 'Away Game' : alert.source === 'admin' ? 'Admin' : 'Community' }}
+          </p>
+          @if (alert.gameName) {
+            <p class="text-[10px] text-slate-500 truncate">{{ alert.gameName }}</p>
+          }
+        </div>
 
         @if (alert.isOfficial) {
           <button

@@ -9,7 +9,7 @@ try:
     _asgi_handler = func.AsgiMiddleware(fastapi_app)
 except Exception:  # pragma: no cover
     logging.exception("Failed to initialise FastAPI app at module load")
-    _asgi_handler = None
+    raise
 
 # Create Azure Functions app
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)

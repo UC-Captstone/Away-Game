@@ -10,7 +10,10 @@ import {
 } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ClerkService } from '@jsrob/ngx-clerk';
+import { catchError, EMPTY, forkJoin, map, of, Subscription, timer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../features/auth/services/auth.service';
+import { AdminService } from '../../../features/admin/services/admin.service';
 import { NotificationBellButtonComponent } from './notification-bell-button/notification-bell-button.component';
 import { NotificationsDropdownComponent } from './notifications-dropdown/notifications-dropdown.component';
 import { IDMNotification } from '../../models/dm-notification';
@@ -20,7 +23,6 @@ import { SafetyAlertService } from '../../services/safety-alert.service';
 import { ISafetyAlert } from '../../models/safety-alert';
 import { FriendsService } from '../../services/friends.service';
 import { IDirectMessage } from '../../models/direct-message';
-import { catchError, forkJoin, map, of } from 'rxjs';
 
 const POLL_INTERVAL_MS = 30_000;
 const DM_SEEN_STORAGE_KEY = 'away-game:dm-seen-at-by-friend';
@@ -46,16 +48,19 @@ export class NavBarComponent implements OnDestroy {
   unacknowledgedAlerts: WritableSignal<ISafetyAlert[]> = signal([]);
   dmNotifications: WritableSignal<IDMNotification[]> = signal([]);
   isBellOpen: WritableSignal<boolean> = signal(false);
-  isAdmin = false;
   readonly relativeTimeFormatter = (dateString: string): string => this.getRelativeTime(dateString);
 
   private navBarLoaded = false;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private pendingPollSub: Subscription | null = null;
+  private readonly PENDING_POLL_INTERVAL_MS = 60_000;
+  private readonly PENDING_ALERT_ID = '__pending_approvals__';
   private dmSeenAtByFriend: Record<string, string> = {};
 
   constructor(
     private userService: UserService,
     private authService: AuthService,
+    private adminService: AdminService,
     private clerkService: ClerkService,
     private safetyAlertService: SafetyAlertService,
     private friendsService: FriendsService,
@@ -71,12 +76,14 @@ export class NavBarComponent implements OnDestroy {
 
       this.navBarLoaded = true;
       this.isLoading.emit(true);
-      this.isAdmin = this.authService.isAdmin();
 
       this.userService.getNavBarInfo().subscribe({
         next: (navBarInfo: INavBar) => {
           this.navBarInfo = navBarInfo;
           this.isLoading.emit(false);
+          if (this.authService.isAdmin()) {
+            this.startPendingPoll();
+          }
         },
         error: (error) => {
           console.error('Error fetching navbar info:', error);
@@ -93,10 +100,8 @@ export class NavBarComponent implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.pollTimer) {
-      clearInterval(this.pollTimer);
-    }
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 
   get unacknowledgedCount(): number {
@@ -251,6 +256,35 @@ export class NavBarComponent implements OnDestroy {
     }
   }
 
+  private startPendingPoll(): void {
+    this.pendingPollSub = timer(0, this.PENDING_POLL_INTERVAL_MS)
+      .pipe(
+        switchMap(() =>
+          this.adminService.getPendingApprovals().pipe(catchError(() => EMPTY)),
+        ),
+      )
+      .subscribe((users) => {
+        const others = this.unacknowledgedAlerts().filter((a) => a.alertId !== this.PENDING_ALERT_ID);
+        if (users.length > 0) {
+          const pendingAlert: ISafetyAlert = {
+            alertId: this.PENDING_ALERT_ID,
+            reporterUserId: '',
+            alertTypeId: 'admin',
+            title: `${users.length} pending verification request${users.length === 1 ? '' : 's'}`,
+            description: 'Review and approve or deny in Admin Settings.',
+            source: 'admin',
+            severity: 'medium',
+            isActive: true,
+            isOfficial: true,
+            createdAt: new Date().toISOString(),
+          };
+          this.unacknowledgedAlerts.set([pendingAlert, ...others]);
+        } else {
+          this.unacknowledgedAlerts.set(others);
+        }
+      });
+  }
+
   private buildDmNotification(
     friend: { friendUserId: string; friendUsername: string; friendAvatarUrl?: string | null },
     lastMessage: IDirectMessage | null,
@@ -346,5 +380,12 @@ export class NavBarComponent implements OnDestroy {
       this.authService.clearInternalToken();
       this.router.navigate(['/login']);
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+    }
+    this.pendingPollSub?.unsubscribe();
   }
 }
