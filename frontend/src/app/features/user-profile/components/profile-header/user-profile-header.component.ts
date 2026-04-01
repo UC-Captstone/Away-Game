@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, WritableSignal, signal, computed } from '@angular/core';
 import { IHeaderInfo } from '../../models/header';
 import { ITeam } from '../../../../shared/models/team';
 
@@ -18,6 +18,19 @@ export class UserProfileHeaderComponent {
   @Output() pickerOpening = new EventEmitter<void>();
 
   isPickerOpen = false;
+  searchTerm: WritableSignal<string> = signal('');
+
+  filteredTeams = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) {
+      return this.availableTeams;
+    }
+    return this.availableTeams.filter(
+      (team) =>
+        team.displayName.toLowerCase().includes(term) ||
+        team.teamName.toLowerCase().includes(term)
+    );
+  });
 
   openPicker(): void {
     this.pickerOpening.emit();
@@ -26,6 +39,7 @@ export class UserProfileHeaderComponent {
 
   closePicker(): void {
     this.isPickerOpen = false;
+    this.searchTerm.set('');
   }
 
   onSelectProfilePicture(logoUrl: string): void {

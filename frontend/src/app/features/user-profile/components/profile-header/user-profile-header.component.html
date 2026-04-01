@@ -117,33 +117,48 @@
           </button>
         </div>
 
+        <div class="mb-4">
+          <input
+            type="text"
+            placeholder="Search teams by name..."
+            [(ngModel)]="searchTerm"
+            class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-colors"
+            aria-label="Search teams"
+          />
+        </div>
+
         @if (isSavingPicture) {
           <p class="text-xs text-slate-400 mb-3">Saving your profile picture...</p>
         }
 
-        <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-[55vh] overflow-y-auto pr-1">
-          @for (team of availableTeams; track trackByTeamId($index, team)) {
-            @if (team.logoUrl) {
-              <button
-                type="button"
-                class="p-1 rounded-lg border transition-colors bg-slate-800/40 hover:bg-slate-700/60 disabled:opacity-50 disabled:cursor-not-allowed"
-                [class.border-sky-400]="isCurrentPicture(team.logoUrl)"
-                [class.border-slate-700]="!isCurrentPicture(team.logoUrl)"
-                [disabled]="isSavingPicture || isCurrentPicture(team.logoUrl)"
-                [attr.aria-label]="'Use ' + team.displayName + ' logo as profile picture'"
-                (click)="onSelectProfilePicture(team.logoUrl)"
-              >
-                <img
-                  [src]="team.logoUrl"
-                  [alt]="team.displayName"
-                  [title]="team.displayName"
-                  class="w-10 h-10 mx-auto object-contain"
-                />
-              </button>
+        @if (filteredTeams().length === 0) {
+          <div class="text-center py-8">
+            <p class="text-sm text-slate-400">No teams found matching "{{ searchTerm() }}"</p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-[55vh] overflow-y-auto pr-1">
+            @for (team of filteredTeams(); track trackByTeamId($index, team)) {
+              @if (team.logoUrl) {
+                <button
+                  type="button"
+                  class="p-1 rounded-lg border transition-colors bg-slate-800/40 hover:bg-slate-700/60 disabled:opacity-50 disabled:cursor-not-allowed"
+                  [class.border-sky-400]="isCurrentPicture(team.logoUrl)"
+                  [class.border-slate-700]="!isCurrentPicture(team.logoUrl)"
+                  [disabled]="isSavingPicture || isCurrentPicture(team.logoUrl)"
+                  [attr.aria-label]="'Use ' + team.displayName + ' logo as profile picture'"
+                  (click)="onSelectProfilePicture(team.logoUrl)"
+                >
+                  <img
+                    [src]="team.logoUrl"
+                    [alt]="team.displayName"
+                    [title]="team.displayName"
+                    class="w-10 h-10 mx-auto object-contain"
+                  />
+                </button>
+              }
             }
-          }
-        </div>
-      </div>
+          </div>
+        }
     </div>
   </div>
 }
