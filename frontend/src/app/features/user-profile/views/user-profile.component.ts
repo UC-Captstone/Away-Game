@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { UserProfileHeaderComponent } from '../components/profile-header/user-profile-header.component';
 import { UserProfileService } from '../services/user-profile.service';
 import { IUserProfile } from '../models/user-profile';
-import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+import { IAccountSettings } from '../models/account-settings';
+import { RouterLink } from '@angular/router';
 import { UserAccountSettingsComponent } from '../components/user-account-settings/user-account-settings.component';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
 import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
@@ -17,7 +19,8 @@ import { ITeam } from '../../../shared/models/team';
   standalone: true,
   imports: [
     CommonModule,
-    BackButtonComponent,
+    FormsModule,
+    RouterLink,
     UserProfileHeaderComponent,
     UserAccountSettingsComponent,
     EventTileComponent,
@@ -36,6 +39,8 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   toastType: WritableSignal<'success' | 'error'> = signal('success');
 
   private toastTimer: ReturnType<typeof setTimeout> | null = null;
+  notificationsChanged: WritableSignal<boolean> = signal(false);
+  private originalNotifications: Partial<IAccountSettings> = {};
 
   constructor(
     private userProfileService: UserProfileService,
@@ -59,6 +64,39 @@ export class UserProfileComponent implements OnInit, OnDestroy {
 
   selectTab(tab: string) {
     this.selectedTab.set(tab);
+    if (tab === 'Notifications' && this.userProfile) {
+      const s = this.userProfile.accountSettings;
+      this.originalNotifications = {
+        enableNearbyEventNotifications: s.enableNearbyEventNotifications,
+        enableFavoriteTeamNotifications: s.enableFavoriteTeamNotifications,
+        enableSafetyAlertNotifications: s.enableSafetyAlertNotifications,
+      };
+      this.notificationsChanged.set(false);
+    }
+  }
+
+  onNotificationChange() {
+    if (!this.userProfile) return;
+    const s = this.userProfile.accountSettings;
+    this.notificationsChanged.set(
+      s.enableNearbyEventNotifications !== this.originalNotifications.enableNearbyEventNotifications ||
+      s.enableFavoriteTeamNotifications !== this.originalNotifications.enableFavoriteTeamNotifications ||
+      s.enableSafetyAlertNotifications !== this.originalNotifications.enableSafetyAlertNotifications,
+    );
+  }
+
+  saveNotifications(settings: IAccountSettings) {
+    this.userProfileService.updateAccountInfo(settings).subscribe({
+      next: () => {
+        this.originalNotifications = {
+          enableNearbyEventNotifications: settings.enableNearbyEventNotifications,
+          enableFavoriteTeamNotifications: settings.enableFavoriteTeamNotifications,
+          enableSafetyAlertNotifications: settings.enableSafetyAlertNotifications,
+        };
+        this.notificationsChanged.set(false);
+      },
+      error: (err) => console.error('Failed to save notifications', err),
+    });
   }
 
   onPickerOpening(): void {

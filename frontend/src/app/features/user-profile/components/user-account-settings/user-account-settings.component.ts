@@ -35,6 +35,9 @@ export class UserAccountSettingsComponent implements OnChanges {
   originalFavoriteTeams: WritableSignal<ITeam[]> = signal([]);
   editableFavoriteTeams: WritableSignal<ITeam[]> = signal([]);
   passwordValid: WritableSignal<boolean> = signal(false);
+  passwordUpdateSuccess: WritableSignal<boolean> = signal(false);
+  passwordUpdateError: WritableSignal<string | null> = signal(null);
+  passwordUpdating: WritableSignal<boolean> = signal(false);
   verificationForm: WritableSignal<IVerificationForm> = signal({
     reasoning: '',
     representedTeams: [],
@@ -45,6 +48,7 @@ export class UserAccountSettingsComponent implements OnChanges {
   currentPassword: string = '';
   newPassword: string = '';
   confirmPassword: string = '';
+  showPasswordModal: boolean = false;
   showVerificationModal: boolean = false;
   showDeleteModal: boolean = false;
   deleteConfirmText: string = '';
@@ -145,14 +149,47 @@ export class UserAccountSettingsComponent implements OnChanges {
   }
 
   onUpdatePassword() {
-    console.log('Password updated:', this.newPassword);
+    if (!this.passwordValid()) return;
+    this.passwordUpdating.set(true);
+    this.passwordUpdateError.set(null);
+    this.passwordUpdateSuccess.set(false);
 
-    this.userProfileService.updateUserPassword(this.newPassword);
+    this.userProfileService.updateUserPassword(this.currentPassword, this.newPassword).subscribe({
+      next: () => {
+        this.currentPassword = '';
+        this.newPassword = '';
+        this.confirmPassword = '';
+        this.passwordValid.set(false);
+        this.passwordUpdating.set(false);
+        this.passwordUpdateSuccess.set(true);
+        setTimeout(() => {
+          this.passwordUpdateSuccess.set(false);
+          this.showPasswordModal = false;
+        }, 1500);
+      },
+      error: (err) => {
+        this.passwordUpdating.set(false);
+        const msg =
+          err?.errors?.[0]?.longMessage ??
+          err?.message ??
+          'Failed to update password. Check your current password and try again.';
+        this.passwordUpdateError.set(msg);
+      },
+    });
+  }
 
+  openPasswordModal(): void {
     this.currentPassword = '';
     this.newPassword = '';
     this.confirmPassword = '';
     this.passwordValid.set(false);
+    this.passwordUpdateSuccess.set(false);
+    this.passwordUpdateError.set(null);
+    this.showPasswordModal = true;
+  }
+
+  closePasswordModal(): void {
+    this.showPasswordModal = false;
   }
 
   openVerificationModal(): void {

@@ -7,6 +7,7 @@ export interface ISafetyAlert {
   alertTypeId: string;
   gameId?: number | null;
   venueId?: number | null;
+  gameName?: string | null;
   title: string;
   description?: string | null;
   source: SafetyAlertSource;

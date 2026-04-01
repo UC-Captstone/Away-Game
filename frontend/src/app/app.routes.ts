@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './features/auth/guards/auth.guard';
 import { protectedGuard } from './features/auth/guards/protected.guard';
+import { adminGuard } from './features/auth/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -58,5 +59,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/alerts/views/alerts.component').then((m) => m.AlertsComponent),
     canActivate: [protectedGuard],
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./features/admin/views/admin-settings.component').then(
+        (m) => m.AdminSettingsComponent,
+      ),
+    canActivate: [adminGuard],
   },
 ];

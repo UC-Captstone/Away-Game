@@ -141,6 +141,20 @@
                   My Alerts
                 </a>
               </li>
+              <li>
+                <a
+                  (click)="selectTab('Notifications'); $event.preventDefault()"
+                  class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                  [ngClass]="
+                    selectedTab() === 'Notifications'
+                      ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                  "
+                  [attr.aria-current]="selectedTab() === 'Notifications' ? 'page' : null"
+                >
+                  Notifications
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -204,6 +218,55 @@
               }
               @case ('MyAlerts') {
                 <app-my-alerts></app-my-alerts>
+              }
+              @case ('Notifications') {
+                <div class="p-4 max-w-lg">
+                  <div class="relative mb-6">
+                    <h3 class="text-2xl font-semibold text-sky-400 text-center">Notifications</h3>
+                    <div class="absolute inset-y-0 right-0 flex items-center">
+                      <button
+                        (click)="saveNotifications(profile.accountSettings)"
+                        [disabled]="!notificationsChanged()"
+                        type="button"
+                        class="bg-sky-500 hover:bg-sky-600 text-white font-medium text-xs py-1 px-2 rounded-lg transition-colors disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                  <div class="space-y-5">
+                    <label class="flex items-start gap-4 cursor-pointer">
+                      <div class="grow">
+                        <span class="block text-sm font-medium text-white">New nearby events</span>
+                        <span class="block text-xs text-slate-400 mt-0.5">Get notified when fan meetups or tailgates are happening near you.</span>
+                      </div>
+                      <div class="ml-auto flex items-center shrink-0">
+                        <input type="checkbox" class="sr-only peer" [(ngModel)]="profile.accountSettings.enableNearbyEventNotifications" (ngModelChange)="onNotificationChange()" name="notifyNearbyEvents" />
+                        <div class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"></div>
+                      </div>
+                    </label>
+                    <label class="flex items-start gap-4 cursor-pointer">
+                      <div class="grow">
+                        <span class="block text-sm font-medium text-white">Favorite team away games</span>
+                        <span class="block text-xs text-slate-400 mt-0.5">Receive alerts when your favorite team plays an away game.</span>
+                      </div>
+                      <div class="ml-auto flex items-center shrink-0">
+                        <input type="checkbox" class="sr-only peer" [(ngModel)]="profile.accountSettings.enableFavoriteTeamNotifications" (ngModelChange)="onNotificationChange()" name="notifyFavoriteTeam" />
+                        <div class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"></div>
+                      </div>
+                    </label>
+                    <label class="flex items-start gap-4 cursor-pointer">
+                      <div class="grow">
+                        <span class="block text-sm font-medium text-white">Safety alerts for saved events</span>
+                        <span class="block text-xs text-slate-400 mt-0.5">Email me if new safety reports appear near my saved events.</span>
+                      </div>
+                      <div class="ml-auto flex items-center shrink-0">
+                        <input type="checkbox" class="sr-only peer" [(ngModel)]="profile.accountSettings.enableSafetyAlertNotifications" (ngModelChange)="onNotificationChange()" name="notifySafety" />
+                        <div class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"></div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
               }
               @default {
                 <div>

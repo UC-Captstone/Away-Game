@@ -1,0 +1,454 @@
+<div
+  class="h-screen flex items-center justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
+>
+  <div class="bg-transparent h-[calc(100%-2rem)] w-full px-6 flex flex-col overflow-hidden">
+    <div class="flex items-center justify-between pt-4 pb-3">
+      <a
+        routerLink="/home"
+        class="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Home
+      </a>
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <h1 class="text-xl font-bold text-white">Admin Settings</h1>
+        <span class="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-400 text-xs font-semibold border border-sky-500/30">Admin</span>
+      </div>
+      <div class="w-16"></div>
+    </div>
+
+    <div class="md:flex flex-1">
+      <div
+        class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden md:flex h-[78vh]"
+      >
+        <div class="tabs-panel bg-transparent w-64 p-3 border-r border-slate-800">
+          <ul
+            class="flex-column space-y space-y-4 text-sm font-medium text-slate-300 mb-0 h-full flex flex-col justify-start"
+          >
+            <li>
+              <a
+                (click)="selectTab('Overview'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                [ngClass]="
+                  selectedTab() === 'Overview'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+              >
+                Overview
+              </a>
+            </li>
+            <li>
+              <a
+                (click)="selectTab('LeagueSettings'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                [ngClass]="
+                  selectedTab() === 'LeagueSettings'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+              >
+                League Settings
+              </a>
+            </li>
+            <li>
+              <a
+                (click)="selectTab('PendingApprovals'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                [ngClass]="
+                  selectedTab() === 'PendingApprovals'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+              >
+                Pending Approvals
+              </a>
+            </li>
+            <li>
+              <a
+                (click)="selectTab('RevokeStatus'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                [ngClass]="
+                  selectedTab() === 'RevokeStatus'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+              >
+                Revoke Status
+              </a>
+            </li>
+            <li>
+              <a
+                (click)="selectTab('UserManagement'); $event.preventDefault()"
+                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                [ngClass]="
+                  selectedTab() === 'UserManagement'
+                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                "
+              >
+                User Management
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          class="content-panel p-5 text-slate-300 w-full h-full overflow-auto flex-1 bg-transparent text-left"
+          style="min-height: 0"
+        >
+          @switch (selectedTab()) {
+
+            @case ('Overview') {
+              @if (overviewLoading()) {
+                <div class="flex items-center gap-2 text-slate-400 mt-4">
+                  <svg class="animate-spin h-5 w-5 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <span>Loading…</span>
+                </div>
+              }
+              @if (overview) {
+                <h2 class="text-xl font-semibold text-white mb-5">Platform Overview</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-1">
+                    <span class="text-slate-400 text-xs uppercase tracking-wide">Total Users</span>
+                    <span class="text-3xl font-bold text-white">{{ overview.totalUsers }}</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-1">
+                    <span class="text-slate-400 text-xs uppercase tracking-wide">Active Users</span>
+                    <span class="text-3xl font-bold text-sky-400">{{ overview.activeUsers }}</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-1">
+                    <span class="text-slate-400 text-xs uppercase tracking-wide">Total Events</span>
+                    <span class="text-3xl font-bold text-white">{{ overview.totalEvents }}</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-1">
+                    <span class="text-slate-400 text-xs uppercase tracking-wide">Events Today</span>
+                    <span class="text-3xl font-bold text-emerald-400">{{ overview.eventsToday }}</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-1">
+                    <span class="text-slate-400 text-xs uppercase tracking-wide">Games Today</span>
+                    <span class="text-3xl font-bold text-emerald-400">{{ overview.gamesToday }}</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-1">
+                    <span class="text-slate-400 text-xs uppercase tracking-wide">Verified Creators</span>
+                    <span class="text-3xl font-bold text-purple-400">{{ overview.verifiedCreators }}</span>
+                  </div>
+                  <div class="bg-slate-800/60 border border-amber-500/30 rounded-2xl p-4 flex flex-col gap-1">
+                    <span class="text-slate-400 text-xs uppercase tracking-wide">Pending Approvals</span>
+                    <span class="text-3xl font-bold text-amber-400">{{ overview.pendingApprovals }}</span>
+                  </div>
+                </div>
+              }
+            }
+
+            @case ('LeagueSettings') {
+              <div class="relative mb-5">
+                <h2 class="text-xl font-semibold text-white text-center">League Settings</h2>
+                <div class="absolute inset-y-0 right-0 flex items-center gap-2">
+                  @if (syncTriggered()) {
+                    <span class="text-emerald-400 text-xs">Sync started!</span>
+                  }
+                  <button
+                    type="button"
+                    (click)="showSyncModal = true"
+                    class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium transition-colors"
+                  >
+                    Sync Now
+                  </button>
+                </div>
+              </div>
+              @if (leaguesLoading()) {
+                <div class="flex items-center gap-2 text-slate-400">
+                  <svg class="animate-spin h-5 w-5 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <span>Loading…</span>
+                </div>
+              }
+              @if (!leaguesLoading() && leagues.length === 0) {
+                <p class="text-slate-400 text-sm">No leagues found.</p>
+              }
+              @if (leagues.length > 0) {
+                <p class="text-slate-400 text-sm mb-4">Toggle the active state of each league to control which leagues are shown in the app.</p>
+                <div class="flex flex-col gap-2">
+                  @for (league of leagues; track league.leagueCode) {
+                    <div
+                      class="flex items-center justify-between bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3"
+                    >
+                      <div>
+                        <span class="text-white font-medium">{{ league.leagueName }}</span>
+                        <span class="ml-2 text-slate-500 text-xs">{{ league.leagueCode }}</span>
+                        @if (league.espnSport) {
+                          <span class="ml-2 text-slate-500 text-xs">({{ league.espnSport }})</span>
+                        }
+                      </div>
+                      <button
+                        type="button"
+                        (click)="toggleLeagueActive(league)"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                        [ngClass]="league.isActive ? 'bg-sky-500' : 'bg-slate-600'"
+                        [attr.aria-checked]="league.isActive"
+                        role="switch"
+                      >
+                        <span
+                          class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                          [ngClass]="league.isActive ? 'translate-x-5' : 'translate-x-0'"
+                        ></span>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            @case ('PendingApprovals') {
+              <h2 class="text-xl font-semibold text-white mb-5">Pending Creator Approvals</h2>
+              @if (pendingLoading()) {
+                <div class="flex items-center gap-2 text-slate-400">
+                  <svg class="animate-spin h-5 w-5 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <span>Loading…</span>
+                </div>
+              }
+              @if (!pendingLoading() && pendingUsers.length === 0) {
+                <div class="text-center mt-10">
+                  <p class="text-slate-400 text-sm">No pending approvals.</p>
+                </div>
+              }
+              @if (pendingUsers.length > 0) {
+                <div class="flex flex-col gap-3">
+                  @for (user of pendingUsers; track user.userId) {
+                    <div
+                      class="flex items-center justify-between bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 gap-4"
+                    >
+                      <div class="flex items-center gap-3 min-w-0">
+                        @if (user.profilePictureUrl) {
+                          <img
+                            [src]="user.profilePictureUrl"
+                            class="w-9 h-9 rounded-full object-cover ring-1 ring-slate-600 shrink-0"
+                            alt="avatar"
+                          />
+                        } @else {
+                          <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+                            <span class="text-slate-400 text-sm font-semibold">{{ user.username[0].toUpperCase() }}</span>
+                          </div>
+                        }
+                        <div class="min-w-0">
+                          <p class="text-white font-medium text-sm truncate">{{ displayName(user) }}</p>
+                          <p class="text-slate-400 text-xs truncate">&#64;{{ user.username }} · {{ user.email }}</p>
+                        </div>
+                      </div>
+                      <div class="flex gap-2 shrink-0">
+                        <button
+                          type="button"
+                          (click)="approveUser(user)"
+                          class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          (click)="denyUser(user)"
+                          class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-red-600/70 text-slate-300 hover:text-white text-xs font-medium transition-colors"
+                        >
+                          Deny
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            @case ('RevokeStatus') {
+              <h2 class="text-xl font-semibold text-white mb-5">Verified Creators</h2>
+              @if (creatorsLoading()) {
+                <div class="flex items-center gap-2 text-slate-400">
+                  <svg class="animate-spin h-5 w-5 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <span>Loading…</span>
+                </div>
+              }
+              @if (!creatorsLoading() && verifiedCreators.length === 0) {
+                <div class="text-center mt-10">
+                  <p class="text-slate-400 text-sm">No verified creators.</p>
+                </div>
+              }
+              @if (verifiedCreators.length > 0) {
+                <div class="flex flex-col gap-3">
+                  @for (user of verifiedCreators; track user.userId) {
+                    <div
+                      class="flex items-center justify-between bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 gap-4"
+                    >
+                      <div class="flex items-center gap-3 min-w-0">
+                        @if (user.profilePictureUrl) {
+                          <img
+                            [src]="user.profilePictureUrl"
+                            class="w-9 h-9 rounded-full object-cover ring-1 ring-slate-600 shrink-0"
+                            alt="avatar"
+                          />
+                        } @else {
+                          <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+                            <span class="text-slate-400 text-sm font-semibold">{{ user.username[0].toUpperCase() }}</span>
+                          </div>
+                        }
+                        <div class="min-w-0">
+                          <p class="text-white font-medium text-sm truncate">{{ displayName(user) }}</p>
+                          <p class="text-slate-400 text-xs truncate">&#64;{{ user.username }} · {{ user.email }}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        (click)="revokeCreator(user)"
+                        class="shrink-0 px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-red-600/70 text-slate-300 hover:text-white text-xs font-medium transition-colors"
+                      >
+                        Revoke
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            @case ('UserManagement') {
+              <h2 class="text-xl font-semibold text-white mb-1">User Management</h2>
+              <p class="text-slate-400 text-xs mb-4">Delete accounts or reset passwords via Clerk.</p>
+              <input
+                type="text"
+                [(ngModel)]="userSearchQuery"
+                placeholder="Search by username or email…"
+                class="w-full max-w-sm mb-4 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+              @if (usersLoading()) {
+                <div class="flex items-center gap-2 text-slate-400">
+                  <svg class="animate-spin h-5 w-5 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <span>Loading…</span>
+                </div>
+              }
+              @if (!usersLoading() && filteredUsers.length === 0) {
+                <p class="text-slate-400 text-sm">No users found.</p>
+              }
+              @if (filteredUsers.length > 0) {
+                <div class="flex flex-col gap-2">
+                  @for (user of filteredUsers; track user.userId) {
+                    <div
+                      class="flex flex-col bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 gap-3"
+                    >
+                      <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
+                          @if (user.profilePictureUrl) {
+                            <img
+                              [src]="user.profilePictureUrl"
+                              class="w-9 h-9 rounded-full object-cover ring-1 ring-slate-600 shrink-0"
+                              alt="avatar"
+                            />
+                          } @else {
+                            <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+                              <span class="text-slate-400 text-sm font-semibold">{{ user.username[0].toUpperCase() }}</span>
+                            </div>
+                          }
+                          <div class="min-w-0">
+                            <p class="text-white font-medium text-sm truncate">
+                              {{ displayName(user) }}
+                              @if (user.role === 'admin') {
+                                <span class="ml-1 px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 text-[10px] font-semibold">Admin</span>
+                              }
+                              @if (user.role === 'verified_creator') {
+                                <span class="ml-1 px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400 text-[10px] font-semibold">Creator</span>
+                              }
+                            </p>
+                            <p class="text-slate-400 text-xs truncate">&#64;{{ user.username }} · {{ user.email }}</p>
+                          </div>
+                        </div>
+                        <div class="shrink-0">
+                          @if (user.role !== 'admin') {
+                            <button
+                              type="button"
+                              (click)="deactivateUser(user)"
+                              class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-red-600/70 text-slate-300 hover:text-white text-xs font-medium transition-colors"
+                            >
+                              Delete
+                            </button>
+                          }
+                        </div>
+                      </div>
+                      @if (user.role !== 'admin') {
+                        <div class="flex items-center gap-2">
+                          <input
+                            type="password"
+                            [(ngModel)]="passwordInputs[user.userId]"
+                            placeholder="New password…"
+                            class="flex-1 max-w-xs px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-600 text-slate-200 text-xs placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                          />
+                          <button
+                            type="button"
+                            (click)="resetPassword(user)"
+                            [disabled]="!passwordInputs[user.userId]"
+                            class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-medium transition-colors"
+                          >
+                            Set Password
+                          </button>
+                          @if (passwordSuccess[user.userId]) {
+                            <span class="text-emerald-400 text-xs">Password updated!</span>
+                          }
+                          @if (passwordError[user.userId]) {
+                            <span class="text-red-400 text-xs">{{ passwordError[user.userId] }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            @default {
+              <div class="text-center mt-10">
+                <p class="text-slate-400 text-sm">Select a tab on the left.</p>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-popup-modal [(open)]="showSyncModal" title="Sync Leagues & Schedules" size="md">
+  <p class="text-sm text-slate-300">
+    This will fetch the latest teams, and game schedules for all selected Leagues. It runs in the background and may a while.
+  </p>
+  <div modal-footer class="flex justify-end gap-3">
+    <button
+      type="button"
+      (click)="showSyncModal = false"
+      class="bg-slate-700 hover:bg-slate-600 text-slate-100 font-medium py-2 px-4 rounded-lg transition-colors"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      (click)="triggerSync()"
+      class="bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+    >
+      Run Sync
+    </button>
+  </div>
+</app-popup-modal>
