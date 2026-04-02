@@ -17,11 +17,13 @@
 			<span
 				class="shrink-0 text-[10px] px-2 py-1 rounded-full border capitalize"
 				[ngClass]="
-					alert.severity === 'high'
+					alert.severity.toLowerCase() === 'high'
 						? 'bg-red-500/15 text-red-300 border-red-500/30'
-						: alert.severity === 'medium'
+						: alert.severity.toLowerCase() === 'medium'
 							? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-							: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+							: alert.severity.toLowerCase() === 'low'
+								? 'bg-green-500/20 text-green-300 border-green-500/30'
+								: 'bg-slate-700/40 text-slate-300 border-slate-600/60'
 				"
 				>{{ alert.severity }}</span
 			>
