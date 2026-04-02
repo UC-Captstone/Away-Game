@@ -63,25 +63,27 @@ export class HomeComponent implements OnInit, OnDestroy {
     // Show map immediately with cached or default location — no waiting.
     const initialLocation = this.geolocationService.getUserLocation();
 
-    initialLocation.pipe(
-      switchMap((location) => {
-        this.userLocation.set(location);
-        this.isNearbyLoading.set(true);
-        console.time('[Home] nearby events');
-        return this.eventService.getNearbyEvents(location);
-      }),
-    ).subscribe({
-      next: (nearbyEvents) => {
-        console.timeEnd('[Home] nearby events');
-        this.nearbyEvents.set(nearbyEvents);
-        this.isNearbyLoading.set(false);
-      },
-      error: (error) => {
-        console.timeEnd('[Home] nearby events');
-        console.error('Error fetching nearby events:', error);
-        this.isNearbyLoading.set(false);
-      },
-    });
+    initialLocation
+      .pipe(
+        switchMap((location) => {
+          this.userLocation.set(location);
+          this.isNearbyLoading.set(true);
+          console.time('[Home] nearby events');
+          return this.eventService.getNearbyEvents(location, 50, 100);
+        }),
+      )
+      .subscribe({
+        next: (nearbyEvents) => {
+          console.timeEnd('[Home] nearby events');
+          this.nearbyEvents.set(nearbyEvents);
+          this.isNearbyLoading.set(false);
+        },
+        error: (error) => {
+          console.timeEnd('[Home] nearby events');
+          console.error('Error fetching nearby events:', error);
+          this.isNearbyLoading.set(false);
+        },
+      });
 
     // In the background, try to get the real GPS location.
     // If it differs from what we already used, refresh nearby events quietly.
@@ -95,7 +97,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
         if (!isSame) {
           this.userLocation.set(realLocation);
-          this.eventService.getNearbyEvents(realLocation).subscribe({
+          this.eventService.getNearbyEvents(realLocation, 50, 100).subscribe({
             next: (nearbyEvents) => this.nearbyEvents.set(nearbyEvents),
           });
         }
