@@ -68,8 +68,8 @@
           </button>
         </div>
         <div class="flex-1 min-h-0 overflow-auto">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
-            @for (event of gameEvents; track event.eventId) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center pt-3">
+            @for (event of displayedGameEvents; track event.eventId) {
               <app-event-tile [event]="event" [showSavedIcon]="true"></app-event-tile>
             } @empty {
               <div class="col-span-full text-center text-slate-400 text-sm">
@@ -80,11 +80,11 @@
         </div>
       }
       @case ('SafetyAlerts') {
-        @if (canCreateAlert && (!showAlertForm() || gameId == null)) {
+        @if (canCreateAlert) {
           <div class="mb-4 flex justify-end">
             <button
               type="button"
-              (click)="showAlertForm.set(true)"
+              (click)="onAddAlertClicked()"
               [disabled]="gameId == null"
               class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -105,14 +105,6 @@
               Add Alert
             </button>
           </div>
-        }
-        @if (showAlertForm() && gameId != null) {
-          <app-alert-form
-            [gameId]="gameId"
-            [isAdmin]="isAdmin"
-            (alertCreated)="onAlertCreated()"
-            (cancelled)="showAlertForm.set(false)"
-          ></app-alert-form>
         }
         <div class="flex-1 min-h-0 overflow-auto">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
