@@ -33,7 +33,6 @@ export class SearchBarComponent {
       this.showDropdown.set(true);
       this.searchService.getSearchResults(term).subscribe({
         next: (results) => {
-          console.log('Search results:', results);
           this.searchResults.set(results);
           this.isLoading.set(false);
         },
@@ -94,6 +93,26 @@ export class SearchBarComponent {
           teamName: result.title,
           teamLogo: result.imageUrl ?? '',
           teamLeague: result.metadata?.league ?? '',
+        },
+      });
+      this.closeDropdown();
+      return;
+    }
+
+    if (result.type === SearchTypeEnum.Event) {
+      this.router.navigate(['/event-details'], {
+        queryParams: {
+          eventId: result.metadata?.eventId ?? result.id,
+          eventName: result.title,
+          description: result.metadata?.description ?? '',
+          eventType: 'Other',
+          saved: result.metadata?.saved ?? false,
+          location: result.metadata?.location ?? '',
+          venueName: result.metadata?.location ?? '',
+          lat: result.metadata?.lat ?? '',
+          lng: result.metadata?.lng ?? '',
+          dateTime: result.metadata?.date ?? '',
+          imageUrl: result.imageUrl ?? '',
         },
       });
       this.closeDropdown();
