@@ -2,16 +2,19 @@
   <h3 class="text-sm font-semibold text-slate-200 mb-4">New Alert</h3>
 
   @if (errorMessage) {
-    <div class="mb-3 px-3 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-xs">
+    <div
+      class="mb-3 px-3 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-xs"
+    >
       {{ errorMessage }}
     </div>
   }
 
   <form (ngSubmit)="onSubmit()" #alertForm="ngForm" class="flex flex-col gap-3">
-
     <!-- Title -->
     <div>
-      <label class="block text-xs font-medium text-slate-400 mb-1">Title <span class="text-red-400">*</span></label>
+      <label class="block text-xs font-medium text-slate-400 mb-1"
+        >Title <span class="text-red-400">*</span></label
+      >
       <input
         type="text"
         [(ngModel)]="title"
@@ -24,7 +27,9 @@
 
     <!-- Alert Type -->
     <div>
-      <label class="block text-xs font-medium text-slate-400 mb-1">Alert Type <span class="text-red-400">*</span></label>
+      <label class="block text-xs font-medium text-slate-400 mb-1"
+        >Alert Type <span class="text-red-400">*</span></label
+      >
       @if (isLoadingTypes) {
         <div class="text-slate-500 text-xs py-2">Loading types...</div>
       } @else {
@@ -52,7 +57,8 @@
             (click)="severity = s"
             [ngClass]="{
               'bg-green-500/30 border-green-400 text-green-300': s === 'low' && severity === s,
-              'bg-yellow-500/30 border-yellow-400 text-yellow-300': s === 'medium' && severity === s,
+              'bg-yellow-500/30 border-yellow-400 text-yellow-300':
+                s === 'medium' && severity === s,
               'bg-red-500/30 border-red-400 text-red-300': s === 'high' && severity === s,
               'bg-slate-700/50 border-slate-600 text-slate-400': severity !== s,
             }"
@@ -74,6 +80,26 @@
         placeholder="Optional additional details..."
         class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-600 text-slate-200 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none"
       ></textarea>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-slate-400 mb-1"
+        >Alert Location <span class="text-red-400">*</span></label
+      >
+      <p class="text-xs text-slate-500 mb-2">Click on the map to set alert coordinates.</p>
+      <app-map
+        [center]="mapCenter"
+        [zoom]="13"
+        [events]="selectionMarker"
+        [height]="'220px'"
+        [showUserMarker]="false"
+        [fitBoundsToMarkers]="false"
+        (mapClicked)="onMapClicked($event)"
+      ></app-map>
+      <div class="mt-2 text-[11px] text-slate-400">
+        Lat: {{ selectedLocation.lat | number: '1.5-5' }} | Lng:
+        {{ selectedLocation.lng | number: '1.5-5' }}
+      </div>
     </div>
 
     <!-- Admin-only: Official Alert -->
@@ -110,6 +136,5 @@
         Cancel
       </button>
     </div>
-
   </form>
 </div>
