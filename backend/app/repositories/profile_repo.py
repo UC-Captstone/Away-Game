@@ -38,6 +38,7 @@ async def get_user_profile_service(current_user: User, db: AsyncSession) -> User
     my_events_stmt = (
         select(Event)
         .where(Event.creator_user_id == current_user.user_id)
+        .where(Event.event_type_id != "GAME")
         .options(
             selectinload(Event.game).selectinload(Game.home_team).selectinload(Team.league),
             selectinload(Event.game).selectinload(Game.away_team).selectinload(Team.league),
