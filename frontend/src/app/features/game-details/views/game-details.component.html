@@ -1,60 +1,104 @@
 <div
-	class="h-[calc(100vh-3.5rem)] flex items-center justify-center text-center bg-gradient-to-b from-slate-800 to-slate-900 overflow-auto"
+  class="h-[calc(100vh-3.5rem)] flex items-center justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
 >
-	@if (isLoading()) {
-		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-			<div class="flex flex-col items-center gap-3">
-				<svg
-					class="animate-spin h-12 w-12 text-sky-400"
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 24 24"
-					aria-hidden="true"
-				>
-					<circle
-						class="opacity-25"
-						cx="12"
-						cy="12"
-						r="10"
-						stroke="currentColor"
-						stroke-width="4"
-					></circle>
-					<path
-						class="opacity-75"
-						fill="currentColor"
-						d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-					></path>
-				</svg>
-				<span class="text-sm font-medium text-slate-300">Loading game details…</span>
-			</div>
-		</div>
-	}
+  @if (isLoading()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div class="flex flex-col items-center gap-3">
+        <svg
+          class="animate-spin h-12 w-12 text-sky-400"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          ></path>
+        </svg>
+        <span class="text-sm font-medium text-slate-300">Loading game details…</span>
+      </div>
+    </div>
+  }
 
-	<div class="bg-transparent h-[calc(100%-2rem)] w-full px-6 py-3 flex flex-col overflow-hidden">
-		<app-details-header [event]="game()"></app-details-header>
+  <div class="bg-transparent h-[calc(100%-2rem)] w-full px-6 py-3 flex flex-col overflow-hidden">
+    <app-details-header [event]="game()"></app-details-header>
 
-		<div class="mt-4 h-[72vh] max-h-[72vh] min-h-0 grid grid-cols-1 xl:grid-cols-2 gap-6">
-			<div class="h-full min-h-0 flex">
-				<app-game-details-panel
-					class="w-full"
-					[eventId]="chatEventId()"
-					[gameId]="game()?.gameId"
-					[gameEvents]="gameEvents()"
-					[safetyAlerts]="safetyAlerts()"
-					(addEventClicked)="onAddEventClicked()"
-					(alertsChanged)="onAlertsChanged()"
-				></app-game-details-panel>
-			</div>
+    <div class="mt-4 h-[72vh] max-h-[72vh] min-h-0 grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div class="h-full min-h-0 flex">
+        <app-game-details-panel
+          class="w-full"
+          [eventId]="chatEventId()"
+          [gameId]="game()?.gameId"
+          [gameEvents]="gameEvents()"
+          [safetyAlerts]="safetyAlerts()"
+          (addEventClicked)="onAddEventClicked()"
+          (addAlertClicked)="onAddAlertClicked()"
+        ></app-game-details-panel>
+      </div>
 
-			<div class="h-full min-h-0 flex">
-				<app-game-map-panel
-					class="w-full"
-					[game]="game()"
-					[gameEvents]="gameEvents()"
-					[safetyAlerts]="safetyAlerts()"
-					[center]="game()?.location ?? { lat: 39.8283, lng: -98.5795 }"
-				></app-game-map-panel>
-			</div>
-		</div>
-	</div>
+      <div class="h-full min-h-0 flex">
+        <app-game-map-panel
+          class="w-full"
+          [game]="game()"
+          [gameEvents]="gameEvents()"
+          [safetyAlerts]="safetyAlerts()"
+          [center]="game()?.location ?? { lat: 39.8283, lng: -98.5795 }"
+        ></app-game-map-panel>
+      </div>
+    </div>
+  </div>
+
+  <app-popup-modal
+    [open]="showAddEventModal()"
+    (closed)="onAddEventCancelled()"
+    title="Add Event"
+    size="lg"
+  >
+    @if (game()?.gameId != null) {
+      <app-add-event-form
+        [gameId]="game()?.gameId ?? 0"
+        [gameDateTime]="game()?.dateTime ?? null"
+        [initialCenter]="game()?.location ?? { lat: 39.8283, lng: -98.5795 }"
+        [isSubmitting]="isEventSubmitting()"
+        [errorMessage]="addEventErrorMessage()"
+        (submitted)="onEventSubmitted($event)"
+        (cancelled)="onAddEventCancelled()"
+      ></app-add-event-form>
+    } @else {
+      <div class="px-3 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-sm">
+        A game id is required before creating an event.
+      </div>
+    }
+  </app-popup-modal>
+
+  <app-popup-modal
+    [open]="showAddAlertModal()"
+    (closed)="onAddAlertCancelled()"
+    title="Add Alert"
+    size="lg"
+  >
+    @if (game()?.gameId != null) {
+      <app-alert-form
+        [gameId]="game()?.gameId ?? 0"
+        [initialCenter]="game()?.location ?? { lat: 39.8283, lng: -98.5795 }"
+        [isAdmin]="isAdmin"
+        (alertCreated)="onAlertCreated()"
+        (cancelled)="onAddAlertCancelled()"
+      ></app-alert-form>
+    } @else {
+      <div class="px-3 py-2 rounded-lg bg-red-500/20 border border-red-500/40 text-red-300 text-sm">
+        A game id is required before creating an alert.
+      </div>
+    }
+  </app-popup-modal>
 </div>
