@@ -2,14 +2,16 @@ import asyncio
 import json
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import partial
 
 from geopy.geocoders import Nominatim
 
-from sqlalchemy import update
+from sqlalchemy import delete, select, update
 
 from db.session import AsyncSessionLocal
+from models.event import Event
+from models.event_chat import EventChat
 from models.safety_alert import SafetyAlert
 from models.game import Game
 from repositories.league_repo import LeagueRepository
@@ -250,6 +252,38 @@ async def deactivate_expired_alerts(session) -> int:
     return count
 
 
+async def cleanup_previous_day(session) -> None:
+    today_aware = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_naive = today_aware.replace(tzinfo=None)
+
+    # Safety alerts tied to a game that occurred before today / admin approval alerts carry over
+    past_game_ids = select(Game.game_id).where(Game.date_time < today_aware).scalar_subquery()
+    alert_result = await session.execute(
+        delete(SafetyAlert).where(
+            SafetyAlert.game_id.in_(past_game_ids)
+        )
+    )
+
+    past_event_ids = select(Event.event_id).where(Event.game_date < today_naive).scalar_subquery()
+    await session.execute(
+        delete(EventChat).where(EventChat.event_id.in_(past_event_ids))
+    )
+
+    event_result = await session.execute(
+        delete(Event).where(Event.game_date < today_naive)
+    )
+
+    game_result = await session.execute(
+        delete(Game).where(Game.date_time < today_aware)
+    )
+
+    logger.info(
+        f"Cleanup: deleted {alert_result.rowcount} game-linked alert(s), "
+        f"{event_result.rowcount} event(s), "
+        f"{game_result.rowcount} game(s) prior to {today_naive.date()}"
+    )
+
+
 async def run_nightly_task():
     logger.info("Starting nightly scraper")
 
@@ -283,10 +317,11 @@ async def run_nightly_task():
                     logger.exception(f"{league.league_code} scrape failed, skipping: {e}")
 
             await deactivate_expired_alerts(session)
+            await cleanup_previous_day(session)
             await session.commit()
             logger.info("Scraper ran successfully")
     except Exception as e:
-        logger.exception(f"Scraper failed: {e}")
+        logger.exception(f"Scraper run failed: {e}")
         raise
     finally:
         await client.close()

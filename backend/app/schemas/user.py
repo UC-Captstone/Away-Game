@@ -39,12 +39,11 @@ class UserUpdate(BaseModel):
 
 
 class UserRead(UserBase):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     user_id: UUID
     created_at: datetime
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class HeaderInfo(BaseModel):
@@ -84,3 +83,9 @@ class NavBarInfo(BaseModel):
     profile_picture_url: Optional[str] = None
     username: str
     display_name: str  # Combined first_name + last_name
+
+
+class ProfilePictureUpdate(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+    profile_picture_url: Optional[str] = None

@@ -1,11 +1,12 @@
 from __future__ import annotations
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_serializer, model_validator
 from pydantic.alias_generators import to_camel
+from .common import Location
 from .common import Location
 
 
@@ -65,6 +66,26 @@ class SafetyAlertRead(SafetyAlertBase):
     is_active: bool
     is_official: bool
     created_at: datetime
+    game_name: Optional[str] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def _derive_game_name(cls, data: object) -> object:
+        if hasattr(data, 'game') and data.game is not None:
+            game = data.game
+            try:
+                away = game.away_team.display_name if game.away_team else '?'
+                home = game.home_team.display_name if game.home_team else '?'
+                object.__setattr__(data, 'game_name', f'{away} @ {home}')
+            except Exception:
+                pass
+        return data
+
+    @field_serializer('created_at')
+    def serialize_created_at(self, v: datetime) -> str:
+        if v.tzinfo is None:
+            v = v.replace(tzinfo=timezone.utc)
+        return v.isoformat()
 
     class Config:
         from_attributes = True

@@ -2,9 +2,12 @@ from __future__ import annotations
 from typing import Optional, Sequence
 from uuid import UUID
 
-from sqlalchemy import select, union
+from sqlalchemy import select, union, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.orm import selectinload
+
+from models.game import Game
 
 from models.user_alert_acknowledgment import UserAlertAcknowledgment
 from models.safety_alert import SafetyAlert
@@ -59,8 +62,14 @@ class UserAlertAcknowledgmentRepository:
             .where(
                 SafetyAlert.is_active == True,
                 SafetyAlert.alert_id.notin_(acknowledged_alert_ids),
-                SafetyAlert.game_id.isnot(None),
-                SafetyAlert.game_id.in_(select(favorited_game_ids.c.game_id)),
+                or_(
+                    SafetyAlert.is_official == True,
+                    SafetyAlert.game_id.in_(favorited_game_ids),
+                ),
+            )
+            .options(
+                selectinload(SafetyAlert.game).selectinload(Game.home_team),
+                selectinload(SafetyAlert.game).selectinload(Game.away_team),
             )
             .order_by(SafetyAlert.is_official.desc(), SafetyAlert.created_at.desc())
         )
@@ -81,6 +90,10 @@ class UserAlertAcknowledgmentRepository:
         stmt = (
             select(SafetyAlert)
             .where(SafetyAlert.alert_id.in_(acknowledged_alert_ids))
+            .options(
+                selectinload(SafetyAlert.game).selectinload(Game.home_team),
+                selectinload(SafetyAlert.game).selectinload(Game.away_team),
+            )
             .order_by(SafetyAlert.created_at.desc())
             .limit(limit)
             .offset(offset)

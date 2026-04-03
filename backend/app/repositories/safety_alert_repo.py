@@ -7,6 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from models.safety_alert import SafetyAlert
+from models.game import Game
+
+_GAME_LOAD = selectinload(SafetyAlert.game).selectinload(Game.home_team), \
+             selectinload(SafetyAlert.game).selectinload(Game.away_team)
 from schemas.common import Location
 from schemas.safety_alert import SafetyAlertFeedRead, SafetyAlertSeverity
 
@@ -15,7 +19,9 @@ class SafetyAlertRepository:
         self.db = db
 
     async def get(self, alert_id: UUID) -> Optional[SafetyAlert]:
-        res = await self.db.execute(select(SafetyAlert).where(SafetyAlert.alert_id == alert_id))
+        res = await self.db.execute(
+            select(SafetyAlert).where(SafetyAlert.alert_id == alert_id).options(*_GAME_LOAD)
+        )
         return res.scalar_one_or_none()
 
     async def list(
@@ -28,7 +34,7 @@ class SafetyAlertRepository:
         limit: int = 100,
         offset: int = 0
     ) -> Sequence[SafetyAlert]:
-        stmt = select(SafetyAlert).order_by(SafetyAlert.created_at.desc()).limit(limit).offset(offset)
+        stmt = select(SafetyAlert).options(*_GAME_LOAD).order_by(SafetyAlert.created_at.desc()).limit(limit).offset(offset)
         if reporter_user_id:
             stmt = stmt.where(SafetyAlert.reporter_user_id == reporter_user_id)
         if game_id is not None:
