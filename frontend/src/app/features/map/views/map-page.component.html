@@ -1,4 +1,4 @@
-<div class="h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-hidden">
+<div class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden">
   @if (isLoading()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div class="flex flex-col items-center gap-3">
@@ -28,7 +28,7 @@
     </div>
   }
 
-  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-hidden max-w-screen-2xl mx-auto min-h-0">
+  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0">
     <app-map-header
       [showGameOverlay]="showGameOverlay()"
       [showEventOverlay]="showEventOverlay()"
@@ -46,9 +46,9 @@
       </div>
     }
 
-    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_24rem] gap-6 xl:h-full">
+    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_24rem] gap-6 xl:h-full xl:items-stretch xl:grid-rows-[minmax(0,1fr)]">
       <div
-        class="w-full h-full min-h-[20rem] sm:min-h-[26rem] xl:min-h-0 bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col"
+        class="w-full h-auto xl:h-full min-h-[20rem] sm:min-h-[26rem] xl:min-h-0 bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col"
       >
         <div
           class="p-4 border-b border-slate-800 text-left text-xs text-slate-300 flex items-center justify-between"
@@ -72,7 +72,7 @@
       </div>
 
       <app-map-sidebar
-        class="h-full min-h-[20rem] sm:min-h-[24rem] xl:min-h-0"
+        class="h-auto xl:h-full min-h-[20rem] sm:min-h-[24rem] xl:min-h-0"
         [visibleEvents]="visibleEvents()"
         (openEventDetails)="openEventDetails($event)"
       ></app-map-sidebar>
