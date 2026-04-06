@@ -42,12 +42,15 @@ export class EventsService {
       .pipe(
         map((events: IEvent[]) =>
           events
+            .filter(
+              (event) =>
+                Number.isFinite(event.location?.lat) && Number.isFinite(event.location?.lng),
+            )
             .map((event) => ({
-              lat: event.location?.lat ?? 0,
-              lng: event.location?.lng ?? 0,
+              lat: event.location!.lat,
+              lng: event.location!.lng,
               popup: `<b>${event.eventName}</b><br><small>${new Date(event.dateTime).toLocaleString()}</small>`,
-            }))
-            .filter((marker) => Number.isFinite(marker.lat) && Number.isFinite(marker.lng)),
+            })),
         ),
       );
   }
