@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './features/auth/guards/auth.guard';
 import { protectedGuard } from './features/auth/guards/protected.guard';
-import { MapPageComponent } from './features/map/views/map-page.component';
 import { adminGuard } from './features/auth/guards/admin.guard';
 
 export const routes: Routes = [
@@ -57,7 +56,8 @@ export const routes: Routes = [
   },
   {
     path: 'map',
-    loadComponent: () => MapPageComponent,
+    loadComponent: () =>
+      import('./features/map/views/map-page.component').then((m) => m.MapPageComponent),
     canActivate: [protectedGuard],
   },
   {
