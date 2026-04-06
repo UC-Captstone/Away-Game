@@ -33,11 +33,13 @@ export class UserProfileHeaderComponent {
   });
 
   openPicker(): void {
+    this.blurActiveElement();
     this.pickerOpening.emit();
     this.isPickerOpen = true;
   }
 
   closePicker(): void {
+    this.blurActiveElement();
     this.isPickerOpen = false;
     this.searchTerm.set('');
   }
@@ -58,5 +60,14 @@ export class UserProfileHeaderComponent {
 
   trackByTeamId(_: number, team: ITeam): number {
     return team.teamId;
+  }
+
+  private blurActiveElement(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const active = document.activeElement as HTMLElement | null;
+    active?.blur();
   }
 }

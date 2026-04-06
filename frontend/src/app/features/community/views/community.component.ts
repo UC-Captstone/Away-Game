@@ -1,4 +1,4 @@
-import { Component, signal, WritableSignal, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, WritableSignal, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription, EMPTY } from 'rxjs';
@@ -26,7 +26,7 @@ export class CommunityComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.isMobile = window.innerWidth < 768;
+    this.updateViewportMode();
     this.subs.add(
       this.route.queryParams
         .pipe(
@@ -54,5 +54,14 @@ export class CommunityComponent implements OnInit, OnDestroy {
 
   onFriendSelected(friend: IFriendship): void {
     this.selectedFriend.set(friend);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateViewportMode();
+  }
+
+  private updateViewportMode(): void {
+    this.isMobile = window.innerWidth < 1024;
   }
 }

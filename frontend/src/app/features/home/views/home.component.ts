@@ -8,6 +8,7 @@ import { interval, Subscription, switchMap } from 'rxjs';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
 import { IMapMarker } from '../../../shared/models/map-marker';
 import { EventsService } from '../../../shared/services/events.service';
+import { LocationFallbackReason } from '../../../shared/services/geolocation.service';
 
 @Component({
   selector: 'app-home',
@@ -19,6 +20,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   // Separate loading states so featured events and nearby events render independently.
   isFeaturedLoading: WritableSignal<boolean> = signal(false);
   isNearbyLoading: WritableSignal<boolean> = signal(false);
+  locationNotice: WritableSignal<string | null> = signal(null);
   userLocation: WritableSignal<ILocation | null> = signal(null);
   nearbyEvents: WritableSignal<IMapMarker[]> = signal([]);
   featuredEvents: WritableSignal<IEvent[]> = signal([]);
@@ -87,8 +89,15 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     // In the background, try to get the real GPS location.
     // If it differs from what we already used, refresh nearby events quietly.
-    this.geolocationService.getRealLocation().subscribe({
-      next: (realLocation) => {
+    this.geolocationService.getRealLocationAttempt().subscribe({
+      next: (result) => {
+        if (result.source === 'fallback') {
+          this.locationNotice.set(this.getLocationNotice(result.reason));
+          return;
+        }
+
+        this.locationNotice.set(null);
+        const realLocation = result.location;
         const current = this.userLocation();
         const isSame =
           current &&
@@ -101,6 +110,9 @@ export class HomeComponent implements OnInit, OnDestroy {
             next: (nearbyEvents) => this.nearbyEvents.set(nearbyEvents),
           });
         }
+      },
+      error: () => {
+        this.locationNotice.set(this.getLocationNotice('unknown'));
       },
     });
   }
@@ -116,5 +128,19 @@ export class HomeComponent implements OnInit, OnDestroy {
       const nextIndex = (this.currentEventIndex() + 1) % this.featuredEvents().length;
       this.currentEventIndex.set(nextIndex);
     });
+  }
+
+  private getLocationNotice(reason: LocationFallbackReason | null): string {
+    switch (reason) {
+      case 'permission-denied':
+        return 'Location access is off. Showing events around a default area.';
+      case 'unsupported':
+        return 'This device/browser does not provide location services. Showing a default area.';
+      case 'timeout':
+      case 'position-unavailable':
+        return 'Unable to determine your location right now. Showing a default area.';
+      default:
+        return 'Using a default location until your device location is available.';
+    }
   }
 }

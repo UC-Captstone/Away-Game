@@ -13,7 +13,7 @@ import { ILocation } from '../../../shared/models/location';
 import { IMapMarker } from '../../../shared/models/map-marker';
 import { ISafetyAlert } from '../../../shared/models/safety-alert';
 import { EventsService } from '../../../shared/services/events.service';
-import { GeolocationService } from '../../../shared/services/geolocation.service';
+import { GeolocationService, LocationFallbackReason } from '../../../shared/services/geolocation.service';
 import { SafetyAlertService } from '../../../shared/services/safety-alert.service';
 
 @Component({
@@ -44,6 +44,7 @@ export class MapPageComponent implements OnInit {
   showEventOverlay: WritableSignal<boolean> = signal(true);
   showSafetyOverlay: WritableSignal<boolean> = signal(true);
   showUserMarker: WritableSignal<boolean> = signal(true);
+  locationNotice: WritableSignal<string | null> = signal(null);
 
   constructor(
     private readonly router: Router,
@@ -124,49 +125,89 @@ export class MapPageComponent implements OnInit {
   private loadMapData(): void {
     this.isLoading.set(true);
 
+    this.geolocationService.getRealLocationAttempt().subscribe({
+      next: (locationResult) => {
+        if (locationResult.source === 'fallback') {
+          this.locationNotice.set(this.getLocationNotice(locationResult.reason));
+          return;
+        }
+
+        this.locationNotice.set(null);
+
+        const current = this.userLocation();
+        const isSameLocation =
+          Math.abs(current.lat - locationResult.location.lat) < 0.001 &&
+          Math.abs(current.lng - locationResult.location.lng) < 0.001;
+
+        if (!isSameLocation) {
+          this.userLocation.set(locationResult.location);
+          this.loadDataForLocation(locationResult.location);
+        }
+      },
+      error: () => {
+        this.locationNotice.set(this.getLocationNotice('unknown'));
+      },
+    });
+
     this.geolocationService.getUserLocation().subscribe({
       next: (location) => {
         this.userLocation.set(location);
-
-        forkJoin({
-          events: this.eventsService
-            .getNearbyEventDetails(location, this.searchRadiusMiles, 100)
-            .pipe(
-              catchError((error) => {
-                console.warn('Failed to load nearby events:', error);
-                return of([]);
-              }),
-            ),
-          safetyAlerts: this.safetyAlertService
-            .listAlerts(undefined, undefined, true, this.safetyAlertFetchLimit, 0)
-            .pipe(
-            catchError((error) => {
-              console.warn('Failed to load safety alerts:', error);
-              return of([]);
-            }),
-            ),
-        }).subscribe({
-          next: ({ events, safetyAlerts }) => {
-            this.allNearbyEvents.set(events);
-            this.allSafetyAlerts.set(this.filterNearbySafetyAlerts(safetyAlerts, location));
-            this.refreshMapMarkers();
-            this.refreshVisibleEvents();
-            this.isLoading.set(false);
-          },
-          error: () => {
-            this.allNearbyEvents.set([]);
-            this.allSafetyAlerts.set([]);
-            this.mapMarkers.set([]);
-            this.visibleEvents.set([]);
-            this.isLoading.set(false);
-          },
-        });
+        this.loadDataForLocation(location);
       },
       error: () => {
         this.userLocation.set(this.defaultCenter);
+        this.locationNotice.set(this.getLocationNotice('unknown'));
         this.isLoading.set(false);
       },
     });
+  }
+
+  private loadDataForLocation(location: ILocation): void {
+    forkJoin({
+      events: this.eventsService.getNearbyEventDetails(location, this.searchRadiusMiles, 100).pipe(
+        catchError((error) => {
+          console.warn('Failed to load nearby events:', error);
+          return of([]);
+        }),
+      ),
+      safetyAlerts: this.safetyAlertService
+        .listAlerts(undefined, undefined, true, this.safetyAlertFetchLimit, 0)
+        .pipe(
+          catchError((error) => {
+            console.warn('Failed to load safety alerts:', error);
+            return of([]);
+          }),
+        ),
+    }).subscribe({
+      next: ({ events, safetyAlerts }) => {
+        this.allNearbyEvents.set(events);
+        this.allSafetyAlerts.set(this.filterNearbySafetyAlerts(safetyAlerts, location));
+        this.refreshMapMarkers();
+        this.refreshVisibleEvents();
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.allNearbyEvents.set([]);
+        this.allSafetyAlerts.set([]);
+        this.mapMarkers.set([]);
+        this.visibleEvents.set([]);
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  private getLocationNotice(reason: LocationFallbackReason | null): string {
+    switch (reason) {
+      case 'permission-denied':
+        return 'Location access is off. Showing a default map area. Enable location services for nearby results.';
+      case 'unsupported':
+        return 'Location services are unavailable on this device. Showing a default map area.';
+      case 'timeout':
+      case 'position-unavailable':
+        return 'Unable to get your current location right now. Showing a default map area.';
+      default:
+        return 'Using a default map area until location becomes available.';
+    }
   }
 
   private refreshMapMarkers(): void {

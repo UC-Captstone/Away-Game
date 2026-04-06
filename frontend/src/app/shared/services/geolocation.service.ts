@@ -2,6 +2,19 @@ import { Injectable } from '@angular/core';
 import { ILocation } from '../models/location';
 import { catchError, map, Observable, of } from 'rxjs';
 
+export type LocationFallbackReason =
+  | 'permission-denied'
+  | 'position-unavailable'
+  | 'timeout'
+  | 'unsupported'
+  | 'unknown';
+
+export interface ILocationResolution {
+  location: ILocation;
+  source: 'gps' | 'fallback';
+  reason: LocationFallbackReason | null;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -25,14 +38,27 @@ export class GeolocationService {
    * errors silently. Subscribe alongside getUserLocation() to get an update.
    */
   getRealLocation(): Observable<ILocation> {
+    return this.getRealLocationAttempt().pipe(map((result) => result.location));
+  }
+
+  getRealLocationAttempt(): Observable<ILocationResolution> {
     return this.requestBrowserGeolocation().pipe(
       map((location) => {
         this.saveLocationToStorage(location);
-        return location;
+        return {
+          location,
+          source: 'gps' as const,
+          reason: null,
+        };
       }),
       catchError((error) => {
+        const reason = this.resolveFallbackReason(error);
         console.warn('Geolocation failed:', error);
-        return of(this.DEFAULT_LOCATION);
+        return of({
+          location: this.DEFAULT_LOCATION,
+          source: 'fallback' as const,
+          reason,
+        });
       }),
     );
   }
@@ -92,5 +118,24 @@ export class GeolocationService {
       console.warn('Failed to retrieve location from storage:', error);
       return null;
     }
+  }
+
+  private resolveFallbackReason(error: unknown): LocationFallbackReason {
+    if (typeof error === 'string') {
+      return error.toLowerCase().includes('not supported') ? 'unsupported' : 'unknown';
+    }
+
+    const code = (error as { code?: number } | null)?.code;
+    if (code === 1) {
+      return 'permission-denied';
+    }
+    if (code === 2) {
+      return 'position-unavailable';
+    }
+    if (code === 3) {
+      return 'timeout';
+    }
+
+    return 'unknown';
   }
 }

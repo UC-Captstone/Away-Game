@@ -1,5 +1,5 @@
 <div
-   class="min-h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
+  class="h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-hidden"
 >
   @if (isLoading()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -29,30 +29,32 @@
       </div>
     </div>
   }
-  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible max-w-screen-2xl mx-auto">
-    <div class="md:flex mt-3 flex-1">
-      <div class="w-full min-h-[32rem] xl:min-h-[72vh] bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0">
-      >
-        <app-event-filters-panel
-          [initialFilters]="initialPanelFilters"
-          [initialSportsFilterMode]="initialSportsFilterMode"
-          [initialSelectedTeams]="initialSelectedTeams"
-          (applyFilters)="onApplyFilters($event)"
-        ></app-event-filters-panel>
-
-        <div
-          class="content-panel pt-3 px-3 text-slate-300 w-full h-full flex-1 bg-transparent flex flex-col"
-          style="min-height: 0"
-        >
-          <div class="flex items-center justify-center mb-4 px-1">
-            <h1
-              class="text-4xl font-extrabold tracking-wide text-slate-100 drop-shadow-[0_4px_12px_rgba(15,23,42,0.55)]"
-            >
-              Events
-            </h1>
+  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-hidden max-w-screen-2xl mx-auto min-h-0">
+    <div class="mt-3 flex-1 min-h-0">
+      <div class="w-full h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0">
+        <div class="flex flex-col xl:flex-row h-full min-h-0">
+          <div class="shrink-0 xl:w-[23rem]">
+            <app-event-filters-panel
+              [initialFilters]="initialPanelFilters"
+              [initialSportsFilterMode]="initialSportsFilterMode"
+              [initialSelectedTeams]="initialSelectedTeams"
+              (applyFilters)="onApplyFilters($event)"
+            ></app-event-filters-panel>
           </div>
 
-          <app-event-result-grid class="flex-1 min-h-0" [events]="events()"></app-event-result-grid>
+          <div
+            class="content-panel pt-3 px-3 text-slate-300 w-full h-full flex-1 bg-transparent flex flex-col min-h-0"
+          >
+            <div class="flex items-center justify-center mb-4 px-1 shrink-0">
+              <h1
+                class="text-3xl sm:text-4xl font-extrabold tracking-wide text-slate-100 drop-shadow-[0_4px_12px_rgba(15,23,42,0.55)]"
+              >
+                Events
+              </h1>
+            </div>
+
+            <app-event-result-grid class="flex-1 min-h-0" [events]="events()"></app-event-result-grid>
+          </div>
         </div>
       </div>
     </div>
