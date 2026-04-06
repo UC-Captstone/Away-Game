@@ -7,7 +7,6 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, field_serializer, model_validator
 from pydantic.alias_generators import to_camel
 from .common import Location
-from .common import Location
 
 
 class SafetyAlertBase(BaseModel):
