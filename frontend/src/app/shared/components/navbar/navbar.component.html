@@ -1,22 +1,11 @@
-<nav
-  class="fixed top-0 inset-x-0 z-50 bg-gradient-to-b from-slate-900 to-slate-950 backdrop-blur-md shadow-lg"
->
-  <div class="max-w-screen-xl mx-auto px-4 py-2 flex items-center gap-4">
-    <!-- Logo: left -->
-    <a class="flex items-center gap-3 shrink-0">
-      <img src="/assets/text-logo.png" class="h-10 w-auto" alt="Away Game Logo" />
+<nav class="fixed top-0 inset-x-0 z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shadow-lg">
+  <div class="max-w-screen-xl mx-auto px-4 py-2 flex items-center gap-3">
+    <a class="flex items-center gap-3 shrink-0" routerLink="/home" aria-label="Away Game home">
+      <img src="/assets/text-logo.png" class="h-9 sm:h-10 w-auto" alt="Away Game Logo" />
     </a>
 
-    <div
-      id="navbar-user"
-      class="flex-1 items-center justify-center gap-4 w-full md:w-auto md:flex"
-      [ngClass]="{
-        hidden: !isMenuOpen(),
-        flex: isMenuOpen(),
-        'md:flex': true,
-      }"
-    >
-      <ul class="flex flex-col md:flex-row gap-2 md:gap-4 mt-4 md:mt-0">
+    <div class="hidden md:flex flex-1 items-center justify-center gap-4 w-full">
+      <ul class="flex items-center gap-2 lg:gap-4">
         <li>
           <a
             routerLink="/home"
@@ -28,7 +17,6 @@
             >Home</a
           >
         </li>
-
         <li>
           <a
             routerLink="/events"
@@ -40,7 +28,6 @@
             >Events</a
           >
         </li>
-
         <li>
           <a
             routerLink="/community"
@@ -52,7 +39,6 @@
             >Community</a
           >
         </li>
-
         <li>
           <a
             routerLink="/map"
@@ -67,17 +53,14 @@
       </ul>
     </div>
 
-    <!-- Alert bell + Profile avatar + hamburger: right -->
     <div class="flex items-center gap-2 ml-auto shrink-0">
       @if (navBarInfo) {
-        <!-- Alert bell with dropdown -->
         <div class="relative">
           <app-notification-bell-button
             [unacknowledgedCount]="unacknowledgedCount"
             (bellClick)="onBellClick()"
           ></app-notification-bell-button>
 
-          <!-- Bell dropdown -->
           @if (isBellOpen()) {
             <app-notifications-dropdown
               [unacknowledgedCount]="unacknowledgedCount"
@@ -94,7 +77,9 @@
 
         <div class="relative group hidden md:block">
           <button
+            type="button"
             class="flex items-center justify-center w-10 h-10 rounded-full ring-1 ring-slate-700 bg-slate-800/90 hover:bg-slate-800 transition-all shadow-sm"
+            aria-label="Open profile menu"
           >
             <img
               class="w-10 h-10 rounded-full object-cover ring-2 ring-white"
@@ -105,22 +90,20 @@
           <div
             class="absolute right-0 top-full w-56 origin-top-right rounded-lg bg-gradient-to-b from-slate-900 to-slate-950 ring-1 ring-slate-800 shadow-2xl backdrop-blur-md p-2 flex flex-col gap-1 opacity-0 pointer-events-none translate-y-1 transition-all duration-150 ease-out group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0"
           >
-            <div
-              class="px-3 py-2 rounded-lg bg-slate-800/60 flex flex-col leading-tight border border-slate-700/40"
-            >
+            <div class="px-3 py-2 rounded-lg bg-slate-800/60 flex flex-col leading-tight border border-slate-700/40">
               <span class="text-slate-200 text-xs font-semibold">@{{ navBarInfo.username }}</span>
               <span class="text-slate-400 text-[11px] truncate">{{ navBarInfo.displayName }}</span>
             </div>
             <div class="h-px bg-slate-700/60 my-1"></div>
             <a
-              href="/profile"
+              routerLink="/profile"
               class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/70 transition-colors"
               >Profile</a
             >
             @if (isAdmin) {
               <div class="h-px bg-slate-700/60 my-1"></div>
               <a
-                href="/admin"
+                routerLink="/admin"
                 class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/70 transition-colors"
               >Admin Settings</a>
             }
@@ -139,12 +122,60 @@
         type="button"
         (click)="isMenuOpen.set(!isMenuOpen())"
         class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg text-slate-300 bg-slate-800/60 hover:bg-slate-800 hover:text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
+        [attr.aria-expanded]="isMenuOpen()"
+        aria-controls="navbar-mobile-menu"
       >
         <span class="sr-only">Open main menu</span>
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" d="M5 7h14M5 12h14M5 17h14" />
         </svg>
       </button>
+    </div>
+  </div>
+
+  <div
+    id="navbar-mobile-menu"
+    class="md:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-md overflow-hidden transition-all duration-200"
+    [ngClass]="isMenuOpen() ? 'max-h-[75vh]' : 'max-h-0'"
+  >
+    <div class="max-w-screen-xl mx-auto px-4 py-3 space-y-4">
+      <ul class="grid gap-2">
+        <li>
+          <a routerLink="/home" (click)="closeMenu()" class="block px-4 py-3 rounded-xl text-sm font-medium text-slate-200 bg-slate-900/60 hover:bg-slate-800/80">Home</a>
+        </li>
+        <li>
+          <a routerLink="/events" (click)="closeMenu()" class="block px-4 py-3 rounded-xl text-sm font-medium text-slate-200 bg-slate-900/60 hover:bg-slate-800/80">Events</a>
+        </li>
+        <li>
+          <a routerLink="/community" (click)="closeMenu()" class="block px-4 py-3 rounded-xl text-sm font-medium text-slate-200 bg-slate-900/60 hover:bg-slate-800/80">Community</a>
+        </li>
+        <li>
+          <a routerLink="/map" (click)="closeMenu()" class="block px-4 py-3 rounded-xl text-sm font-medium text-slate-200 bg-slate-900/60 hover:bg-slate-800/80">Map</a>
+        </li>
+      </ul>
+
+      @if (navBarInfo) {
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3 space-y-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <img
+              class="w-12 h-12 rounded-full object-cover ring-2 ring-slate-700 shrink-0"
+              [src]="navBarInfo.profilePictureUrl || '/assets/default-avatar.jpg'"
+              alt="User avatar"
+            />
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-slate-100 truncate">@{{ navBarInfo.username }}</p>
+              <p class="text-xs text-slate-400 truncate">{{ navBarInfo.displayName }}</p>
+            </div>
+          </div>
+          <div class="grid gap-2">
+            <a routerLink="/profile" (click)="closeMenu()" class="px-4 py-3 rounded-xl text-sm font-medium text-slate-200 bg-slate-900 hover:bg-slate-800 transition-colors">Profile</a>
+            @if (isAdmin) {
+              <a routerLink="/admin" (click)="closeMenu()" class="px-4 py-3 rounded-xl text-sm font-medium text-slate-200 bg-slate-900 hover:bg-slate-800 transition-colors">Admin Settings</a>
+            }
+            <button type="button" (click)="onSignOut()" class="px-4 py-3 rounded-xl text-left text-sm font-medium text-red-200 bg-red-500/10 hover:bg-red-500/20 transition-colors">Sign out</button>
+          </div>
+        </div>
+      }
     </div>
   </div>
 </nav>

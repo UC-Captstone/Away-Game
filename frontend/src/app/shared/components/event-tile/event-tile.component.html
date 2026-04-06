@@ -1,5 +1,5 @@
 <article
-  class="group bg-slate-900 border-4 border-slate-700 rounded-lg overflow-hidden shadow-lg text-slate-300 w-64 h-64 flex flex-col transform transition-all duration-200 ease-out hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:border-sky-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-600 will-change-transform"
+  class="group bg-slate-900 border-4 border-slate-700 rounded-lg overflow-hidden shadow-lg text-slate-300 w-full max-w-[20rem] sm:max-w-none sm:w-64 min-h-[17rem] sm:h-64 flex flex-col transform transition-all duration-200 ease-out hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:border-sky-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-600 will-change-transform"
   (click)="navigateToEventDetails($event)"
 >
   <div class="shrink-0 w-full h-1/2 bg-slate-800 relative overflow-hidden">
@@ -45,14 +45,14 @@
     }
   </div>
 
-  <div class="p-2 flex-1 flex flex-col justify-between">
+  <div class="p-3 sm:p-2 flex-1 flex flex-col justify-between gap-3">
     <div>
       <h4 class="text-sky-400 text-lg font-semibold truncate">{{ event.eventName }}</h4>
       <p class="text-xs text-slate-400 mt-2 truncate">{{ event.venueName }}</p>
       <p class="text-xs text-slate-400 mt-2">{{ event.dateTime | date: 'medium' }}</p>
     </div>
 
-    <div class="flex items-center justify-center gap-2 mt-2">
+    <div class="flex flex-wrap items-center justify-center gap-2 mt-1 sm:mt-2">
       <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">{{
         event.eventType
       }}</span>
@@ -64,7 +64,7 @@
           type="button"
           (click)="toggleSaved($event)"
           [disabled]="isSaving()"
-          class="ml-auto inline-flex items-center gap-2 px-2 py-1 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="ml-auto inline-flex min-h-10 items-center gap-2 px-3 py-2 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
           [attr.aria-pressed]="event.isSaved"
           [title]="event.isSaved ? 'Saved - click to unsave' : 'Save event'"
         >

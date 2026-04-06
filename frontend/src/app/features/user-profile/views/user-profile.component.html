@@ -1,6 +1,4 @@
-<div
-  class="h-screen flex items-center justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
->
+<div class="min-h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto">
   @if (toastMessage(); as message) {
     <div class="fixed top-20 right-5 z-[70] max-w-sm w-[calc(100%-2.5rem)] md:w-auto">
       <div
@@ -53,12 +51,12 @@
     </div>
   }
   @if (userProfile; as profile) {
-    <div class="bg-transparent h-[calc(100%-2rem)] w-full px-6 flex flex-col overflow-hidden relative">
+    <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col gap-4 overflow-visible relative max-w-screen-2xl mx-auto">
       <app-back-button
         routerLink="/"
         label="Back"
         position="absolute"
-        positionClasses="left-6 top-4 z-20"
+        positionClasses="left-4 top-3 z-20"
       ></app-back-button>
       <app-user-profile-header
         [profileHeaderInfo]="profile.headerInfo"
@@ -68,22 +66,18 @@
         (profilePictureSelected)="onProfilePictureSelected($event)"
       ></app-user-profile-header>
 
-      <div class="md:flex mt-5 flex-1">
-        <div
-          class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden md:flex h-[78vh]"
-        >
-          <div class="tabs-panel bg-transparent w-64 p-3 border-r border-slate-800">
-            <ul
-              class="flex-column space-y space-y-4 text-sm font-medium text-slate-300 mb-0 h-full flex flex-col justify-start"
-            >
+      <div class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col lg:flex-row">
+        <div class="border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950/20 lg:w-72">
+          <div class="p-3 overflow-x-auto lg:overflow-x-visible">
+            <ul class="flex lg:flex-col gap-2 text-sm font-medium text-slate-300 min-w-max lg:min-w-0">
               <li>
                 <a
                   (click)="selectTab('AccountSettings'); $event.preventDefault()"
-                  class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                  class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full"
                   [ngClass]="
                     selectedTab() === 'AccountSettings'
-                      ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                      ? 'bg-sky-500 text-white font-medium transition-colors'
+                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                   "
                   [attr.aria-current]="selectedTab() === 'AccountSettings' ? 'page' : null"
                 >
@@ -93,11 +87,11 @@
               <li>
                 <a
                   (click)="selectTab('SavedEvents'); $event.preventDefault()"
-                  class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                  class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full"
                   [ngClass]="
                     selectedTab() === 'SavedEvents'
-                      ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                      ? 'bg-sky-500 text-white font-medium transition-colors'
+                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                   "
                   [attr.aria-current]="selectedTab() === 'SavedEvents' ? 'page' : null"
                 >
@@ -107,11 +101,11 @@
               <li>
                 <a
                   (click)="selectTab('UserCreatedEvents'); $event.preventDefault()"
-                  class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                  class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full"
                   [ngClass]="
                     selectedTab() === 'UserCreatedEvents'
-                      ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                      ? 'bg-sky-500 text-white font-medium transition-colors'
+                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                   "
                   [attr.aria-current]="selectedTab() === 'UserCreatedEvents' ? 'page' : null"
                 >
@@ -121,11 +115,11 @@
               <li>
                 <a
                   (click)="selectTab('RecentChats'); $event.preventDefault()"
-                  class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                  class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full"
                   [ngClass]="
                     selectedTab() === 'RecentChats'
-                      ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                      ? 'bg-sky-500 text-white font-medium transition-colors'
+                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                   "
                   [attr.aria-current]="selectedTab() === 'RecentChats' ? 'page' : null"
                 >
@@ -135,11 +129,11 @@
               <li>
                 <a
                   (click)="selectTab('MyAlerts'); $event.preventDefault()"
-                  class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                  class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full"
                   [ngClass]="
                     selectedTab() === 'MyAlerts'
-                      ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                      ? 'bg-sky-500 text-white font-medium transition-colors'
+                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                   "
                   [attr.aria-current]="selectedTab() === 'MyAlerts' ? 'page' : null"
                 >
@@ -149,11 +143,11 @@
               <li>
                 <a
                   (click)="selectTab('Notifications'); $event.preventDefault()"
-                  class="inline-flex items-center px-3 py-3 rounded-lg w-full"
+                  class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full"
                   [ngClass]="
                     selectedTab() === 'Notifications'
-                      ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                      ? 'bg-sky-500 text-white font-medium transition-colors'
+                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                   "
                   [attr.aria-current]="selectedTab() === 'Notifications' ? 'page' : null"
                 >
@@ -162,11 +156,9 @@
               </li>
             </ul>
           </div>
+        </div>
 
-          <div
-            class="content-panel p-3 text-slate-300 w-full h-full overflow-auto flex-1 bg-transparent"
-            style="min-height: 0"
-          >
+        <div class="content-panel p-4 sm:p-5 text-slate-300 w-full overflow-visible lg:overflow-auto flex-1 bg-transparent min-h-[32rem] lg:min-h-0">
             @switch (selectedTab()) {
               @case ('AccountSettings') {
                 <app-user-account-settings
@@ -177,9 +169,7 @@
                 ></app-user-account-settings>
               }
               @case ('SavedEvents') {
-                <div
-                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
-                >
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   @for (event of profile.savedEvents; track event.eventId) {
                     <app-event-tile
                       [event]="event"
@@ -194,9 +184,7 @@
                 </div>
               }
               @case ('UserCreatedEvents') {
-                <div
-                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
-                >
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   @for (event of profile.myEvents; track event) {
                     <app-event-tile [event]="event" [showSavedIcon]="false"></app-event-tile>
                   } @empty {
@@ -208,9 +196,7 @@
                 </div>
               }
               @case ('RecentChats') {
-                <div
-                  class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 gap-y-5"
-                >
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   @for (chat of profile.myChats; track chat) {
                     <app-chat-tile [chat]="chat"></app-chat-tile>
                   } @empty {
@@ -225,22 +211,22 @@
                 <app-my-alerts></app-my-alerts>
               }
               @case ('Notifications') {
-                <div class="p-4 max-w-lg">
-                  <div class="relative mb-6">
-                    <h3 class="text-2xl font-semibold text-sky-400 text-center">Notifications</h3>
-                    <div class="absolute inset-y-0 right-0 flex items-center">
+                <div class="w-full max-w-2xl mx-auto">
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <h3 class="text-2xl font-semibold text-sky-400 text-center sm:text-left">Notifications</h3>
+                    <div class="flex items-center justify-end">
                       <button
                         (click)="saveNotifications(profile.accountSettings)"
                         [disabled]="!notificationsChanged()"
                         type="button"
-                        class="bg-sky-500 hover:bg-sky-600 text-white font-medium text-xs py-1 px-2 rounded-lg transition-colors disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
+                        class="bg-sky-500 hover:bg-sky-600 text-white font-medium text-xs py-2 px-3 rounded-lg transition-colors disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
                       >
                         Save
                       </button>
                     </div>
                   </div>
                   <div class="space-y-5">
-                    <label class="flex items-start gap-4 cursor-pointer">
+                    <label class="flex items-start gap-4 cursor-pointer rounded-2xl border border-slate-800/70 bg-slate-950/20 p-4">
                       <div class="grow">
                         <span class="block text-sm font-medium text-white">New nearby events</span>
                         <span class="block text-xs text-slate-400 mt-0.5">Get notified when fan meetups or tailgates are happening near you.</span>
@@ -250,7 +236,7 @@
                         <div class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"></div>
                       </div>
                     </label>
-                    <label class="flex items-start gap-4 cursor-pointer">
+                    <label class="flex items-start gap-4 cursor-pointer rounded-2xl border border-slate-800/70 bg-slate-950/20 p-4">
                       <div class="grow">
                         <span class="block text-sm font-medium text-white">Favorite team away games</span>
                         <span class="block text-xs text-slate-400 mt-0.5">Receive alerts when your favorite team plays an away game.</span>
@@ -285,6 +271,5 @@
           </div>
         </div>
       </div>
-    </div>
   }
 </div>

@@ -1,11 +1,12 @@
-<div class="h-[calc(100vh-3.5rem)] bg-slate-900 flex overflow-hidden">
+<div class="min-h-[calc(100dvh-4rem)] bg-slate-900 flex flex-col lg:flex-row overflow-hidden">
   <!-- Left Panel: Friends -->
   <div
-    class="flex flex-col border-r border-slate-700 bg-slate-800 overflow-y-auto"
-    [class.w-full]="!selectedFriend() && isMobile"
-    [class.hidden]="selectedFriend() && isMobile"
-    [class.w-80]="!isMobile"
-    [class.flex-shrink-0]="!isMobile"
+    class="flex flex-col border-b lg:border-b-0 lg:border-r border-slate-700 bg-slate-800 overflow-y-auto min-h-0 w-full lg:w-80"
+    [ngClass]="{
+      hidden: selectedFriend() && isMobile,
+      'flex-shrink-0': !isMobile,
+      'w-full': isMobile,
+    }"
   >
     <div class="p-4 overflow-y-auto flex-1">
       <app-friends-management
@@ -16,7 +17,7 @@
   </div>
 
   <!-- Right Panel: DM Chat -->
-  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden min-h-[32rem] lg:min-h-0">
     @if (selectedFriend()) {
       <app-dm-chat
         [otherUserId]="selectedFriend()!.friendUserId"

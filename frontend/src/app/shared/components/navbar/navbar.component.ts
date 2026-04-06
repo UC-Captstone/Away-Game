@@ -8,10 +8,10 @@ import {
   WritableSignal,
   signal,
 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ClerkService } from '@jsrob/ngx-clerk';
 import { catchError, EMPTY, forkJoin, map, of, Subscription, timer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../features/auth/services/auth.service';
 import { AdminService } from '../../../features/admin/services/admin.service';
 import { NotificationBellButtonComponent } from './notification-bell-button/notification-bell-button.component';
@@ -52,6 +52,10 @@ export class NavBarComponent implements OnDestroy {
 
   get isAdmin(): boolean {
     return this.authService.isAdmin();
+  }
+
+  closeMenu(): void {
+    this.isMenuOpen.set(false);
   }
 
   private navBarLoaded = false;
@@ -113,6 +117,13 @@ export class NavBarComponent implements OnDestroy {
         this.loadDmNotifications();
       }, POLL_INTERVAL_MS);
     });
+
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.closeMenu();
+        this.isBellOpen.set(false);
+      });
   }
 
   get unacknowledgedCount(): number {
@@ -389,6 +400,7 @@ export class NavBarComponent implements OnDestroy {
       console.error('Error signing out:', error);
     } finally {
       this.authService.clearInternalToken();
+      this.closeMenu();
       this.router.navigate(['/login']);
     }
   }
