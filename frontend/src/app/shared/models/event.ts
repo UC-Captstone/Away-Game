@@ -7,6 +7,7 @@ export interface IEvent {
   gameId?: number; // numeric game id (when this event represents/is tied to a game)
   eventType: EventTypeEnum;
   eventName: string;
+  description?: string;
   dateTime: Date;
   location: ILocation;
   venueName: string;

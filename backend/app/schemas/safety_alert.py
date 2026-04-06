@@ -90,6 +90,9 @@ class SafetyAlertRead(SafetyAlertBase):
         from_attributes = True
 
 
+SafetyAlertRead.model_rebuild()
+
+
 class SafetyAlertSeverity(str, Enum):
     LOW = "Low"
     MEDIUM = "Medium"

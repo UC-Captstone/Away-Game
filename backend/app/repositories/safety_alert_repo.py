@@ -98,6 +98,22 @@ def _derive_alert_severity(alert_type_code: Optional[str], alert_type_name: Opti
     return SafetyAlertSeverity.MEDIUM
 
 
+def _severity_from_db_or_derived(alert: SafetyAlert) -> SafetyAlertSeverity:
+    # Prefer the persisted alert severity; derive from type only as a fallback.
+    raw = (alert.severity or "").strip().lower()
+    if raw == "high":
+        return SafetyAlertSeverity.HIGH
+    if raw == "medium":
+        return SafetyAlertSeverity.MEDIUM
+    if raw == "low":
+        return SafetyAlertSeverity.LOW
+
+    return _derive_alert_severity(
+        alert.alert_type_id,
+        alert.alert_type.type_name if alert.alert_type is not None else None,
+    )
+
+
 def _map_alert_to_feed(alert: SafetyAlert) -> Optional[SafetyAlertFeedRead]:
     lat = alert.latitude
     lng = alert.longitude
@@ -128,10 +144,7 @@ def _map_alert_to_feed(alert: SafetyAlert) -> Optional[SafetyAlertFeedRead]:
         latitude=lat,
         longitude=lng,
         created_at=alert.created_at,
-        severity=_derive_alert_severity(
-            alert.alert_type_id,
-            alert.alert_type.type_name if alert.alert_type is not None else None,
-        ),
+        severity=_severity_from_db_or_derived(alert),
         title=title,
         description=description,
         date_time=date_time,

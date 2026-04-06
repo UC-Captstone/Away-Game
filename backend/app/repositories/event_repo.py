@@ -6,17 +6,19 @@ import math
 import time
 import uuid
 
+from fastapi import HTTPException, status
 from sqlalchemy import select, update, delete, and_, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
+from core.content_filter import clean_message
 from models.event import Event
 from models.favorite import Favorite
 from models.game import Game
 from models.team import Team
 from models.venue import Venue
 from schemas.common import Location
-from schemas.event import EventRead, EventSearchFilters, TeamLogos
+from schemas.event import EventCreateRequest, EventRead, EventSearchFilters, TeamLogos
 from schemas.types import EventTypeEnum
 
 
@@ -79,6 +81,71 @@ class EventRepository:
     async def remove(self, event_id: UUID) -> int:
         res = await self.db.execute(delete(Event).where(Event.event_id == event_id))
         return res.rowcount or 0
+
+
+async def create_event_service(
+    event_data: EventCreateRequest,
+    creator_user_id: UUID,
+    db: AsyncSession,
+) -> EventRead:
+    event_type_code_map = {
+        EventTypeEnum.GAME: "GAME",
+        EventTypeEnum.TAILGATE: "TAILGATE",
+        EventTypeEnum.POSTGAME: "POSTGAME",
+        EventTypeEnum.WATCH: "WATCH",
+        EventTypeEnum.OTHER: "OTHER",
+    }
+
+    event_type_code = event_type_code_map[event_data.event_type]
+    if event_type_code == "GAME":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Game type cannot be user-created")
+
+    venue_id = event_data.venue_id
+    latitude = event_data.latitude
+    longitude = event_data.longitude
+
+    if event_data.game_id is not None:
+        game_result = await db.execute(select(Game).where(Game.game_id == event_data.game_id))
+        game = game_result.scalar_one_or_none()
+        if game is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game not found")
+
+        if venue_id is None and game.venue_id is not None:
+            venue_id = game.venue_id
+
+        if (latitude is None or longitude is None) and game.venue_id is not None:
+            venue_result = await db.execute(select(Venue).where(Venue.venue_id == game.venue_id))
+            venue = venue_result.scalar_one_or_none()
+            if venue is not None:
+                if latitude is None:
+                    latitude = venue.latitude
+                if longitude is None:
+                    longitude = venue.longitude
+
+    event = Event(
+        creator_user_id=creator_user_id,
+        event_type_id=event_type_code,
+        game_id=event_data.game_id,
+        venue_id=venue_id,
+        title=clean_message(event_data.title),
+        description=clean_message(event_data.description) if event_data.description else None,
+        game_date=event_data.date_time,
+        latitude=latitude,
+        longitude=longitude,
+    )
+    db.add(event)
+    await db.commit()
+
+    opts = [
+        joinedload(Event.venue),
+        joinedload(Event.event_type),
+        joinedload(Event.game).joinedload(Game.home_team),
+        joinedload(Event.game).joinedload(Game.away_team),
+        joinedload(Event.game).joinedload(Game.league),
+    ]
+    result = await db.execute(select(Event).where(Event.event_id == event.event_id).options(*opts))
+    created_event = result.unique().scalar_one()
+    return _map_event_to_read(created_event)
 
 
 async def search_events_with_filters_service(
@@ -524,19 +591,22 @@ async def get_nearby_events_service(
     cos_lat = math.cos(math.radians(location.lat))
     cos_lat = max(cos_lat, 1e-6)  # avoid division by zero near the poles
     lng_degrees = radius_miles / (69.0 * cos_lat)
-    now = datetime.utcnow()
+    cutoff = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     fetch_limit = limit * 3  # over-fetch so haversine filtering still yields `limit` results
+    event_lat = func.coalesce(Event.latitude, Venue.latitude)
+    event_lng = func.coalesce(Event.longitude, Venue.longitude)
 
     events_stmt = (
         select(Event)
+        .outerjoin(Venue, Event.venue_id == Venue.venue_id)
         .where(
             and_(
-                Event.latitude.isnot(None),
-                Event.longitude.isnot(None),
+                event_lat.isnot(None),
+                event_lng.isnot(None),
                 Event.game_date.isnot(None),
-                Event.game_date >= now,
-                Event.latitude.between(location.lat - lat_degrees, location.lat + lat_degrees),
-                Event.longitude.between(location.lng - lng_degrees, location.lng + lng_degrees),
+                Event.game_date >= cutoff,
+                event_lat.between(location.lat - lat_degrees, location.lat + lat_degrees),
+                event_lng.between(location.lng - lng_degrees, location.lng + lng_degrees),
             )
         )
         .options(
@@ -556,7 +626,7 @@ async def get_nearby_events_service(
         .where(
             and_(
                 Game.date_time.isnot(None),
-                Game.date_time >= now,
+                Game.date_time >= cutoff,
                 Venue.latitude.isnot(None),
                 Venue.longitude.isnot(None),
                 Venue.latitude.between(location.lat - lat_degrees, location.lat + lat_degrees),
@@ -582,7 +652,12 @@ async def get_nearby_events_service(
     # Compute haversine once per item — not twice.
     filtered_items: list[tuple] = []
     for event in events:
-        dist = _haversine_distance(location.lat, location.lng, event.latitude, event.longitude)
+        event_lat_value = event.latitude if event.latitude is not None else (event.venue.latitude if event.venue else None)
+        event_lng_value = event.longitude if event.longitude is not None else (event.venue.longitude if event.venue else None)
+        if event_lat_value is None or event_lng_value is None:
+            continue
+
+        dist = _haversine_distance(location.lat, location.lng, event_lat_value, event_lng_value)
         if dist <= radius_miles:
             filtered_items.append((event.game_date, dist, "event", event))
 
@@ -614,25 +689,35 @@ async def get_nearby_events_service(
 
 
 def _map_event_to_read(event: Event, is_saved: bool = False) -> EventRead:
-    type_code = event.event_type if isinstance(event.event_type, str) else (
-        event.event_type.code if hasattr(event.event_type, "code") else str(event.event_type)
-    )
+    if isinstance(event.event_type, str):
+        type_code = event.event_type
+    elif getattr(event, "event_type", None) is not None and hasattr(event.event_type, "code"):
+        type_code = event.event_type.code
+    else:
+        type_code = event.event_type_id
+
+    normalized_type_code = (type_code or "").upper()
 
     event_type_map = {
         "GAME": EventTypeEnum.GAME,
         "TAILGATE": EventTypeEnum.TAILGATE,
         "POSTGAME": EventTypeEnum.POSTGAME,
         "WATCH": EventTypeEnum.WATCH,
+        "OTHER": EventTypeEnum.OTHER,
     }
-    event_type_value = event_type_map.get(type_code, EventTypeEnum.GAME)
+    event_type_value = event_type_map.get(normalized_type_code, EventTypeEnum.OTHER)
+
+    event_lat_value = event.latitude if event.latitude is not None else (event.venue.latitude if event.venue else None)
+    event_lng_value = event.longitude if event.longitude is not None else (event.venue.longitude if event.venue else None)
 
     return EventRead(
         event_id=event.event_id,
         game_id=event.game_id,
         event_type=event_type_value,
         event_name=event.title,
+        description=event.description,
         date_time=event.game_date,
-        location=Location(lat=event.latitude, lng=event.longitude),
+        location=Location(lat=event_lat_value, lng=event_lng_value) if event_lat_value is not None and event_lng_value is not None else None,
         venue_name=event.venue.name if event.venue else "",
         image_url=event.picture_url,
         team_logos=TeamLogos(

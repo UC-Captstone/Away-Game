@@ -43,7 +43,23 @@ export class EventTileComponent {
       return;
     }
 
-    console.log('Event tile clicked (non-game event):', this.event);
+    this.router.navigate(['/event-details'], {
+      queryParams: {
+        eventId: this.event.eventId,
+        eventName: this.event.eventName,
+        description: this.event.description ?? '',
+        eventType: this.event.eventType,
+        venueName: this.event.venueName,
+        location: this.event.venueName,
+        dateTime: this.event.dateTime,
+        lat: this.event.location?.lat,
+        lng: this.event.location?.lng,
+        imageUrl: this.event.imageUrl ?? '',
+        league: this.event.league ?? '',
+        isUserCreated: this.event.isUserCreated ?? false,
+        saved: this.event.isSaved,
+      },
+    });
   }
 
   toggleSaved(event?: Event): void {

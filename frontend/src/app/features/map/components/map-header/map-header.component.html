@@ -1,0 +1,54 @@
+<div
+  class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md px-4 py-3"
+>
+  <div class="flex flex-wrap items-center justify-between gap-3 text-left">
+    <div>
+      <h1 class="text-lg md:text-xl font-semibold text-slate-100">Map Explorer</h1>
+      <p class="text-xs text-slate-400 mt-1">
+        Browse events and safety alerts around your stored location.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-4 text-xs text-slate-300">
+      <label class="inline-flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          [checked]="showGameOverlay"
+          (change)="onToggleGameOverlay()"
+          class="accent-amber-500"
+        />
+        Games
+      </label>
+
+      <label class="inline-flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          [checked]="showEventOverlay"
+          (change)="onToggleEventOverlay()"
+          class="accent-emerald-500"
+        />
+        Events
+      </label>
+
+      <label class="inline-flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          [checked]="showSafetyOverlay"
+          (change)="onToggleSafetyOverlay()"
+          class="accent-red-500"
+        />
+        Safety Alerts
+      </label>
+
+      <label class="inline-flex items-center gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          [checked]="showUserMarker"
+          (change)="onToggleUserMarker()"
+          class="accent-sky-500"
+        />
+        My Location
+      </label>
+    </div>
+  </div>
+</div>

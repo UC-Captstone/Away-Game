@@ -1,0 +1,130 @@
+<div
+  class="w-full h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0"
+>
+  <div class="p-3 border-b border-slate-800 text-left">
+    <div class="flex items-start gap-2 flex-wrap">
+      <h2 class="text-base font-semibold text-slate-100">Event Information</h2>
+    </div>
+    <p class="mt-1 text-xs text-slate-400">
+      {{ event?.description ?? 'No description has been added for this event yet.' }}
+    </p>
+  </div>
+
+  <div class="flex-1 min-h-0 flex flex-col overflow-hidden text-left">
+    <div class="p-3 sm:p-4 border-b border-slate-800">
+      @if (localEditNotice) {
+        <div
+          class="mb-3 text-xs rounded-lg border border-amber-400/30 bg-amber-500/10 text-amber-200 px-3 py-2"
+        >
+          {{ localEditNotice }}
+        </div>
+      }
+
+      @if (isEditing) {
+        <div class="space-y-3">
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Event Name</label>
+              <input
+                type="text"
+                [ngModel]="editDraft.eventName"
+                (ngModelChange)="onEventNameChanged($event)"
+                class="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Venue / Location</label>
+              <input
+                type="text"
+                [ngModel]="editDraft.venueName"
+                (ngModelChange)="onVenueNameChanged($event)"
+                class="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Date & Time</label>
+              <input
+                type="datetime-local"
+                [ngModel]="editDraft.dateTime"
+                (ngModelChange)="onDateTimeChanged($event)"
+                class="w-full bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              (click)="onCancelEditing()"
+              class="px-3 py-2 rounded-lg bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              (click)="onSaveEdits()"
+              class="px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      } @else {
+        @if (event?.gameId) {
+          <button
+            type="button"
+            (click)="onNavigateToLinkedGame()"
+            class="w-full mt-2 rounded-2xl border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-left hover:bg-sky-500/20 transition-colors"
+          >
+            <p class="text-[11px] uppercase tracking-wide text-sky-300">Game Information</p>
+            <div class="mt-1.5 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                @if (relatedAwayLogo) {
+                  <img
+                    [src]="relatedAwayLogo"
+                    [alt]="relatedAwayName"
+                    class="w-7 h-7 object-contain rounded-md border border-slate-700 bg-slate-800"
+                  />
+                }
+                <span class="text-sm text-slate-100 truncate">{{ relatedAwayName }}</span>
+              </div>
+
+              <span class="text-[11px] text-slate-400 font-semibold">VS</span>
+
+              <div class="flex items-center justify-end gap-2 min-w-0">
+                <span class="text-sm text-slate-100 truncate">{{ relatedHomeName }}</span>
+                @if (relatedHomeLogo) {
+                  <img
+                    [src]="relatedHomeLogo"
+                    [alt]="relatedHomeName"
+                    class="w-7 h-7 object-contain rounded-md border border-slate-700 bg-slate-800"
+                  />
+                }
+              </div>
+            </div>
+          </button>
+        }
+      }
+    </div>
+
+    <div class="flex-1 min-h-0 flex flex-col">
+      <div class="flex-1 min-h-0 px-3 sm:px-4 pb-3">
+        <ng-container *ngIf="eventId; else noEventChat">
+          <app-chat-panel
+            class="block h-full min-h-0"
+            [eventId]="eventId"
+            [gameId]="event?.gameId"
+          ></app-chat-panel>
+        </ng-container>
+
+        <ng-template #noEventChat>
+          <div class="h-full flex items-center justify-center text-sm text-slate-500">
+            Chat will appear once an event is loaded.
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

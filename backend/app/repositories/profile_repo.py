@@ -38,6 +38,7 @@ async def get_user_profile_service(current_user: User, db: AsyncSession) -> User
     my_events_stmt = (
         select(Event)
         .where(Event.creator_user_id == current_user.user_id)
+        .where(Event.event_type_id != "GAME")
         .options(
             selectinload(Event.game).selectinload(Game.home_team).selectinload(Team.league),
             selectinload(Event.game).selectinload(Game.away_team).selectinload(Team.league),
@@ -179,21 +180,7 @@ async def delete_saved_event_service(
     )
 
     if (deleted_by_event.rowcount or 0) == 0:
-        game_favs_stmt = (
-            select(Favorite)
-            .where(Favorite.user_id == current_user.user_id)
-            .where(Favorite.game_id.isnot(None))
-        )
-        game_favs_result = await db.execute(game_favs_stmt)
-        game_favorites = game_favs_result.scalars().all()
-
-        matched_game_id = None
-        for favorite in game_favorites:
-            synthetic_id = uuid.uuid5(uuid.NAMESPACE_DNS, f"game:{favorite.game_id}")
-            if synthetic_id == event_id:
-                matched_game_id = favorite.game_id
-                break
-
+        matched_game_id = await _resolve_game_id_from_event_identifier(db, event_id)
         if matched_game_id is not None:
             await db.execute(
                 sa.delete(Favorite).where(
@@ -210,6 +197,20 @@ async def add_saved_event_service(
     db: AsyncSession,
     event_id: UUID,
 ) -> List[EventRead]:
+    matched_game_id = await _resolve_game_id_from_event_identifier(db, event_id)
+    if matched_game_id is not None:
+        existing_game_favorite_stmt = (
+            select(Favorite)
+            .where(Favorite.user_id == current_user.user_id)
+            .where(Favorite.game_id == matched_game_id)
+        )
+        existing_game_favorite_result = await db.execute(existing_game_favorite_stmt)
+        if existing_game_favorite_result.scalar_one_or_none() is None:
+            db.add(Favorite(user_id=current_user.user_id, event_id=None, game_id=matched_game_id))
+            await db.commit()
+
+        return await _get_saved_items_for_user(current_user.user_id, db)
+
     existing_event_favorite_stmt = (
         select(Favorite)
         .where(Favorite.user_id == current_user.user_id)
@@ -231,32 +232,34 @@ async def add_saved_event_service(
         await db.commit()
         return await _get_saved_items_for_user(current_user.user_id, db)
 
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Event with id {event_id} not found",
+    )
+
+
+async def _resolve_game_id_from_event_identifier(
+    db: AsyncSession,
+    event_id: UUID,
+) -> int | None:
+    event_game_result = await db.execute(
+        select(Event.game_id)
+        .where(Event.event_id == event_id)
+        .where(Event.event_type_id == "GAME")
+        .where(Event.game_id.isnot(None))
+    )
+    event_game_id = event_game_result.scalar_one_or_none()
+    if event_game_id is not None:
+        return event_game_id
+
     games_id_stmt = select(Game.game_id)
     games_id_result = await db.execute(games_id_stmt)
-    matched_game_id = None
     for game_id in games_id_result.scalars().all():
         synthetic_id = uuid.uuid5(uuid.NAMESPACE_DNS, f"game:{game_id}")
         if synthetic_id == event_id:
-            matched_game_id = game_id
-            break
+            return game_id
 
-    if matched_game_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Event with id {event_id} not found",
-        )
-
-    existing_game_favorite_stmt = (
-        select(Favorite)
-        .where(Favorite.user_id == current_user.user_id)
-        .where(Favorite.game_id == matched_game_id)
-    )
-    existing_game_favorite_result = await db.execute(existing_game_favorite_stmt)
-    if existing_game_favorite_result.scalar_one_or_none() is None:
-        db.add(Favorite(user_id=current_user.user_id, event_id=None, game_id=matched_game_id))
-        await db.commit()
-
-    return await _get_saved_items_for_user(current_user.user_id, db)
+    return None
 
 
 async def get_navbar_info_service(current_user: User, db: AsyncSession) -> NavBarInfo:

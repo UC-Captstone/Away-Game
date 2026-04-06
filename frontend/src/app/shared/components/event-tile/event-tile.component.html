@@ -56,7 +56,7 @@
       <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">{{
         event.eventType
       }}</span>
-      @if (event.isUserCreated) {
+      @if (event.isUserCreated && event.eventType != 'Game') {
         <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">Your event</span>
       }
       @if (showSavedIcon) {

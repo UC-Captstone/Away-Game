@@ -3,11 +3,13 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
+  Output,
   signal,
   SimpleChanges,
   ViewChild,
@@ -15,6 +17,7 @@ import {
 } from '@angular/core';
 import { ILocation } from '../../models/location';
 import { IMapMarker } from '../../models/map-marker';
+import { IMapViewportBounds } from '../../models/map-viewport-bounds';
 import * as L from 'leaflet';
 
 @Component({
@@ -33,6 +36,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
   @Input() showUserMarker: boolean = true;
   @Input() fitBoundsToMarkers: boolean = false;
   @Input() fillContainer: boolean = false;
+  @Input() minZoom: number = 4;
+  @Input() maxZoom: number = 19;
+  @Input() maxBounds: [[number, number], [number, number]] = [
+    [15, -170],
+    [72, -50],
+  ];
+  @Output() mapClicked = new EventEmitter<ILocation>();
+  @Output() viewportChanged = new EventEmitter<IMapViewportBounds>();
 
   isMapReady: WritableSignal<boolean> = signal(false);
 
@@ -95,6 +106,19 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
       this.map.setZoom(this.zoom);
     }
 
+    if (changes['minZoom'] && this.map) {
+      this.map.setMinZoom(this.minZoom);
+    }
+
+    if (changes['maxZoom'] && this.map) {
+      this.map.setMaxZoom(this.maxZoom);
+    }
+
+    if (changes['maxBounds'] && this.map) {
+      this.map.setMaxBounds(this.maxBounds as L.LatLngBoundsExpression);
+      this.map.panInsideBounds(this.maxBounds as L.LatLngBoundsExpression);
+    }
+
     if (changes['events'] || changes['showUserMarker']) {
       this.updateEvents(this.events);
     }
@@ -134,7 +158,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
         this.map.remove();
       }
 
-      const mapElement = this.mapContainer.nativeElement as HTMLDivElement & { _leaflet_id?: number };
+      const mapElement = this.mapContainer.nativeElement as HTMLDivElement & {
+        _leaflet_id?: number;
+      };
       if (mapElement._leaflet_id) {
         delete mapElement._leaflet_id;
       }
@@ -142,6 +168,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
       this.map = L.map(this.mapContainer.nativeElement, {
         center: [this.center.lat, this.center.lng],
         zoom: this.zoom,
+        minZoom: this.minZoom,
+        maxZoom: this.maxZoom,
+        maxBounds: this.maxBounds,
+        maxBoundsViscosity: 1,
         zoomControl: true,
         attributionControl: true,
       });
@@ -152,6 +182,24 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
       }).addTo(this.map);
 
       this.markerLayer = L.layerGroup().addTo(this.map);
+
+      this.map.on('click', (event: L.LeafletMouseEvent) => {
+        this.ngZone.run(() => {
+          this.mapClicked.emit({
+            lat: event.latlng.lat,
+            lng: event.latlng.lng,
+          });
+        });
+      });
+
+      const onViewportEvent = () => {
+        this.ngZone.run(() => {
+          this.emitViewportBounds();
+        });
+      };
+
+      this.map.on('moveend', onViewportEvent);
+      this.map.on('zoomend', onViewportEvent);
 
       if (this.showUserMarker) {
         this.addUserMarker();
@@ -167,10 +215,25 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
 
       this.ngZone.run(() => {
         this.isMapReady.set(true);
+        this.emitViewportBounds();
       });
     } catch (error) {
       console.error('Error initializing map:', error);
     }
+  }
+
+  private emitViewportBounds(): void {
+    if (!this.map) {
+      return;
+    }
+
+    const bounds = this.map.getBounds();
+    this.viewportChanged.emit({
+      north: bounds.getNorth(),
+      south: bounds.getSouth(),
+      east: bounds.getEast(),
+      west: bounds.getWest(),
+    });
   }
 
   private invalidateMapSize(): void {

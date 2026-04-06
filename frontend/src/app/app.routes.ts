@@ -47,11 +47,23 @@ export const routes: Routes = [
     canActivate: [protectedGuard],
   },
   {
+    path: 'event-details',
+    loadComponent: () =>
+      import('./features/event-details/views/event-details.component').then(
+        (m) => m.EventDetailsComponent,
+      ),
+    canActivate: [protectedGuard],
+  },
+  {
+    path: 'map',
+    loadComponent: () =>
+      import('./features/map/views/map-page.component').then((m) => m.MapPageComponent),
+    canActivate: [protectedGuard],
+  },
+  {
     path: 'community',
     loadComponent: () =>
-      import('./features/community/views/community.component').then(
-        (m) => m.CommunityComponent,
-      ),
+      import('./features/community/views/community.component').then((m) => m.CommunityComponent),
     canActivate: [protectedGuard],
   },
   {
