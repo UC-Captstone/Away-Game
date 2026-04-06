@@ -59,6 +59,10 @@ export class SearchBarComponent {
     this.showDropdown.set(false);
   }
 
+  private toQueryCoordinate(value: number | undefined): number | undefined {
+    return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+  }
+
   onResultClick(result: ISearchResults): void {
     if (result.type === SearchTypeEnum.Game) {
       this.router.navigate(['/game-details'], {
@@ -69,8 +73,8 @@ export class SearchBarComponent {
           saved: result.metadata?.saved ?? false,
           league: result.metadata?.league ?? '',
           location: result.metadata?.location ?? '',
-          lat: result.metadata?.lat ?? '',
-          lng: result.metadata?.lng ?? '',
+          lat: this.toQueryCoordinate(result.metadata?.lat),
+          lng: this.toQueryCoordinate(result.metadata?.lng),
           date: result.metadata?.date ?? '',
           homeLogo: result.teamLogos?.home ?? '',
           awayLogo: result.teamLogos?.away ?? '',
@@ -109,8 +113,8 @@ export class SearchBarComponent {
           saved: result.metadata?.saved ?? false,
           location: result.metadata?.location ?? '',
           venueName: result.metadata?.location ?? '',
-          lat: result.metadata?.lat ?? '',
-          lng: result.metadata?.lng ?? '',
+          lat: this.toQueryCoordinate(result.metadata?.lat),
+          lng: this.toQueryCoordinate(result.metadata?.lng),
           dateTime: result.metadata?.date ?? '',
           imageUrl: result.imageUrl ?? '',
         },
