@@ -456,10 +456,10 @@ export class EventDetailsComponent implements OnInit {
     const eventId = params.get('eventId') ?? params.get('id') ?? '';
     const eventTypeRaw = (params.get('eventType') ?? EventTypeEnum.Other).toLowerCase();
 
-    const lat = Number(params.get('lat'));
-    const lng = Number(params.get('lng'));
+    const lat = this.parseCoordinateParam(params.get('lat'));
+    const lng = this.parseCoordinateParam(params.get('lng'));
     const location =
-      Number.isFinite(lat) && Number.isFinite(lng)
+      lat !== undefined && lng !== undefined
         ? { lat, lng }
         : { ...this.defaultCenter };
 
@@ -482,6 +482,20 @@ export class EventDetailsComponent implements OnInit {
       isUserCreated: params.get('isUserCreated') === 'true',
       isSaved: params.get('saved') === 'true',
     };
+  }
+
+  private parseCoordinateParam(rawValue: string | null): number | undefined {
+    if (rawValue == null) {
+      return undefined;
+    }
+
+    const trimmedValue = rawValue.trim();
+    if (!trimmedValue) {
+      return undefined;
+    }
+
+    const parsedValue = Number(trimmedValue);
+    return Number.isFinite(parsedValue) ? parsedValue : undefined;
   }
 
   private mapEventType(value: string): EventTypeEnum {
