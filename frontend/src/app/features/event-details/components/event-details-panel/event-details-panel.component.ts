@@ -11,7 +11,7 @@ import { EventDetailsEditDraft } from '../../../../shared/models/event-details-e
   standalone: true,
   imports: [CommonModule, FormsModule, ChatPanelComponent],
   host: {
-    class: 'block h-full min-h-0',
+    class: 'block h-auto xl:h-full min-h-0',
   },
 })
 export class EventDetailsPanelComponent {
