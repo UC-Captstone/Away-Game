@@ -25,6 +25,9 @@ import * as L from 'leaflet';
   templateUrl: './map.component.html',
   standalone: true,
   imports: [CommonModule],
+  host: {
+    class: 'block h-full min-h-0 w-full',
+  },
 })
 export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
