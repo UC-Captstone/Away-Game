@@ -1,4 +1,4 @@
-<div class="min-h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto">
+<div class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden">
   @if (isLoading()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div class="flex flex-col items-center gap-3">
@@ -28,11 +28,11 @@
     </div>
   }
 
-  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible max-w-screen-2xl mx-auto">
+  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0">
     <app-details-header [event]="game()"></app-details-header>
 
-    <div class="mt-4 min-h-0 grid grid-cols-1 xl:grid-cols-2 gap-6">
-      <div class="h-full min-h-0 flex">
+    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-2 gap-6 xl:h-[calc(100dvh-12rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)]">
+      <div class="h-auto xl:h-full min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex xl:max-h-[calc(100dvh-12rem)]">
         <app-game-details-panel
           class="w-full"
           [eventId]="chatEventId()"
@@ -44,7 +44,7 @@
         ></app-game-details-panel>
       </div>
 
-      <div class="h-full min-h-0 flex">
+      <div class="h-auto xl:h-full min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex xl:max-h-[calc(100dvh-12rem)]">
         <app-game-map-panel
           class="w-full"
           [game]="game()"

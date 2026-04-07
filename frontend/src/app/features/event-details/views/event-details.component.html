@@ -114,10 +114,10 @@
       </div>
     </div>
 
-    <div class="mt-4 min-h-0 grid grid-cols-1 xl:grid-cols-2 gap-6 xl:h-[calc(100dvh-14rem)] xl:overflow-hidden">
-      <div class="h-auto xl:h-full min-h-0 flex">
+    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-2 gap-6 xl:h-[calc(100dvh-14rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)] xl:overflow-hidden">
+      <div class="h-auto xl:h-[calc(100dvh-14rem)] min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex">
         <app-event-details-panel
-          class="w-full h-auto xl:h-full"
+          class="w-full h-full"
           [event]="event()"
           [eventId]="event()?.eventId ?? ''"
           [isEditing]="isEditing()"
@@ -137,9 +137,9 @@
         ></app-event-details-panel>
       </div>
 
-      <div class="h-auto xl:h-full min-h-0 flex">
+      <div class="h-auto xl:h-[calc(100dvh-14rem)] min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex">
         <app-event-details-map-panel
-          class="w-full h-auto xl:h-full"
+          class="w-full h-full"
           [center]="eventCenter"
           [markers]="mapMarkers()"
           [showEventOverlay]="showEventOverlay()"
