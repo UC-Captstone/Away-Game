@@ -61,6 +61,7 @@ export class NavBarComponent implements OnDestroy {
   private navBarLoaded = false;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private pendingPollSub: Subscription | null = null;
+  private routerEventsSub: Subscription | null = null;
   private readonly PENDING_POLL_INTERVAL_MS = 60_000;
   private readonly PENDING_ALERT_ID = '__pending_approvals__';
   private dmSeenAtByFriend: Record<string, string> = {};
@@ -118,7 +119,7 @@ export class NavBarComponent implements OnDestroy {
       }, POLL_INTERVAL_MS);
     });
 
-    this.router.events
+    this.routerEventsSub = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe(() => {
         this.closeMenu();
@@ -410,5 +411,7 @@ export class NavBarComponent implements OnDestroy {
       clearInterval(this.pollTimer);
     }
     this.pendingPollSub?.unsubscribe();
+    this.routerEventsSub?.unsubscribe();
+    window.removeEventListener('away-game:profile-picture-updated', this.onProfilePictureUpdated);
   }
 }
