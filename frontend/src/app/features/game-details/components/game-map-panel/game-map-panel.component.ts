@@ -6,6 +6,7 @@ import { MapComponent } from '../../../../shared/components/map/map.component';
 import { ISafetyAlert } from '../../../../shared/models/safety-alert';
 import * as L from 'leaflet';
 import { IEvent } from '../../../../shared/models/event';
+import { EventTypeEnum } from '../../../../shared/models/event-type-enum';
 
 @Component({
   selector: 'app-game-map-panel',
@@ -72,6 +73,7 @@ export class GameMapPanelComponent {
           lng: event.location.lng,
           popup: `<b>${event.eventName}</b><br><small>${event.eventType}</small>`,
           icon: this.eventMarkerIcon,
+          navigation: this.buildNavigationForEvent(event),
         });
       });
     }
@@ -90,6 +92,48 @@ export class GameMapPanelComponent {
     }
 
     this.markers.set(markers);
+  }
+
+  private buildNavigationForEvent(event: IEvent): IMapMarker['navigation'] {
+    const isGame = (event.eventType ?? '').trim().toLowerCase() === EventTypeEnum.Game.toLowerCase();
+
+    if (isGame) {
+      return {
+        path: '/game-details',
+        queryParams: {
+          eventId: event.eventId,
+          gameId: event.gameId,
+          gameName: event.eventName,
+          venueName: event.venueName,
+          dateTime: event.dateTime?.toString(),
+          lat: event.location?.lat,
+          lng: event.location?.lng,
+          homeLogo: event.teamLogos?.home ?? '',
+          awayLogo: event.teamLogos?.away ?? '',
+          league: event.league ?? '',
+          saved: event.isSaved,
+        },
+      };
+    }
+
+    return {
+      path: '/event-details',
+      queryParams: {
+        eventId: event.eventId,
+        eventName: event.eventName,
+        description: event.description ?? '',
+        eventType: event.eventType,
+        venueName: event.venueName,
+        location: event.venueName,
+        dateTime: event.dateTime?.toString(),
+        lat: event.location?.lat,
+        lng: event.location?.lng,
+        imageUrl: event.imageUrl ?? '',
+        league: event.league ?? '',
+        isUserCreated: event.isUserCreated ?? false,
+        saved: event.isSaved,
+      },
+    };
   }
 
   private createCircleMarkerIcon(colorHex: string): L.Icon {

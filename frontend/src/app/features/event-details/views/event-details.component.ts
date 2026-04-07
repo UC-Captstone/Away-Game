@@ -392,6 +392,7 @@ export class EventDetailsComponent implements OnInit {
         lng: currentEvent.location.lng,
         popup: `<b>${currentEvent.eventName}</b><br><small>${currentEvent.eventType}</small>`,
         icon: this.eventMarkerIcon,
+        navigation: this.buildNavigationForEvent(currentEvent),
       });
     }
 
@@ -402,6 +403,7 @@ export class EventDetailsComponent implements OnInit {
           lng: nearbyEvent.location.lng,
           popup: `<b>${nearbyEvent.eventName}</b><br><small>${nearbyEvent.eventType}</small>`,
           icon: this.nearbyMarkerIcon,
+          navigation: this.buildNavigationForEvent(nearbyEvent),
         });
       });
     }
@@ -511,6 +513,48 @@ export class EventDetailsComponent implements OnInit {
       default:
         return EventTypeEnum.Other;
     }
+  }
+
+  private buildNavigationForEvent(event: IEvent): IMapMarker['navigation'] {
+    const isGame = (event.eventType ?? '').trim().toLowerCase() === EventTypeEnum.Game.toLowerCase();
+
+    if (isGame) {
+      return {
+        path: '/game-details',
+        queryParams: {
+          eventId: event.eventId,
+          gameId: event.gameId,
+          gameName: event.eventName,
+          venueName: event.venueName,
+          dateTime: event.dateTime?.toString(),
+          lat: event.location?.lat,
+          lng: event.location?.lng,
+          homeLogo: event.teamLogos?.home ?? '',
+          awayLogo: event.teamLogos?.away ?? '',
+          league: event.league ?? '',
+          saved: event.isSaved,
+        },
+      };
+    }
+
+    return {
+      path: '/event-details',
+      queryParams: {
+        eventId: event.eventId,
+        eventName: event.eventName,
+        description: event.description ?? '',
+        eventType: event.eventType,
+        venueName: event.venueName,
+        location: event.venueName,
+        dateTime: event.dateTime?.toString(),
+        lat: event.location?.lat,
+        lng: event.location?.lng,
+        imageUrl: event.imageUrl ?? '',
+        league: event.league ?? '',
+        isUserCreated: event.isUserCreated ?? false,
+        saved: event.isSaved,
+      },
+    };
   }
 
   private buildInitialDraft(event: IEvent | null): EventDetailsEditDraft {

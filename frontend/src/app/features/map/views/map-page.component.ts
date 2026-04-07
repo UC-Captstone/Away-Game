@@ -223,6 +223,7 @@ export class MapPageComponent implements OnInit {
         lng: event.location!.lng,
         popup: `<b>${event.eventName}</b><br><small>${event.eventType}</small>`,
         icon: this.isGameEvent(event) ? this.gameMarkerIcon : this.eventMarkerIcon,
+        navigation: this.buildNavigationForEvent(event),
       });
     });
 
@@ -306,6 +307,46 @@ export class MapPageComponent implements OnInit {
 
   private isGameEvent(event: IEvent): boolean {
     return (event.eventType ?? '').trim().toLowerCase() === EventTypeEnum.Game.toLowerCase();
+  }
+
+  private buildNavigationForEvent(event: IEvent): IMapMarker['navigation'] {
+    if (this.isGameEvent(event)) {
+      return {
+        path: '/game-details',
+        queryParams: {
+          eventId: event.eventId,
+          gameId: event.gameId,
+          gameName: event.eventName,
+          venueName: event.venueName,
+          dateTime: event.dateTime?.toString(),
+          lat: event.location?.lat,
+          lng: event.location?.lng,
+          homeLogo: event.teamLogos?.home ?? '',
+          awayLogo: event.teamLogos?.away ?? '',
+          league: event.league ?? '',
+          saved: event.isSaved,
+        },
+      };
+    }
+
+    return {
+      path: '/event-details',
+      queryParams: {
+        eventId: event.eventId,
+        eventName: event.eventName,
+        description: event.description ?? '',
+        eventType: event.eventType,
+        venueName: event.venueName,
+        location: event.venueName,
+        dateTime: event.dateTime?.toString(),
+        lat: event.location?.lat,
+        lng: event.location?.lng,
+        imageUrl: event.imageUrl ?? '',
+        league: event.league ?? '',
+        isUserCreated: event.isUserCreated ?? false,
+        saved: event.isSaved,
+      },
+    };
   }
 
   private isInBounds(lat: number, lng: number, bounds: IMapViewportBounds): boolean {

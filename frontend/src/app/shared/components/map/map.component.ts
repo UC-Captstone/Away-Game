@@ -15,6 +15,7 @@ import {
   ViewChild,
   WritableSignal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { ILocation } from '../../models/location';
 import { IMapMarker } from '../../models/map-marker';
 import { IMapViewportBounds } from '../../models/map-viewport-bounds';
@@ -70,7 +71,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
     popupAnchor: [0, -32],
   });
 
-  constructor(private ngZone: NgZone) {}
+  constructor(
+    private ngZone: NgZone,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     if (!this.center) {
@@ -277,12 +281,53 @@ export class MapComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy
       });
 
       if (event.popup) {
-        leafletMarker.bindPopup(event.popup);
+        leafletMarker.bindPopup(
+          event.navigation ? this.buildInteractivePopupContent(event.popup) : event.popup,
+        );
+      }
+
+      if (event.navigation) {
+        leafletMarker.on('popupopen', () => {
+          const popupRoot = leafletMarker.getPopup()?.getElement();
+          const tappableDescription = popupRoot?.querySelector('.js-popup-description');
+
+          if (!tappableDescription) {
+            return;
+          }
+
+          tappableDescription.addEventListener(
+            'click',
+            (clickEvent) => {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
+
+              this.ngZone.run(() => {
+                this.router.navigate([event.navigation!.path], {
+                  queryParams: event.navigation!.queryParams,
+                });
+              });
+            },
+            { once: true },
+          );
+        });
       }
 
       leafletMarker.addTo(this.markerLayer!);
       this.markerInstances.push(leafletMarker);
     });
+  }
+
+  private buildInteractivePopupContent(content: string): string {
+    return `
+      <button
+        type="button"
+        class="js-popup-description"
+        style="display:block;width:100%;border:0;background:transparent;padding:0;text-align:left;cursor:pointer;"
+        aria-label="Open details"
+      >
+        ${content}
+      </button>
+    `;
   }
 
   private adjustZoomToFitMarkers(): void {
