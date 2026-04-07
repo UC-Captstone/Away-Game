@@ -31,10 +31,10 @@
   <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0">
     <app-details-header [event]="game()"></app-details-header>
 
-    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-2 gap-6 xl:h-[calc(100dvh-12rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)]">
-      <div class="h-auto xl:h-full min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex xl:max-h-[calc(100dvh-12rem)]">
+    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-2 gap-6 xl:h-[calc(100dvh-10rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)]">
+      <div class="h-auto xl:h-[calc(100dvh-10rem)] min-h-[24rem] sm:min-h-[28rem] xl:min-h-0 flex">
         <app-game-details-panel
-          class="w-full"
+          class="w-full h-full"
           [eventId]="chatEventId()"
           [gameId]="game()?.gameId"
           [gameEvents]="gameEvents()"
@@ -44,9 +44,9 @@
         ></app-game-details-panel>
       </div>
 
-      <div class="h-auto xl:h-full min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex xl:max-h-[calc(100dvh-12rem)]">
+      <div class="h-auto xl:h-[calc(100dvh-10rem)] min-h-[24rem] sm:min-h-[28rem] xl:min-h-0 flex">
         <app-game-map-panel
-          class="w-full"
+          class="w-full h-full"
           [game]="game()"
           [gameEvents]="gameEvents()"
           [safetyAlerts]="safetyAlerts()"
