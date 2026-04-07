@@ -1,5 +1,5 @@
 <div
-  class="w-full h-auto xl:h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0"
+  class="w-full h-auto xl:h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0 xl:max-h-[calc(100dvh-12rem)]"
 >
   <div class="p-4 border-b border-slate-800 text-left">
     <h2 class="text-base font-semibold text-slate-100">Events In View</h2>
@@ -8,7 +8,7 @@
     </p>
   </div>
 
-  <div class="p-3 flex-1 min-h-0 overflow-visible xl:overflow-auto text-left">
+  <div class="p-3 flex-1 min-h-0 overflow-visible xl:overflow-auto xl:max-h-[calc(100dvh-16rem)] text-left">
     <div class="space-y-2">
       @for (event of visibleEvents; track event.eventId) {
         <button

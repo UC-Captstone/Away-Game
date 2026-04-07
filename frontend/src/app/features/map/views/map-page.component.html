@@ -46,9 +46,9 @@
       </div>
     }
 
-    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_24rem] gap-6 xl:h-full xl:items-stretch xl:grid-rows-[minmax(0,1fr)]">
+    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_24rem] gap-6 xl:h-[calc(100dvh-12rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)]">
       <div
-        class="w-full h-auto xl:h-full min-h-[20rem] sm:min-h-[26rem] xl:min-h-0 bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col"
+        class="w-full h-auto xl:h-full min-h-[20rem] sm:min-h-[26rem] xl:min-h-0 bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col xl:max-h-[calc(100dvh-12rem)]"
       >
         <div
           class="p-4 border-b border-slate-800 text-left text-xs text-slate-300 flex items-center justify-between"
@@ -57,7 +57,7 @@
           <span>Search Radius: 100 mi</span>
         </div>
 
-        <div class="flex-1 min-h-[18rem] xl:min-h-0">
+        <div class="flex-1 min-h-[18rem] xl:min-h-0 xl:max-h-[calc(100dvh-16rem)]">
           <app-map
             [center]="userLocation()"
             [zoom]="11"
@@ -72,7 +72,7 @@
       </div>
 
       <app-map-sidebar
-        class="h-auto xl:h-full min-h-[20rem] sm:min-h-[24rem] xl:min-h-0"
+        class="h-auto xl:h-full min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 xl:max-h-[calc(100dvh-12rem)]"
         [visibleEvents]="visibleEvents()"
         (openEventDetails)="openEventDetails($event)"
       ></app-map-sidebar>
