@@ -145,7 +145,7 @@
           </div>
         </div>
 
-        <div class="content-panel p-4 sm:p-5 text-slate-300 w-full overflow-visible lg:overflow-auto flex-1 bg-transparent min-h-[32rem] lg:min-h-0">
+        <div class="content-panel p-4 sm:p-5 text-slate-300 w-full overflow-visible flex-1 bg-transparent min-h-[32rem]">
             @switch (selectedTab()) {
               @case ('AccountSettings') {
                 <app-user-account-settings
@@ -221,7 +221,7 @@
                         <div class="relative w-11 h-6 bg-slate-600 rounded-full transition-colors peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-sky-800 peer-checked:bg-sky-500 after:content-[''] after:absolute after:top-0.5 after:inset-s-0.5 after:h-5 after:w-5 after:bg-white after:border after:border-slate-600 after:rounded-full after:transition-all peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full"></div>
                       </div>
                     </label>
-                    <label class="flex items-start gap-4 cursor-pointer">
+                    <label class="flex items-start gap-4 cursor-pointer rounded-2xl border border-slate-800/70 bg-slate-950/20 p-4">
                       <div class="grow">
                         <span class="block text-sm font-medium text-white">Safety alerts for saved events</span>
                         <span class="block text-xs text-slate-400 mt-0.5">Email me if new safety reports appear near my saved events.</span>
