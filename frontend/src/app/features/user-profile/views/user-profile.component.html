@@ -115,20 +115,6 @@
               </li>
               <li>
                 <a
-                  (click)="selectTab('RecentChats'); $event.preventDefault()"
-                  class="inline-flex items-center justify-center lg:justify-start text-center lg:text-left px-4 py-3 rounded-lg w-full min-h-11"
-                  [ngClass]="
-                    selectedTab() === 'RecentChats'
-                      ? 'bg-sky-500 text-white font-medium transition-colors'
-                      : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
-                  "
-                  [attr.aria-current]="selectedTab() === 'RecentChats' ? 'page' : null"
-                >
-                  Recent Chats
-                </a>
-              </li>
-              <li>
-                <a
                   (click)="selectTab('MyAlerts'); $event.preventDefault()"
                   class="inline-flex items-center justify-center lg:justify-start text-center lg:text-left px-4 py-3 rounded-lg w-full min-h-11"
                   [ngClass]="
@@ -196,18 +182,6 @@
                   }
                 </div>
               }
-              @case ('RecentChats') {
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                  @for (chat of profile.myChats; track chat) {
-                    <app-chat-tile [chat]="chat"></app-chat-tile>
-                  } @empty {
-                    <div class="col-span-full text-center">
-                      <h3 class="text-2xl font-semibold text-sky-400 mb-2">No User Chats</h3>
-                      <p class="mb-2 text-slate-400 text-sm">You have no user chats.</p>
-                    </div>
-                  }
-                </div>
-              }
               @case ('MyAlerts') {
                 <app-my-alerts></app-my-alerts>
               }
@@ -258,14 +232,6 @@
                       </div>
                     </label>
                   </div>
-                </div>
-              }
-              @default {
-                <div>
-                  <h3 class="text-2xl font-semibold text-sky-400 mb-2">Select a tab</h3>
-                  <p class="mb-2 text-slate-400 text-sm">
-                    Choose a tab on the left to update this content.
-                  </p>
                 </div>
               }
             }

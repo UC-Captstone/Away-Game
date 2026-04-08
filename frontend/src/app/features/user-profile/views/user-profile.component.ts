@@ -8,11 +8,17 @@ import { IAccountSettings } from '../models/account-settings';
 import { RouterLink } from '@angular/router';
 import { UserAccountSettingsComponent } from '../components/user-account-settings/user-account-settings.component';
 import { EventTileComponent } from '../../../shared/components/event-tile/event-tile.component';
-import { ChatTileComponent } from '../components/chat-tile/chat-tile.component';
 import { MyAlertsComponent } from '../components/my-alerts/my-alerts.component';
 import { TeamService } from '../../../shared/services/team.service';
 import { ITeam } from '../../../shared/models/team';
 import { BackButtonComponent } from '../../../shared/components/back-button/back-button.component';
+
+type ProfileTab =
+  | 'AccountSettings'
+  | 'SavedEvents'
+  | 'UserCreatedEvents'
+  | 'MyAlerts'
+  | 'Notifications';
 
 @Component({
   selector: 'app-user-profile',
@@ -25,7 +31,6 @@ import { BackButtonComponent } from '../../../shared/components/back-button/back
     UserProfileHeaderComponent,
     UserAccountSettingsComponent,
     EventTileComponent,
-    ChatTileComponent,
     MyAlertsComponent,
     BackButtonComponent,
   ],
@@ -34,7 +39,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   userProfile: IUserProfile | null = null;
   availableTeams: ITeam[] = [];
   private teamsLoaded = false;
-  selectedTab: WritableSignal<string> = signal('profile');
+  selectedTab: WritableSignal<ProfileTab> = signal('AccountSettings');
   isLoading: WritableSignal<boolean> = signal(false);
   isSavingProfilePicture: WritableSignal<boolean> = signal(false);
   toastMessage: WritableSignal<string | null> = signal(null);
@@ -64,7 +69,7 @@ export class UserProfileComponent implements OnInit, OnDestroy {
     this.loadUserProfile();
   }
 
-  selectTab(tab: string) {
+  selectTab(tab: ProfileTab) {
     this.selectedTab.set(tab);
     if (tab === 'Notifications' && this.userProfile) {
       const s = this.userProfile.accountSettings;
