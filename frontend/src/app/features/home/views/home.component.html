@@ -1,4 +1,6 @@
-<div class="min-h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto">
+<div
+  class="min-h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
+>
   <div class="bg-transparent w-full py-4 px-4 sm:px-6 flex flex-col gap-6 max-w-screen-2xl mx-auto">
     <app-search-bar></app-search-bar>
 
@@ -20,10 +22,14 @@
           <h2 class="text-xl font-semibold text-slate-100">Featured Events</h2>
           <span class="text-xs font-medium text-sky-400/60">TRENDING</span>
         </div>
-        <div class="relative w-full min-h-[24rem] sm:min-h-[30rem] p-4 sm:p-8 md:p-12 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50">
+        <div
+          class="relative w-full min-h-96 sm:min-h-120 p-4 sm:p-8 md:p-12 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-900 border border-slate-700 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50"
+        >
           @if (isFeaturedLoading()) {
             <!-- Skeleton while featured events load -->
-            <div class="w-full h-full animate-pulse flex flex-col gap-3 p-6 justify-center items-center">
+            <div
+              class="w-full h-full animate-pulse flex flex-col gap-3 p-6 justify-center items-center"
+            >
               <div class="h-6 w-48 rounded bg-slate-600/50"></div>
               <div class="h-4 w-32 rounded bg-slate-700/50"></div>
               <div class="h-4 w-40 rounded bg-slate-700/50"></div>
@@ -67,24 +73,37 @@
           <span class="text-xs font-medium text-sky-400/60">LOCATION</span>
         </div>
         @if (locationNotice(); as notice) {
-          <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-100 text-left px-3 py-2 text-xs sm:text-sm">
+          <div
+            class="rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-100 text-left px-3 py-2 text-xs sm:text-sm"
+          >
             {{ notice }}
           </div>
         }
         @if (isNearbyLoading()) {
           <!-- Skeleton while location + nearby events load -->
-          <div class="w-full min-h-[18rem] sm:min-h-[22rem] rounded-2xl ring-1 ring-slate-600/30 bg-gradient-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md flex items-center justify-center shadow-2xl shadow-slate-900/50 animate-pulse">
+          <div
+            class="w-full min-h-96 sm:min-h-120 rounded-2xl ring-1 ring-slate-600/30 bg-linear-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md flex items-center justify-center shadow-2xl shadow-slate-900/50 animate-pulse"
+          >
             <div class="flex flex-col items-center gap-2 text-slate-500">
-              <svg class="w-8 h-8 opacity-40 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <svg
+                class="w-8 h-8 opacity-40 animate-spin"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                ></path>
               </svg>
               <span class="text-sm">Locating nearby events…</span>
             </div>
           </div>
         } @else if (userLocation()) {
           <div
-            class="rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50 p-2 h-[20rem] sm:h-[24rem] md:h-[28rem]"
+            class="rounded-2xl overflow-hidden bg-slate-900 border border-slate-700 backdrop-blur-md ring-1 ring-slate-600/30 shadow-2xl shadow-slate-900/50 p-2 h-96 sm:h-120"
           >
             <app-map
               [center]="userLocation()!"
@@ -96,7 +115,9 @@
             />
           </div>
         } @else {
-          <div class="w-full min-h-[18rem] sm:min-h-[22rem] rounded-2xl ring-1 ring-slate-600/30 bg-linear-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md flex items-center justify-center text-slate-400 shadow-2xl shadow-slate-900/50">
+          <div
+            class="w-full min-h-96 sm:min-h-120 rounded-2xl ring-1 ring-slate-600/30 bg-linear-to-br from-slate-700/20 to-slate-800/20 backdrop-blur-md flex items-center justify-center text-slate-400 shadow-2xl shadow-slate-900/50"
+          >
             <div class="flex flex-col items-center gap-2">
               <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
