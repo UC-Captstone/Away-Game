@@ -1,6 +1,4 @@
-<div
-  class="h-[calc(100vh-3.5rem)] flex items-center justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
->
+<div class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden">
   @if (isLoading()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div class="flex flex-col items-center gap-3">
@@ -30,9 +28,9 @@
     </div>
   }
 
-  <div class="bg-transparent h-[calc(100%-2rem)] w-full px-6 py-3 flex flex-col overflow-hidden">
+  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0">
     <div
-      class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md px-4 py-3 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4"
+      class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md px-4 py-3 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] gap-4 min-h-0"
     >
       <div class="text-left min-w-0">
         <div class="flex items-center justify-between gap-3">
@@ -70,11 +68,11 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-2">
+      <div class="flex items-center justify-start xl:justify-end gap-2 flex-wrap">
         <button
           type="button"
           (click)="onSavedToggle()"
-          class="inline-flex items-center justify-center p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors"
+          class="inline-flex items-center justify-center min-h-11 min-w-11 p-2 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors"
           [title]="event()?.isSaved ? 'Saved event - click to unsave' : 'Save event'"
         >
           @if (event()?.isSaved) {
@@ -108,7 +106,7 @@
           <button
             type="button"
             (click)="startEditing()"
-            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-500 text-white text-xs font-medium hover:bg-sky-600 transition-colors min-h-11"
           >
             Edit Event
           </button>
@@ -116,10 +114,10 @@
       </div>
     </div>
 
-    <div class="mt-4 h-[72vh] max-h-[72vh] min-h-0 grid grid-cols-1 xl:grid-cols-2 gap-6">
-      <div class="h-full min-h-0 flex">
+    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-2 gap-6 xl:h-[calc(100dvh-14rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)] xl:overflow-hidden">
+      <div class="h-auto xl:h-[calc(100dvh-14rem)] min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex">
         <app-event-details-panel
-          class="w-full"
+          class="w-full h-full"
           [event]="event()"
           [eventId]="event()?.eventId ?? ''"
           [isEditing]="isEditing()"
@@ -139,9 +137,9 @@
         ></app-event-details-panel>
       </div>
 
-      <div class="h-full min-h-0 flex">
+      <div class="h-auto xl:h-[calc(100dvh-14rem)] min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex">
         <app-event-details-map-panel
-          class="w-full"
+          class="w-full h-full"
           [center]="eventCenter"
           [markers]="mapMarkers()"
           [showEventOverlay]="showEventOverlay()"

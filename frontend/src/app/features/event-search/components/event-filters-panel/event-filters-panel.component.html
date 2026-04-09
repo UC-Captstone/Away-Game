@@ -1,26 +1,26 @@
 <div
-  class="tabs-panel bg-transparent w-full md:w-92.5 p-4 border-r border-slate-800 overflow-y-auto"
+  class="tabs-panel bg-transparent w-full p-4 sm:p-5 border-b xl:border-b-0 xl:border-r border-slate-800 overflow-visible xl:overflow-y-auto h-auto xl:h-full"
   style="min-height: 0"
 >
   <div class="flex flex-col h-full">
-    <div class="mb-4 flex items-center justify-between">
+    <div class="mb-4 flex items-center justify-between gap-3">
       <h1 class="text-white text-lg font-semibold">Event Filters</h1>
       <button
         type="button"
         (click)="onApplyFilters()"
         [disabled]="!hasFilterChanges()"
-        class="bg-sky-500 hover:bg-sky-600 disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors"
+        class="min-h-11 bg-sky-500 hover:bg-sky-600 disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-xs font-medium py-2 px-4 rounded-lg transition-colors"
       >
         Apply
       </button>
     </div>
 
     <div class="space-y-4 text-left">
-      <div class="rounded-lg border border-slate-700/80 p-2">
+      <div class="rounded-lg border border-slate-700/80 p-3">
         <app-event-search-filter [(keyword)]="keyword"></app-event-search-filter>
       </div>
 
-      <div class="rounded-lg border border-slate-700/80 p-2">
+      <div class="rounded-lg border border-slate-700/80 p-3">
         <label class="block mb-1.5 text-xs font-medium text-white">Sports Filter</label>
         <div
           class="relative mb-2 rounded-lg bg-slate-800 border border-slate-700 p-1 grid grid-cols-2"
@@ -33,7 +33,7 @@
           <button
             type="button"
             (click)="onSportsFilterModeChange('league')"
-            class="relative z-10 text-xs py-1 rounded-md transition-colors"
+            class="relative z-10 text-xs py-2 rounded-md transition-colors min-h-10"
             [ngClass]="sportsFilterMode === 'league' ? 'text-white font-medium' : 'text-slate-300'"
           >
             Sports League
@@ -42,7 +42,7 @@
           <button
             type="button"
             (click)="onSportsFilterModeChange('team')"
-            class="relative z-10 text-xs py-1 rounded-md transition-colors"
+            class="relative z-10 text-xs py-2 rounded-md transition-colors min-h-10"
             [ngClass]="sportsFilterMode === 'team' ? 'text-white font-medium' : 'text-slate-300'"
           >
             Team
@@ -54,7 +54,7 @@
             [(selectedLeagues)]="selectedLeagues"
           ></app-league-selection-filter>
         } @else {
-          <div class="py-1.25">
+          <div class="py-1.5">
             <app-team-selector
               [multi]="true"
               [selectedTeams]="selectedTeams"
@@ -67,22 +67,22 @@
         }
       </div>
 
-      <div class="rounded-lg border border-slate-700/80 p-2">
+      <div class="rounded-lg border border-slate-700/80 p-3">
         <app-date-range-filter
           [(startDate)]="startDate"
           [(endDate)]="endDate"
         ></app-date-range-filter>
       </div>
 
-      <div class="rounded-lg border border-slate-700/80 p-2">
+      <div class="rounded-lg border border-slate-700/80 p-3">
         <app-location-filter [(locationQuery)]="locationQuery"></app-location-filter>
       </div>
 
-      <div class="rounded-lg border border-slate-700/80 p-2">
+      <div class="rounded-lg border border-slate-700/80 p-3">
         <app-saved-only-filter [(savedOnly)]="savedOnly"></app-saved-only-filter>
       </div>
 
-      <div class="rounded-lg border border-slate-700/80 p-2">
+      <div class="rounded-lg border border-slate-700/80 p-3">
         <app-event-type-filter [(selectedEventTypes)]="selectedEventTypes"></app-event-type-filter>
       </div>
     </div>

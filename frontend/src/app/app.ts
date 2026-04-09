@@ -1,5 +1,5 @@
 import { Component, signal, WritableSignal } from '@angular/core';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, NavigationError, Router, RouterOutlet } from '@angular/router';
 import { NavBarComponent } from './shared/components/navbar/navbar.component';
 import { filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,8 @@ import { CommonModule } from '@angular/common';
   standalone: true,
 })
 export class App {
+  private readonly chunkRetryStorageKey = 'chunk-load-retried';
+
   protected readonly title = signal('frontend');
 
   showNavbar: WritableSignal<boolean> = signal(true);
@@ -20,9 +22,35 @@ export class App {
   constructor(private router: Router) {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
+      .subscribe((event) => {
+        const nav = event as NavigationEnd;
         const hiddenRoutes = ['/login', '/signup', '/profile', '/login#/factor-one'];
-        this.showNavbar.set(!hiddenRoutes.includes(event.urlAfterRedirects));
+        this.showNavbar.set(!hiddenRoutes.includes(nav.urlAfterRedirects));
+        sessionStorage.removeItem(this.chunkRetryStorageKey);
+      });
+
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationError))
+      .subscribe((event) => {
+        const navError = event as NavigationError;
+        const message = String(navError.error?.message ?? navError.error ?? '');
+        const isChunkLoadFailure =
+          message.includes('Failed to fetch dynamically imported module') ||
+          message.includes('Importing a module script failed');
+
+        if (!isChunkLoadFailure) {
+          return;
+        }
+
+        const hasRetried = sessionStorage.getItem(this.chunkRetryStorageKey) === 'true';
+        if (!hasRetried) {
+          sessionStorage.setItem(this.chunkRetryStorageKey, 'true');
+          window.location.reload();
+          return;
+        }
+
+        console.error('Lazy-loaded chunk failed after one reload attempt:', navError);
+        this.router.navigateByUrl('/home');
       });
   }
 

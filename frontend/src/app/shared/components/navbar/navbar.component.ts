@@ -8,10 +8,10 @@ import {
   WritableSignal,
   signal,
 } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ClerkService } from '@jsrob/ngx-clerk';
 import { catchError, EMPTY, forkJoin, map, of, Subscription, timer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../features/auth/services/auth.service';
 import { AdminService } from '../../../features/admin/services/admin.service';
 import { NotificationBellButtonComponent } from './notification-bell-button/notification-bell-button.component';
@@ -54,9 +54,14 @@ export class NavBarComponent implements OnDestroy {
     return this.authService.isAdmin();
   }
 
+  closeMenu(): void {
+    this.isMenuOpen.set(false);
+  }
+
   private navBarLoaded = false;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private pendingPollSub: Subscription | null = null;
+  private routerEventsSub: Subscription | null = null;
   private readonly PENDING_POLL_INTERVAL_MS = 60_000;
   private readonly PENDING_ALERT_ID = '__pending_approvals__';
   private dmSeenAtByFriend: Record<string, string> = {};
@@ -113,6 +118,13 @@ export class NavBarComponent implements OnDestroy {
         this.loadDmNotifications();
       }, POLL_INTERVAL_MS);
     });
+
+    this.routerEventsSub = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.closeMenu();
+        this.isBellOpen.set(false);
+      });
   }
 
   get unacknowledgedCount(): number {
@@ -389,6 +401,7 @@ export class NavBarComponent implements OnDestroy {
       console.error('Error signing out:', error);
     } finally {
       this.authService.clearInternalToken();
+      this.closeMenu();
       this.router.navigate(['/login']);
     }
   }
@@ -398,5 +411,7 @@ export class NavBarComponent implements OnDestroy {
       clearInterval(this.pollTimer);
     }
     this.pendingPollSub?.unsubscribe();
+    this.routerEventsSub?.unsubscribe();
+    window.removeEventListener('away-game:profile-picture-updated', this.onProfilePictureUpdated);
   }
 }

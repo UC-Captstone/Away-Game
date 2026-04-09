@@ -8,7 +8,7 @@ import { IEvent } from '../../../../shared/models/event';
   standalone: true,
   imports: [CommonModule, DatePipe],
   host: {
-    class: 'block h-full min-h-0',
+    class: 'block h-auto xl:h-[calc(100dvh-12rem)] min-h-0',
   },
 })
 export class MapSidebarComponent {

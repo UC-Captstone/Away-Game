@@ -1,18 +1,18 @@
-<div class="shrink-0 pt-2 border-t border-slate-800">
-  <div class="flex items-end gap-2">
+<div class="shrink-0 pt-3 border-t border-slate-800">
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-2">
     <textarea
       [(ngModel)]="messageText"
       (keydown)="onKeydown($event)"
       [disabled]="sending"
       placeholder="Send a message... (Enter to send)"
       rows="1"
-      class="flex-1 resize-none rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-sky-500 transition-colors disabled:opacity-50 min-h-10 max-h-28 overflow-y-auto"
+      class="flex-1 resize-none rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 px-3 py-3 focus:outline-none focus:ring-1 focus:ring-sky-500 transition-colors disabled:opacity-50 min-h-11 max-h-28 overflow-y-auto"
     ></textarea>
     <button
       type="button"
       (click)="onSend()"
       [disabled]="!messageText.trim() || sending"
-      class="shrink-0 h-10 w-10 rounded-xl bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+      class="shrink-0 h-11 w-full sm:w-11 rounded-xl bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
     >
       @if (sending) {
         <svg

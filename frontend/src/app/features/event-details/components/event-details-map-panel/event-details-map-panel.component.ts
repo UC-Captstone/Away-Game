@@ -10,7 +10,7 @@ import { IMapMarker } from '../../../../shared/models/map-marker';
   standalone: true,
   imports: [CommonModule, MapComponent],
   host: {
-    class: 'block h-full min-h-0',
+    class: 'block h-auto xl:h-full min-h-0',
   },
 })
 export class EventDetailsMapPanelComponent {

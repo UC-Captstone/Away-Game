@@ -1,8 +1,6 @@
-<div
-  class="h-screen flex items-center justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto"
->
-  <div class="bg-transparent h-[calc(100%-2rem)] w-full px-6 flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between pt-4 pb-3">
+<div class="min-h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-auto">
+  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col gap-4 overflow-visible max-w-screen-2xl mx-auto">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-1 pb-1 text-left">
       <a
         routerLink="/home"
         class="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm transition-colors"
@@ -20,25 +18,21 @@
         <h1 class="text-xl font-bold text-white">Admin Settings</h1>
         <span class="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-400 text-xs font-semibold border border-sky-500/30">Admin</span>
       </div>
-      <div class="w-16"></div>
+      <div class="hidden sm:block w-16"></div>
     </div>
 
-    <div class="md:flex flex-1">
-      <div
-        class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden md:flex h-[78vh]"
-      >
-        <div class="tabs-panel bg-transparent w-64 p-3 border-r border-slate-800">
-          <ul
-            class="flex-column space-y space-y-4 text-sm font-medium text-slate-300 mb-0 h-full flex flex-col justify-start"
-          >
+    <div class="w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col lg:flex-row text-left">
+      <div class="border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950/20 lg:w-72">
+        <div class="p-3 overflow-x-auto lg:overflow-x-visible">
+          <ul class="flex lg:flex-col gap-2 text-sm font-medium text-slate-300 min-w-max lg:min-w-0">
             <li>
               <a
                 (click)="selectTab('Overview'); $event.preventDefault()"
-                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full cursor-pointer"
                 [ngClass]="
                   selectedTab() === 'Overview'
-                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                    ? 'bg-sky-500 text-white font-medium transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                 "
               >
                 Overview
@@ -47,11 +41,11 @@
             <li>
               <a
                 (click)="selectTab('LeagueSettings'); $event.preventDefault()"
-                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full cursor-pointer"
                 [ngClass]="
                   selectedTab() === 'LeagueSettings'
-                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                    ? 'bg-sky-500 text-white font-medium transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                 "
               >
                 League Settings
@@ -60,11 +54,11 @@
             <li>
               <a
                 (click)="selectTab('PendingApprovals'); $event.preventDefault()"
-                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full cursor-pointer"
                 [ngClass]="
                   selectedTab() === 'PendingApprovals'
-                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                    ? 'bg-sky-500 text-white font-medium transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                 "
               >
                 Pending Approvals
@@ -73,11 +67,11 @@
             <li>
               <a
                 (click)="selectTab('RevokeStatus'); $event.preventDefault()"
-                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full cursor-pointer"
                 [ngClass]="
                   selectedTab() === 'RevokeStatus'
-                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                    ? 'bg-sky-500 text-white font-medium transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                 "
               >
                 Revoke Status
@@ -86,11 +80,11 @@
             <li>
               <a
                 (click)="selectTab('UserManagement'); $event.preventDefault()"
-                class="inline-flex items-center px-3 py-3 rounded-lg w-full cursor-pointer"
+                class="inline-flex items-center whitespace-nowrap px-4 py-3 rounded-lg w-full cursor-pointer"
                 [ngClass]="
                   selectedTab() === 'UserManagement'
-                    ? 'bg-sky-500 text-white font-medium py-2 px-4 rounded-lg transition-colors'
-                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 rounded-lg transition-colors'
+                    ? 'bg-sky-500 text-white font-medium transition-colors'
+                    : 'text-slate-300 hover:text-slate-100 bg-transparent hover:bg-slate-800 transition-colors'
                 "
               >
                 User Management
@@ -98,11 +92,9 @@
             </li>
           </ul>
         </div>
+      </div>
 
-        <div
-          class="content-panel p-5 text-slate-300 w-full h-full overflow-auto flex-1 bg-transparent text-left"
-          style="min-height: 0"
-        >
+      <div class="content-panel p-4 sm:p-5 text-slate-300 w-full overflow-visible lg:overflow-auto flex-1 bg-transparent text-left min-h-[32rem] lg:min-h-0">
           @switch (selectedTab()) {
 
             @case ('Overview') {
@@ -117,7 +109,7 @@
               }
               @if (overview) {
                 <h2 class="text-xl font-semibold text-white mb-5">Platform Overview</h2>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                   <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 flex flex-col gap-1">
                     <span class="text-slate-400 text-xs uppercase tracking-wide">Total Users</span>
                     <span class="text-3xl font-bold text-white">{{ overview.totalUsers }}</span>
@@ -151,9 +143,9 @@
             }
 
             @case ('LeagueSettings') {
-              <div class="relative mb-5">
-                <h2 class="text-xl font-semibold text-white text-center">League Settings</h2>
-                <div class="absolute inset-y-0 right-0 flex items-center gap-2">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
+                  <h2 class="text-xl font-semibold text-white text-center sm:text-left">League Settings</h2>
+                  <div class="flex items-center justify-end gap-2">
                   @if (syncTriggered()) {
                     <span class="text-emerald-400 text-xs">Sync started!</span>
                   }
@@ -230,9 +222,7 @@
               @if (pendingUsers.length > 0) {
                 <div class="flex flex-col gap-3">
                   @for (user of pendingUsers; track user.userId) {
-                    <div
-                      class="flex items-center justify-between bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 gap-4"
-                    >
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 gap-4">
                       <div class="flex items-center gap-3 min-w-0">
                         @if (user.profilePictureUrl) {
                           <img
@@ -250,7 +240,7 @@
                           <p class="text-slate-400 text-xs truncate">&#64;{{ user.username }} · {{ user.email }}</p>
                         </div>
                       </div>
-                      <div class="flex gap-2 shrink-0">
+                      <div class="flex gap-2 shrink-0 flex-wrap sm:flex-nowrap">
                         <button
                           type="button"
                           (click)="approveUser(user)"
@@ -291,9 +281,7 @@
               @if (verifiedCreators.length > 0) {
                 <div class="flex flex-col gap-3">
                   @for (user of verifiedCreators; track user.userId) {
-                    <div
-                      class="flex items-center justify-between bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 gap-4"
-                    >
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 gap-4">
                       <div class="flex items-center gap-3 min-w-0">
                         @if (user.profilePictureUrl) {
                           <img
@@ -429,7 +417,6 @@
       </div>
     </div>
   </div>
-</div>
 
 <app-popup-modal [(open)]="showSyncModal" title="Sync Leagues & Schedules" size="md">
   <p class="text-sm text-slate-300">

@@ -50,6 +50,42 @@ export class EventsService {
               lat: event.location!.lat,
               lng: event.location!.lng,
               popup: `<b>${event.eventName}</b><br><small>${new Date(event.dateTime).toLocaleString()}</small>`,
+              navigation:
+                (event.eventType ?? '').trim().toLowerCase() === 'game'
+                  ? {
+                      path: '/game-details' as const,
+                      queryParams: {
+                        eventId: event.eventId,
+                        gameId: event.gameId,
+                        gameName: event.eventName,
+                        venueName: event.venueName,
+                        dateTime: event.dateTime?.toString(),
+                        lat: event.location?.lat,
+                        lng: event.location?.lng,
+                        homeLogo: event.teamLogos?.home ?? '',
+                        awayLogo: event.teamLogos?.away ?? '',
+                        league: event.league ?? '',
+                        saved: event.isSaved,
+                      },
+                    }
+                  : {
+                      path: '/event-details' as const,
+                      queryParams: {
+                        eventId: event.eventId,
+                        eventName: event.eventName,
+                        description: event.description ?? '',
+                        eventType: event.eventType,
+                        venueName: event.venueName,
+                        location: event.venueName,
+                        dateTime: event.dateTime?.toString(),
+                        lat: event.location?.lat,
+                        lng: event.location?.lng,
+                        imageUrl: event.imageUrl ?? '',
+                        league: event.league ?? '',
+                        isUserCreated: event.isUserCreated ?? false,
+                        saved: event.isSaved,
+                      },
+                    },
             })),
         ),
       );

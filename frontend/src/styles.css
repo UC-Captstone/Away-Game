@@ -1,2 +1,36 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'tailwindcss';
+
+html {
+	color-scheme: dark;
+	scroll-behavior: smooth;
+}
+
+body {
+	min-height: 100dvh;
+	overflow-x: hidden;
+	overscroll-behavior-y: none;
+	background: #020617;
+}
+
+* {
+	-webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #334155;
+	border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #475569;
+}

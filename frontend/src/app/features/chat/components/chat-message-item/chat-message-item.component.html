@@ -7,7 +7,7 @@
       [class.cursor-pointer]="message.userId !== currentUserId"
       [class.hover:ring-sky-400]="message.userId !== currentUserId"
       [class.cursor-default]="message.userId === currentUserId"
-      class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-600 shrink-0 mt-0.5 transition-shadow p-0 overflow-hidden border-none bg-transparent"
+      class="h-10 w-10 sm:h-8 sm:w-8 rounded-full object-cover ring-1 ring-slate-600 shrink-0 mt-0.5 transition-shadow p-0 overflow-hidden border-none bg-transparent"
       [attr.title]="message.userId !== currentUserId ? 'Send Friend Request to ' + message.userName : null"
       [attr.aria-label]="message.userId !== currentUserId ? 'Send friend request to ' + message.userName : null"
     >
@@ -25,7 +25,7 @@
       [class.cursor-pointer]="message.userId !== currentUserId"
       [class.hover:ring-sky-400]="message.userId !== currentUserId"
       [class.cursor-default]="message.userId === currentUserId"
-      class="h-8 w-8 rounded-full bg-sky-600 flex items-center justify-center text-white text-xs font-semibold shrink-0 ring-1 ring-slate-600 mt-0.5 transition-shadow border-none p-0"
+      class="h-10 w-10 sm:h-8 sm:w-8 rounded-full bg-sky-600 flex items-center justify-center text-white text-xs font-semibold shrink-0 ring-1 ring-slate-600 mt-0.5 transition-shadow border-none p-0"
       [attr.title]="message.userId !== currentUserId ? 'Send Friend Request to ' + message.userName : null"
       [attr.aria-label]="message.userId !== currentUserId ? 'Send friend request to ' + message.userName : null"
     >
@@ -41,7 +41,7 @@
           (click)="onDelete()"
           [disabled]="deleting"
           title="Delete message"
-          class="opacity-0 group-hover:opacity-100 shrink-0 p-1 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-900/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-150"
+          class="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shrink-0 p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-900/30 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-150 min-h-10 min-w-10"
         >
           @if (deleting) {
             <svg
