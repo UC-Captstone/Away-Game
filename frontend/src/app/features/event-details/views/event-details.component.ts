@@ -18,12 +18,18 @@ import { IMapMarker } from '../../../shared/models/map-marker';
 import { ISafetyAlert } from '../../../shared/models/safety-alert';
 import { SafetyAlertService } from '../../../shared/services/safety-alert.service';
 import { SavedEventsService } from '../../../shared/services/saved-events.service';
+import { OpenMapsButtonComponent } from '../../../shared/components/open-maps-button/open-maps-button.component';
 
 @Component({
   selector: 'app-event-details',
   templateUrl: './event-details.component.html',
   standalone: true,
-  imports: [CommonModule, EventDetailsPanelComponent, EventDetailsMapPanelComponent],
+  imports: [
+    CommonModule,
+    EventDetailsPanelComponent,
+    EventDetailsMapPanelComponent,
+    OpenMapsButtonComponent,
+  ],
 })
 export class EventDetailsComponent implements OnInit {
   private readonly defaultCenter: ILocation = { lat: 39.8283, lng: -98.5795 };
