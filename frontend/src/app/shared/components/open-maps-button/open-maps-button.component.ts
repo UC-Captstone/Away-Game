@@ -11,6 +11,7 @@ type DevicePlatform = 'ios' | 'android' | 'desktop';
 export class OpenMapsButtonComponent {
   @Input() location: ILocation | null | undefined;
   @Input() venueName: string | null | undefined;
+  @Input() preferCoordinates = false;
   @Input() compact = false;
   @Input() label = 'Open in Maps';
 
@@ -49,6 +50,10 @@ export class OpenMapsButtonComponent {
   private getLocationQuery(): string | null {
     const venue = this.venueName?.trim() ?? '';
     const coordinates = this.getCoordinateString();
+
+    if (this.preferCoordinates) {
+      return coordinates ?? (venue || null);
+    }
 
     if (venue && coordinates) {
       return `${venue} ${coordinates}`;

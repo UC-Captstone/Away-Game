@@ -72,6 +72,7 @@
         <app-open-maps-button
           [location]="event()?.location"
           [venueName]="event()?.venueName"
+          [preferCoordinates]="event()?.eventType !== 'Game'"
         ></app-open-maps-button>
 
         <button
