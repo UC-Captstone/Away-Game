@@ -4,12 +4,13 @@ import { IEvent } from '../../models/event';
 import { Router } from '@angular/router';
 import { EventTypeEnum } from '../../models/event-type-enum';
 import { SavedEventsService } from '../../services/saved-events.service';
+import { OpenMapsButtonComponent } from '../open-maps-button/open-maps-button.component';
 
 @Component({
   selector: 'app-event-tile',
   templateUrl: './event-tile.component.html',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, OpenMapsButtonComponent],
 })
 export class EventTileComponent {
   @Input() event!: IEvent;

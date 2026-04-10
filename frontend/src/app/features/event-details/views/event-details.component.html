@@ -69,6 +69,11 @@
       </div>
 
       <div class="flex items-center justify-start xl:justify-end gap-2 flex-wrap">
+        <app-open-maps-button
+          [location]="event()?.location"
+          [venueName]="event()?.venueName"
+        ></app-open-maps-button>
+
         <button
           type="button"
           (click)="onSavedToggle()"
