@@ -52,27 +52,19 @@
       <p class="text-xs text-slate-400 mt-2 truncate">{{ event.dateTime | date: 'medium' }}</p>
     </div>
 
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-center justify-center gap-2">
       <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">{{
         event.eventType
       }}</span>
       @if (event.isUserCreated && event.eventType != 'Game') {
         <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">Your event</span>
       }
-
-      <div class="ml-auto flex items-center gap-2">
-        <app-open-maps-button
-          [location]="event.location"
-          [venueName]="event.venueName"
-          [compact]="true"
-        ></app-open-maps-button>
-
       @if (showSavedIcon) {
         <button
           type="button"
           (click)="toggleSaved($event)"
           [disabled]="isSaving()"
-          class="inline-flex min-h-8 items-center gap-2 px-2 py-1 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="ml-auto inline-flex min-h-8 items-center gap-2 px-2 py-1 rounded-md bg-slate-800 text-slate-200 hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
           [attr.aria-pressed]="event.isSaved"
           [title]="event.isSaved ? 'Saved - click to unsave' : 'Save event'"
         >
@@ -103,7 +95,6 @@
           }
         </button>
       }
-      </div>
     </div>
   </div>
 </article>
