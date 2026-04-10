@@ -34,11 +34,7 @@ export class OpenMapsButtonComponent {
     const platform = this.getPlatform();
     if (platform === 'desktop') {
       const desktopUrl = this.buildGoogleMapsUrl(query);
-      const openedWindow = window.open(desktopUrl, '_blank', 'noopener,noreferrer');
-
-      if (!openedWindow) {
-        window.location.assign(desktopUrl);
-      }
+      this.openInNewTab(desktopUrl);
       return;
     }
 
@@ -80,6 +76,14 @@ export class OpenMapsButtonComponent {
 
   private buildGoogleMapsUrl(query: string): string {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  }
+
+  private openInNewTab(url: string): void {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.click();
   }
 
   private buildNativeMapsUrl(platform: Exclude<DevicePlatform, 'desktop'>, query: string): string {
