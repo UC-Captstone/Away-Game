@@ -1,0 +1,43 @@
+<button
+  type="button"
+  (click)="openMaps($event)"
+  [disabled]="!canOpen"
+  [attr.aria-label]="label"
+  [title]="canOpen ? label : 'Location unavailable'"
+  class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+  [class.min-h-8]="compact"
+  [class.px-2]="compact"
+  [class.py-1]="compact"
+  [class.min-h-11]="!compact"
+  [class.min-w-11]="!compact"
+  [class.px-3]="!compact"
+  [class.py-2]="!compact"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    [class.h-4]="compact"
+    [class.w-4]="compact"
+    [class.h-5]="!compact"
+    [class.w-5]="!compact"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    aria-hidden="true"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      d="M12 21s7-4.35 7-11a7 7 0 10-14 0c0 6.65 7 11 7 11z"
+    />
+    <circle cx="12" cy="10" r="2.5" />
+  </svg>
+
+  <span
+    class="text-xs font-medium"
+    [class.hidden]="compact"
+    [class.sm:inline]="compact"
+  >
+    {{ compact ? 'Maps' : label }}
+  </span>
+</button>

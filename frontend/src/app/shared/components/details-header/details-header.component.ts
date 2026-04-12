@@ -2,12 +2,13 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges, signal, WritableSignal } from '@angular/core';
 import { SavedEventsService } from '../../services/saved-events.service';
 import { IEvent } from '../../models/event';
+import { OpenMapsButtonComponent } from '../open-maps-button/open-maps-button.component';
 
 @Component({
   selector: 'app-details-header',
   templateUrl: './details-header.component.html',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, OpenMapsButtonComponent],
 })
 export class DetailsHeaderComponent implements OnChanges {
   @Input() event: IEvent | null = null;
