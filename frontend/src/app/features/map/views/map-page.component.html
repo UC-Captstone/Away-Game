@@ -1,4 +1,6 @@
-<div class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden">
+<div
+  class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden"
+>
   @if (isLoading()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div class="flex flex-col items-center gap-3">
@@ -28,25 +30,31 @@
     </div>
   }
 
-  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0">
+  <div
+    class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0"
+  >
     <app-map-header
       [showGameOverlay]="showGameOverlay()"
       [showEventOverlay]="showEventOverlay()"
       [showSafetyOverlay]="showSafetyOverlay()"
-      [showUserMarker]="showUserMarker()"
+      [placeCategoryFilters]="placeCategoryFilters()"
       (toggleGameOverlay)="onToggleGameOverlay()"
       (toggleEventOverlay)="onToggleEventOverlay()"
       (toggleSafetyOverlay)="onToggleSafetyOverlay()"
-      (toggleUserMarker)="onToggleUserMarker()"
+      (togglePlaceCategory)="onTogglePlaceCategory($event)"
     ></app-map-header>
 
     @if (locationNotice(); as notice) {
-      <div class="mt-3 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-100 text-left px-3 py-2 text-xs sm:text-sm">
+      <div
+        class="mt-3 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-100 text-left px-3 py-2 text-xs sm:text-sm"
+      >
         {{ notice }}
       </div>
     }
 
-    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_24rem] gap-6 xl:h-[calc(100dvh-12rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)]">
+    <div
+      class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_24rem] gap-6 xl:h-[calc(100dvh-12rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)]"
+    >
       <div
         class="w-full h-auto xl:h-[calc(100dvh-12rem)] min-h-[20rem] sm:min-h-[26rem] xl:min-h-0 bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col"
       >
@@ -63,7 +71,7 @@
             [zoom]="11"
             [events]="mapMarkers()"
             [height]="'100%'"
-            [showUserMarker]="showUserMarker()"
+            [showUserMarker]="true"
             [fitBoundsToMarkers]="false"
             [fillContainer]="true"
             (viewportChanged)="onViewportChanged($event)"
