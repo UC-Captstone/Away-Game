@@ -20,4 +20,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_exp_minutes: int = 720
 
+    foursquare_api_key: str = ""
+    foursquare_base_url: str = "https://places-api.foursquare.com"
+    foursquare_api_version: str = "2025-06-17"
+
 settings = Settings()
