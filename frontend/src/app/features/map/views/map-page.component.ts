@@ -362,6 +362,7 @@ export class MapPageComponent implements OnInit {
 
     return this.cappedNearbyPlaces().filter((place) => {
       const searchableText = `${place.name} ${place.categoryLabel ?? ''}`.toLowerCase();
+      const subLabelText = (place.categoryLabel ?? '').toLowerCase();
 
       switch (place.category) {
         case 'restaurant':
@@ -370,7 +371,7 @@ export class MapPageComponent implements OnInit {
             this.containsAnyKeyword(searchableText, ['restaurant', 'restuarant'])
           );
         case 'bar':
-          return filters.bar && this.containsAnyKeyword(searchableText, ['bar']);
+          return filters.bar && this.containsAnyKeyword(subLabelText, ['bar']);
         case 'hotel':
           return filters.hotel;
       }
