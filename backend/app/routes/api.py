@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from routes import auth, games, users, teams, user_favorite_teams, favorites, profile, search, events, event_chat, friends, direct_messages, safety_alerts, alert_types, admin
+from routes import auth, games, users, teams, user_favorite_teams, favorites, profile, search, events, event_chat, friends, direct_messages, safety_alerts, alert_types, admin, places
 
 
 api_router = APIRouter(prefix="/api")
@@ -17,5 +17,6 @@ api_router.include_router(friends.router)
 api_router.include_router(direct_messages.router)
 api_router.include_router(safety_alerts.router)
 api_router.include_router(alert_types.router)
+api_router.include_router(places.router)
 
 api_router.include_router(admin.router)
