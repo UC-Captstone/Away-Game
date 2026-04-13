@@ -32,7 +32,7 @@ export class MapPageComponent implements OnInit {
   private readonly searchRadiusMiles = 100;
   private readonly placesSearchRadiusMiles = 10;
   private readonly safetyAlertFetchLimit = 200;
-  private readonly placesFetchLimit = 150;
+  private readonly placesFetchLimit = 80;
   private readonly maxPlaceMarkers = 45;
   private readonly defaultCenter: ILocation = { lat: 39.1031, lng: -84.512 };
   private readonly gameMarkerIcon: L.Icon = this.createCircleMarkerIcon('#f59e0b');
