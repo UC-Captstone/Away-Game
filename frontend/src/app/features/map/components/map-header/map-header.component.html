@@ -5,12 +5,14 @@
     <div>
       <h1 class="text-lg md:text-xl font-semibold text-slate-100">Map Explorer</h1>
       <p class="text-xs text-slate-400 mt-1">
-        Browse events and safety alerts around your stored location.
+        Browse events, safety alerts, and nearby places around your stored location.
       </p>
     </div>
 
     <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-slate-300">
-      <label class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10">
+      <label
+        class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10"
+      >
         <input
           type="checkbox"
           [checked]="showGameOverlay"
@@ -20,7 +22,9 @@
         Games
       </label>
 
-      <label class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10">
+      <label
+        class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10"
+      >
         <input
           type="checkbox"
           [checked]="showEventOverlay"
@@ -30,7 +34,9 @@
         Events
       </label>
 
-      <label class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10">
+      <label
+        class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10"
+      >
         <input
           type="checkbox"
           [checked]="showSafetyOverlay"
@@ -40,14 +46,40 @@
         Safety Alerts
       </label>
 
-      <label class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10">
+      <label
+        class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10"
+      >
         <input
           type="checkbox"
-          [checked]="showUserMarker"
-          (change)="onToggleUserMarker()"
-          class="accent-sky-500"
+          [checked]="placeCategoryFilters.restaurant"
+          (change)="onTogglePlaceCategory('restaurant')"
+          class="accent-yellow-300"
         />
-        My Location
+        Restaurants
+      </label>
+
+      <label
+        class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10"
+      >
+        <input
+          type="checkbox"
+          [checked]="placeCategoryFilters.bar"
+          (change)="onTogglePlaceCategory('bar')"
+          class="accent-violet-600"
+        />
+        Bars
+      </label>
+
+      <label
+        class="inline-flex items-center gap-2 cursor-pointer rounded-lg px-2 py-2 hover:bg-slate-800/60 transition-colors min-h-10"
+      >
+        <input
+          type="checkbox"
+          [checked]="placeCategoryFilters.hotel"
+          (change)="onTogglePlaceCategory('hotel')"
+          class="accent-cyan-500"
+        />
+        Hotels
       </label>
     </div>
   </div>

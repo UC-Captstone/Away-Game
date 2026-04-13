@@ -11,9 +11,15 @@ import { EventTypeEnum } from '../../../shared/models/event-type-enum';
 import { IEvent } from '../../../shared/models/event';
 import { ILocation } from '../../../shared/models/location';
 import { IMapMarker } from '../../../shared/models/map-marker';
+import { IPlaceCategoryFilters, PlaceCategory } from '../../../shared/models/place-category';
+import { IPlace } from '../../../shared/models/place';
 import { ISafetyAlert } from '../../../shared/models/safety-alert';
 import { EventsService } from '../../../shared/services/events.service';
-import { GeolocationService, LocationFallbackReason } from '../../../shared/services/geolocation.service';
+import {
+  GeolocationService,
+  LocationFallbackReason,
+} from '../../../shared/services/geolocation.service';
+import { PlacesService } from '../../../shared/services/places.service';
 import { SafetyAlertService } from '../../../shared/services/safety-alert.service';
 
 @Component({
@@ -24,11 +30,19 @@ import { SafetyAlertService } from '../../../shared/services/safety-alert.servic
 })
 export class MapPageComponent implements OnInit {
   private readonly searchRadiusMiles = 100;
+  private readonly placesSearchRadiusMiles = 10;
   private readonly safetyAlertFetchLimit = 200;
+  private readonly placesFetchLimit = 80;
+  private readonly maxPlaceMarkers = 45;
   private readonly defaultCenter: ILocation = { lat: 39.1031, lng: -84.512 };
   private readonly gameMarkerIcon: L.Icon = this.createCircleMarkerIcon('#f59e0b');
   private readonly eventMarkerIcon: L.Icon = this.createCircleMarkerIcon('#22c55e');
   private readonly safetyMarkerIcon: L.Icon = this.createCircleMarkerIcon('#ef4444');
+  private readonly placeMarkerIcons: Record<PlaceCategory, L.Icon> = {
+    restaurant: this.createCircleMarkerIcon('#fde047'),
+    bar: this.createCircleMarkerIcon('#7c3aed'),
+    hotel: this.createCircleMarkerIcon('#06b6d4'),
+  };
 
   isLoading: WritableSignal<boolean> = signal(false);
   userLocation: WritableSignal<ILocation> = signal(this.defaultCenter);
@@ -36,6 +50,8 @@ export class MapPageComponent implements OnInit {
 
   allNearbyEvents: WritableSignal<IEvent[]> = signal([]);
   allSafetyAlerts: WritableSignal<ISafetyAlert[]> = signal([]);
+  allNearbyPlaces: WritableSignal<IPlace[]> = signal([]);
+  cappedNearbyPlaces: WritableSignal<IPlace[]> = signal([]);
 
   visibleEvents: WritableSignal<IEvent[]> = signal([]);
   mapMarkers: WritableSignal<IMapMarker[]> = signal([]);
@@ -43,7 +59,11 @@ export class MapPageComponent implements OnInit {
   showGameOverlay: WritableSignal<boolean> = signal(true);
   showEventOverlay: WritableSignal<boolean> = signal(true);
   showSafetyOverlay: WritableSignal<boolean> = signal(true);
-  showUserMarker: WritableSignal<boolean> = signal(true);
+  placeCategoryFilters: WritableSignal<IPlaceCategoryFilters> = signal({
+    restaurant: true,
+    bar: true,
+    hotel: true,
+  });
   locationNotice: WritableSignal<string | null> = signal(null);
 
   constructor(
@@ -51,6 +71,7 @@ export class MapPageComponent implements OnInit {
     private readonly eventsService: EventsService,
     private readonly geolocationService: GeolocationService,
     private readonly safetyAlertService: SafetyAlertService,
+    private readonly placesService: PlacesService,
   ) {}
 
   ngOnInit(): void {
@@ -79,8 +100,13 @@ export class MapPageComponent implements OnInit {
     this.refreshMapMarkers();
   }
 
-  onToggleUserMarker(): void {
-    this.showUserMarker.set(!this.showUserMarker());
+  onTogglePlaceCategory(category: PlaceCategory): void {
+    const nextFilters: IPlaceCategoryFilters = {
+      ...this.placeCategoryFilters(),
+      [category]: !this.placeCategoryFilters()[category],
+    };
+    this.placeCategoryFilters.set(nextFilters);
+    this.refreshMapMarkers();
   }
 
   openEventDetails(event: IEvent): void {
@@ -178,10 +204,25 @@ export class MapPageComponent implements OnInit {
             return of([]);
           }),
         ),
+      places: this.placesService
+        .getNearbyPlaces(
+          location,
+          this.milesToMeters(this.placesSearchRadiusMiles),
+          this.placesFetchLimit,
+          this.getAllPlaceCategories(),
+        )
+        .pipe(
+          catchError((error) => {
+            console.warn('Failed to load nearby places:', error);
+            return of([]);
+          }),
+        ),
     }).subscribe({
-      next: ({ events, safetyAlerts }) => {
+      next: ({ events, safetyAlerts, places }) => {
         this.allNearbyEvents.set(events);
         this.allSafetyAlerts.set(this.filterNearbySafetyAlerts(safetyAlerts, location));
+        this.allNearbyPlaces.set(places);
+        this.cappedNearbyPlaces.set(this.getInitialCappedPlaces(places, location));
         this.refreshMapMarkers();
         this.refreshVisibleEvents();
         this.isLoading.set(false);
@@ -189,6 +230,8 @@ export class MapPageComponent implements OnInit {
       error: () => {
         this.allNearbyEvents.set([]);
         this.allSafetyAlerts.set([]);
+        this.allNearbyPlaces.set([]);
+        this.cappedNearbyPlaces.set([]);
         this.mapMarkers.set([]);
         this.visibleEvents.set([]);
         this.isLoading.set(false);
@@ -241,6 +284,15 @@ export class MapPageComponent implements OnInit {
         });
       });
     }
+
+    this.getOverlayFilteredPlaces().forEach((place) => {
+      markers.push({
+        lat: place.location.lat,
+        lng: place.location.lng,
+        popup: `<b>${place.name}</b><br><small>${place.categoryLabel ?? this.formatPlaceCategory(place.category)}</small>${place.address ? `<br><small>${place.address}</small>` : ''}`,
+        icon: this.placeMarkerIcons[place.category],
+      });
+    });
 
     this.mapMarkers.set(markers);
   }
@@ -303,6 +355,65 @@ export class MapPageComponent implements OnInit {
 
       return this.showEventOverlay();
     });
+  }
+
+  private getOverlayFilteredPlaces(): IPlace[] {
+    const filters = this.placeCategoryFilters();
+
+    return this.cappedNearbyPlaces().filter((place) => {
+      const searchableText = `${place.name} ${place.categoryLabel ?? ''}`.toLowerCase();
+
+      switch (place.category) {
+        case 'restaurant':
+          return (
+            filters.restaurant &&
+            this.containsAnyKeyword(searchableText, ['restaurant', 'restuarant'])
+          );
+        case 'bar':
+          return filters.bar && this.containsAnyKeyword(searchableText, ['bar']);
+        case 'hotel':
+          return filters.hotel;
+      }
+    });
+  }
+
+  private containsAnyKeyword(value: string, keywords: string[]): boolean {
+    return keywords.some((keyword) => value.includes(keyword));
+  }
+
+  private getInitialCappedPlaces(places: IPlace[], origin: ILocation): IPlace[] {
+    if (places.length <= this.maxPlaceMarkers) {
+      return [...places].sort(
+        (a, b) => this.getPlaceDistanceMiles(a, origin) - this.getPlaceDistanceMiles(b, origin),
+      );
+    }
+
+    return [...places]
+      .sort((a, b) => this.getPlaceDistanceMiles(a, origin) - this.getPlaceDistanceMiles(b, origin))
+      .slice(0, this.maxPlaceMarkers);
+  }
+
+  private getAllPlaceCategories(): PlaceCategory[] {
+    return ['restaurant', 'bar', 'hotel'];
+  }
+
+  private getPlaceDistanceMiles(place: IPlace, origin: ILocation): number {
+    if (Number.isFinite(place.distanceMeters)) {
+      return (place.distanceMeters as number) / 1609.34;
+    }
+
+    return this.distanceMiles(origin, place.location);
+  }
+
+  private formatPlaceCategory(category: PlaceCategory): string {
+    switch (category) {
+      case 'restaurant':
+        return 'Restaurant';
+      case 'bar':
+        return 'Bar';
+      case 'hotel':
+        return 'Hotel';
+    }
   }
 
   private isGameEvent(event: IEvent): boolean {
@@ -390,5 +501,9 @@ export class MapPageComponent implements OnInit {
 
   private toRadians(value: number): number {
     return (value * Math.PI) / 180;
+  }
+
+  private milesToMeters(value: number): number {
+    return Math.round(value * 1609.34);
   }
 }
