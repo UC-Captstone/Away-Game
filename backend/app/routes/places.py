@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query, Response
 from auth import get_optional_current_user
 from models.user import User
 from repositories.places_repo import get_nearby_places_service
-from schemas.place import PlaceCategory, PlaceRead
+from schemas.place import PlaceRead
 
 router = APIRouter(prefix="/places", tags=["places"])
 
@@ -21,7 +21,7 @@ async def get_nearby_places(
     limit: int = Query(24, ge=4, le=80, description="Maximum number of results"),
     categories: str = Query(
         "restaurant,bar,hotel",
-        description="Comma-separated categories: restaurant,bar,hotel,coffee",
+        description="Comma-separated categories: restaurant,bar,hotel",
     ),
     _current_user: Optional[User] = Depends(get_optional_current_user),
 ):
