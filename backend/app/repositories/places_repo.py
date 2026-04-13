@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from typing import Dict, List, Optional
 
 import httpx
@@ -63,6 +64,32 @@ def _extract_coordinates(raw_place: dict) -> tuple[Optional[float], Optional[flo
     return None, None
 
 
+async def _search_places_for_category(
+    *,
+    client: httpx.AsyncClient,
+    lat: float,
+    lng: float,
+    radius: int,
+    per_category_limit: int,
+    category: PlaceCategory,
+    headers: Dict[str, str],
+) -> dict:
+    query_term = CATEGORY_QUERY_BY_TYPE[category]
+    upstream_response = await client.get(
+        f"{settings.foursquare_base_url}/places/search",
+        params={
+            "ll": f"{lat},{lng}",
+            "radius": radius,
+            "limit": per_category_limit,
+            "sort": "DISTANCE",
+            "query": query_term,
+        },
+        headers=headers,
+    )
+    upstream_response.raise_for_status()
+    return upstream_response.json()
+
+
 async def get_nearby_places_service(
     *,
     lat: float,
@@ -92,31 +119,35 @@ async def get_nearby_places_service(
     places_by_id: Dict[str, PlaceRead] = {}
 
     try:
-        async with httpx.AsyncClient(timeout=8.0) as client:
-            for category in selected_categories:
-                query_term = CATEGORY_QUERY_BY_TYPE[category]
-                upstream_response = await client.get(
-                    f"{settings.foursquare_base_url}/places/search",
-                    params={
-                        "ll": f"{lat},{lng}",
-                        "radius": radius,
-                        "limit": per_category_limit,
-                        "sort": "DISTANCE",
-                        "query": query_term,
-                    },
-                    headers=headers,
-                )
-                upstream_response.raise_for_status()
-                payload = upstream_response.json()
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            payloads = await asyncio.gather(
+                *[
+                    _search_places_for_category(
+                        client=client,
+                        lat=lat,
+                        lng=lng,
+                        radius=radius,
+                        per_category_limit=per_category_limit,
+                        category=category,
+                        headers=headers,
+                    )
+                    for category in selected_categories
+                ]
+            )
 
+            for category, payload in zip(selected_categories, payloads):
                 for raw_place in payload.get("results", []):
                     fsq_id = raw_place.get("fsq_place_id") or raw_place.get("fsq_id")
                     place_lat, place_lng = _extract_coordinates(raw_place)
                     place_name = raw_place.get("name")
 
+                    if not isinstance(place_name, str):
+                        continue
+
+                    normalized_name = place_name.strip()
                     if (
                         not fsq_id
-                        or place_name is None
+                        or not normalized_name
                         or not isinstance(place_lat, (int, float))
                         or not isinstance(place_lng, (int, float))
                         or fsq_id in places_by_id
@@ -132,7 +163,7 @@ async def get_nearby_places_service(
 
                     place = PlaceRead(
                         fsq_id=fsq_id,
-                        name=place_name,
+                        name=normalized_name,
                         category=place_category,
                         category_label=category_labels[0] if category_labels else None,
                         location=Location(lat=place_lat, lng=place_lng),
