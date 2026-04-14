@@ -1,4 +1,6 @@
-<div class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden">
+<div
+  class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden"
+>
   @if (isLoading()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div class="flex flex-col items-center gap-3">
@@ -28,11 +30,17 @@
     </div>
   }
 
-  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0">
+  <div
+    class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0"
+  >
     <app-details-header [event]="game()"></app-details-header>
 
-    <div class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 xl:h-[calc(100dvh-13rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)] xl:overflow-hidden">
-      <div class="h-[70dvh] sm:h-[68dvh] md:h-[34rem] max-h-[40rem] xl:h-[calc(100dvh-13rem)] min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex overflow-hidden">
+    <div
+      class="mt-4 min-h-0 flex-1 grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 xl:h-[calc(100dvh-13rem)] xl:items-stretch xl:grid-rows-[minmax(0,1fr)] xl:overflow-hidden"
+    >
+      <div
+        class="h-[70dvh] sm:h-[68dvh] md:h-[34rem] max-h-[40rem] xl:h-[calc(100dvh-13rem)] xl:max-h-none min-h-[20rem] sm:min-h-[24rem] xl:min-h-0 flex overflow-hidden"
+      >
         <app-game-details-panel
           class="w-full h-full"
           [eventId]="chatEventId()"
@@ -44,7 +52,9 @@
         ></app-game-details-panel>
       </div>
 
-      <div class="h-[48dvh] sm:h-[52dvh] md:h-[28rem] max-h-[32rem] xl:h-[calc(100dvh-13rem)] min-h-[16rem] sm:min-h-[20rem] xl:min-h-0 flex overflow-hidden">
+      <div
+        class="h-[48dvh] sm:h-[52dvh] md:h-[28rem] max-h-[32rem] xl:h-[calc(100dvh-13rem)] xl:max-h-none min-h-[16rem] sm:min-h-[20rem] xl:min-h-0 flex overflow-hidden"
+      >
         <app-game-map-panel
           class="w-full h-full"
           [game]="game()"

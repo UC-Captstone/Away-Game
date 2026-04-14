@@ -1,5 +1,5 @@
 <div
-  class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden"
+  class="min-h-[calc(100dvh-4rem)] xl:h-[calc(100dvh-4rem)] flex items-start xl:items-stretch justify-center text-center bg-linear-to-b from-slate-800 to-slate-900 overflow-y-auto xl:overflow-hidden"
 >
   @if (isLoading()) {
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -29,12 +29,17 @@
       </div>
     </div>
   }
-  <div class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0">
-    <div class="mt-3 flex-1 min-h-0">
-      <div class="w-full h-auto xl:h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0">
+  <div
+    class="bg-transparent w-full px-4 sm:px-6 py-4 sm:py-6 flex flex-col overflow-visible xl:overflow-hidden max-w-screen-2xl mx-auto min-h-0 xl:h-full"
+  >
+    <div class="mt-3 flex-1 min-h-0 xl:h-full">
+      <div
+        class="w-full h-auto xl:h-full bg-slate-900 border border-slate-700 rounded-3xl shadow-lg backdrop-blur-md overflow-hidden flex flex-col min-h-0"
+      >
         <div class="flex flex-col xl:flex-row h-auto xl:h-full min-h-0">
-          <div class="shrink-0 xl:w-[23rem] xl:h-full">
+          <div class="shrink-0 xl:w-92 xl:h-full xl:self-stretch">
             <app-event-filters-panel
+              class="block h-full"
               [initialFilters]="initialPanelFilters"
               [initialSportsFilterMode]="initialSportsFilterMode"
               [initialSelectedTeams]="initialSelectedTeams"
@@ -53,7 +58,10 @@
               </h1>
             </div>
 
-            <app-event-result-grid class="flex-1 min-h-0" [events]="events()"></app-event-result-grid>
+            <app-event-result-grid
+              class="flex-1 min-h-0"
+              [events]="events()"
+            ></app-event-result-grid>
           </div>
         </div>
       </div>

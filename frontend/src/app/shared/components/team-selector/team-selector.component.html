@@ -12,8 +12,8 @@
       <select
         [(ngModel)]="selectedLeague"
         (change)="onLeagueChange()"
-        class="w-full bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg pr-10 appearance-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors min-h-11"
-        [ngClass]="compactSelectors ? 'py-2 px-2 text-xs min-h-10' : 'px-3 py-2.5'"
+        class="w-full bg-slate-700 border border-slate-600 text-white placeholder-slate-400 text-sm rounded-lg pr-10 appearance-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors"
+        [ngClass]="compactSelectors ? 'py-2 px-2 text-xs' : 'px-2 py-2.5'"
       >
         <option [ngValue]="null" disabled>Select a league</option>
         @for (league of leagues; track league) {
@@ -52,8 +52,8 @@
     </label>
     <button
       type="button"
-      class="w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg flex items-center justify-between gap-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-11"
-      [ngClass]="compactSelectors ? 'py-2 px-2 text-xs min-h-10' : 'px-3 py-2.5'"
+      class="w-full bg-slate-700 border border-slate-600 text-white text-sm rounded-lg flex items-center justify-between gap-2 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      [ngClass]="compactSelectors ? 'py-2 px-2 text-xs' : 'px-3 py-2.5'"
       (click)="toggleDropdown()"
       (keydown.enter)="toggleDropdown()"
       (keydown.space)="$event.preventDefault(); toggleDropdown()"
