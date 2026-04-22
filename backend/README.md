@@ -6,12 +6,22 @@ Azure Functions app serving the Away-Game REST API and nightly ESPN data scraper
 
 - Python 3.11.x (via pyenv)
 - [Azure Functions Core Tools v4](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local): `npm install -g azure-functions-core-tools@4`
+- PostgreSQL connection available (local Docker or Azure Postgres)
+
+## Install Dependencies
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r app/requirements.txt
+```
 
 ## Running Locally
 
 ### 1. Create `app/local.settings.json`
 
-This file is gitignored. Populate it with values from Azure Key Vault:
+This file is gitignored. Populate it with values from Azure Key Vault (or local equivalents):
 
 ```json
 {
@@ -24,6 +34,7 @@ This file is gitignored. Populate it with values from Azure Key Vault:
     "CLERK_SECRET_KEY": "<clerk secret>",
     "CLERK_DOMAIN": "<clerk domain>",
     "JWT_SECRET_KEY": "<jwt secret>",
+    "FOURSQUARE_API_KEY": "<foursquare api key>",
     "LEAGUES_CONFIG": "<JSON array of league objects>"
   }
 }
@@ -39,6 +50,15 @@ func start
 This starts:
 - **HttpTrigger** — REST API at `http://localhost:7071/api/{route}`
 - **NightlyTaskTimer** — ESPN scraper (cron: 5 AM UTC daily)
+
+Optional (API only, without Functions host):
+
+```bash
+cd backend/app
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+With `uvicorn`, app routes are under `http://localhost:8000/api` and Swagger is at `http://localhost:8000/docs`.
 
 ### 3. Manually Trigger the Scraper
 

@@ -7,7 +7,8 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN AP
 - Python 3.11+
 - PostgreSQL 16
 - Node.js 18+
-- Azure account
+- Azure account (for cloud deployment)
+- Azure Functions Core Tools v4 (for local backend runtime)
 
 ## Tech Stack
 
@@ -35,7 +36,6 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN AP
 - **Auth**: Clerk
 - **Maps**: OpenStreetMap (tiles), Leaflet (rendering)
 - **Venues**: Foursquare Places API
-- **City Search**: Geoapify Address Autocomplete API
 - **Geolocation**: Browser Geolocation API + IP-based fallback
 - **Game Data**: ESPN (game data)
 
@@ -44,7 +44,7 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN AP
 - **CI/CD**: GitHub Actions (Azure deployment)
 - **Database**: PostgreSQL 16
 - **Migrations**: Alembic
-- **Environment**: `.env` + `load_env.sh`
+- **Environment**: `.env`/`local.settings.json` + `load_env.sh`
 - **CORS**: Configured middleware
 
 ### Backend Setup
@@ -63,7 +63,7 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN AP
 
 3. **Install dependencies**
    ```bash
-   pip install -r requirements.txt
+   pip install -r app/requirements.txt
    ```
 
 4. **Configure environment variables**
@@ -71,8 +71,8 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN AP
    We use Clerk for identity and issue our own internal JWT after sync. Configure the following env vars.
 
    Where to put `.env` (pick one):
-   - Recommended: keep `.env` at the repo root and load it via the helper script: `cd backend && . ./load_env.sh ../.env`
-   - Or: place a `.env` inside `backend/` so FastAPI auto-loads it.
+   - Recommended: keep `.env` at the repo root and load it via the helper script.
+   - Or: place a `.env` inside `backend/` and load it explicitly.
 
    Example `.env` contents:
    ```env
@@ -85,31 +85,40 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN AP
    DATABASE_URL_ASYNC=postgresql+asyncpg://username:password@localhost:5432/awaygame
 
    # Auth (Clerk + Internal JWT)
+   CLERK_SECRET_KEY=your-clerk-secret-key
+   CLERK_DOMAIN=your-clerk-domain
    JWT_SECRET_KEY=your-secret-key-here
 
    # External APIs
    FOURSQUARE_API_KEY=your-foursquare-key
-   GEOAPIFY_API_KEY=your-geoapify-key
+
+   # Nightly ESPN scraper config (JSON string)
+   LEAGUES_CONFIG=[{"league_code":"NFL","espn_sport":"football","espn_league":"nfl","league_name":"National Football League","is_active":true}]
    ```
 
    Load env vars for local testing:
    ```bash
    cd Away-Game/backend
-   . ./load_env.sh
+   . ./load_env.sh ../.env
    ```
 
-5. **Start the FastAPI server (must be in backend directory)**
+5. **Start the backend (Azure Functions host)**
    ```bash
-   # Development mode with auto-reload
-   python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+   cd app
+   func start
+   ```
 
-   # Production mode
-   python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+   Optional: run FastAPI directly (outside Functions host):
+   ```bash
+   cd backend/app
+   python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
    ```
 
 6. **Access the API**
-   - **API Documentation (Swagger)**: http://localhost:8000/docs
-   - **OpenAPI Schema**: http://localhost:8000/openapi.json
+   - **Functions host**: http://localhost:7071
+   - **App routes base**: http://localhost:7071/api
+   - **Swagger UI (when running `uvicorn`)**: http://localhost:8000/docs
+   - **OpenAPI Schema (when running `uvicorn`)**: http://localhost:8000/openapi.json
 
 ### Frontend Setup
 
@@ -151,13 +160,12 @@ Full-stack Angular/FastAPI web app for traveling sports fans. Integrates ESPN AP
 ### Full Map Page (Planned)
 - **Venue Overlays**: Foursquare Places API for restaurants, bars, etc.
 - **Event Markers**: All nearby games and fan meetups
-- **City Search**: Geoapify autocomplete for manual location input
 - **Filters**: Event types, distance radius, venue categories
 
 ## Auth Flow
 
 - Users sign in/up via Clerk UI (Angular).
-- Frontend calls `POST /auth/sync` with the Clerk session token.
+- Frontend calls `POST /api/auth/sync` with the Clerk session token.
 - Backend verifies Clerk JWT, syncs user (create/update), then issues an internal JWT (HS256) and returns `{ token, user }`.
 - Frontend stores the internal JWT in `localStorage` and automatically sends `Authorization: Bearer <token>` on subsequent API calls via an HTTP interceptor.
 
@@ -188,9 +196,10 @@ Away-Game/
 │   │   ├── schemas/       # Pydantic schemas (DTOs)
 │   │   ├── repositories/  # Data access layer
 │   │   ├── routes/        # API endpoints
-│   │   ├── controllers/   # Business logic
 │   │   ├── auth.py        # JWT utilities
-│   │   └── main.py        # FastAPI app
+│   │   ├── main.py        # FastAPI app
+│   │   ├── function_app.py# Azure Functions entrypoint
+│   │   └── scheduled/     # Nightly ESPN tasks
 │   ├── migrations/        # Alembic migrations
 │   ├── requirements.txt
 │   └── alembic.ini
@@ -210,20 +219,15 @@ Away-Game/
 
 ### Testing the API
 
-Use the interactive Swagger UI at http://localhost:8000/docs to test endpoints.
+Use the interactive Swagger UI at http://localhost:8000/docs (when running `uvicorn`) to test endpoints.
 
 Or use curl:
 ```bash
 # List games
-curl http://localhost:8000/games/
+curl http://localhost:8000/api/games/
 
 # Get games for a team
-curl http://localhost:8000/games/team/6
-
-# Create a user
-curl -X POST http://localhost:8000/users/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "johndoe", "email": "john@example.com"}'
+curl http://localhost:8000/api/games/team/6
 ```
 
 ### Code Quality
