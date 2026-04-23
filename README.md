@@ -173,6 +173,28 @@ Notes:
 - Local dev works without extra setup (a dev default exists) but you should set `JWT_SECRET_KEY` in `.env`.
 - In Azure, store secrets in Key Vault or App Settings and map to the env names above.
 
+## Chat, Community & Notifications
+
+### Event Chat
+- **Event Chat Panel**: Event-based live chat is available on event/game experiences.
+- **Near-real-time updates**: Uses REST polling on a short interval while the tab is visible.
+- **Message actions**: Authenticated users can post and delete their own messages.
+- **Safety filtering**: Chat text is passed through backend content filtering before persistence.
+- **Social shortcut**: Clicking another user's avatar in event chat opens a friend-request flow.
+
+### Community (Friends + Direct Messages)
+- **Community workspace**: Dedicated page for friend management and one-on-one DMs.
+- **Friend system**: Search users, send requests, accept/reject incoming requests, and remove friends.
+- **Direct messages**: Private conversation threads with periodic refresh and soft-delete support.
+- **Responsive UX**: Desktop shows friend list + chat side-by-side; mobile shifts to a focused single-pane view.
+
+### Notifications
+- **Unified bell menu**: Navbar bell combines unacknowledged safety alerts and new DM notifications.
+- **DM notification model**: Tracks latest incoming message per friend and compares against per-user local seen timestamps.
+- **Alert acknowledgement (official)**: Official alerts remain until explicitly acknowledged.
+- **Alert acknowledgement (community/non-official)**: Non-official alerts are auto-acknowledged when the dropdown closes.
+- **Quick actions**: "View messages" jumps to Community, and "Alert history" opens the alerts view.
+
 ##  Database
 
 This project uses PostgreSQL 16 with async SQLAlchemy 2.0 and Alembic for migrations.
