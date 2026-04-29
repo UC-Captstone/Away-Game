@@ -41,6 +41,63 @@ npm run build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## iOS build (Capacitor)
+
+The iOS app is a Capacitor wrapper around the Angular frontend, reusing the same routes, services, and data flows.
+
+### Prerequisites
+- Node.js 20+
+- Xcode 15+
+- iOS 15.0 deployment target
+- CocoaPods (`brew install cocoapods`)
+
+### Build + sync
+
+```bash
+cd frontend
+npm install --legacy-peer-deps
+npm run ios:build
+```
+
+### Debug vs release
+- Debug: open Xcode (`npm run cap:open:ios`) and run on a simulator or device.
+- Release: set the Marketing Version + Build in Xcode, then Product → Archive → Distribute App.
+
+### Generate icons + splash
+
+```bash
+npx @capacitor/assets generate --icon ./resources/icon.png --splash ./resources/splash.png
+npx cap sync ios
+```
+
+### Open in Xcode
+
+```bash
+npm run cap:open:ios
+```
+
+### Environment config
+- iOS builds use `src/environments/environment.ios.ts`.
+- Update `apiUrl` and `clerkPublishableKey` for the target environment before building.
+
+### Signing + provisioning checklist
+- Set the bundle ID to match your Apple Developer account in `ios/App/App.xcodeproj`.
+- Select the correct Team and Provisioning Profile in Xcode.
+- Ensure `NSLocationWhenInUseUsageDescription` in `ios/App/App/Info.plist` matches your usage text.
+
+### Reproducible build checklist
+- `npm run ios:build` (regenerates `dist/frontend/browser`).
+- `npx cap sync ios` (copies web assets + plugins).
+- `npx @capacitor/assets generate --assetPath ./resources --ios` (refreshes icons/splash).
+
+### QA checklist (mobile)
+- Login/signup flows, token refresh, and logout.
+- Home featured + nearby events, map rendering, and location permissions.
+- Event search filters and event details.
+- Game details, add event flow, and safety alerts.
+- Community (friends + DMs) and notifications dropdown.
+- Profile updates and admin-only access (if enabled).
+
 ## Running unit tests
 
 To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:

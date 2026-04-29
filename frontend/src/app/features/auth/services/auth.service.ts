@@ -4,10 +4,10 @@ import { ClerkService } from '@jsrob/ngx-clerk';
 import { from, Observable, shareReplay, switchMap, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { UserAuthResponse } from '../models/authResponse';
+import { TokenStorageService } from '../../../shared/services/token-storage.service';
 
 const API_URL = environment.apiUrl + '/auth';
 
-const INTERNAL_JWT_STORAGE_KEY = 'ag_token';
 // Refresh the internal token if it expires within this many seconds.
 const TOKEN_EXPIRY_BUFFER_SECONDS = 60;
 
@@ -17,6 +17,7 @@ const TOKEN_EXPIRY_BUFFER_SECONDS = 60;
 export class AuthService {
   private clerkService = inject(ClerkService);
   private http = inject(HttpClient);
+  private tokenStorage = inject(TokenStorageService);
 
   // Shared in-flight sync observable. Any concurrent calls while a sync
   // is already in progress will subscribe to the same observable rather
@@ -44,7 +45,7 @@ export class AuthService {
       }),
       tap((resp) => {
         if (resp?.token) {
-          localStorage.setItem(INTERNAL_JWT_STORAGE_KEY, resp.token);
+          this.tokenStorage.setToken(resp.token);
         }
       }),
       // shareReplay(1) multicasts the single result to all concurrent subscribers,
@@ -62,7 +63,7 @@ export class AuthService {
   }
 
   getInternalToken(): string | null {
-    return localStorage.getItem(INTERNAL_JWT_STORAGE_KEY);
+    return this.tokenStorage.getToken();
   }
 
   /**
@@ -79,7 +80,7 @@ export class AuthService {
   }
 
   clearInternalToken(): void {
-    localStorage.removeItem(INTERNAL_JWT_STORAGE_KEY);
+    this.tokenStorage.clearToken();
   }
 
   getUserRole(): string | null {

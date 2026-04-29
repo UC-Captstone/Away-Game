@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 import { ILocation } from '../models/location';
 import { catchError, map, Observable, of } from 'rxjs';
 
@@ -65,6 +67,25 @@ export class GeolocationService {
 
   private requestBrowserGeolocation(): Observable<ILocation> {
     return new Observable<ILocation>((observer) => {
+      if (Capacitor.isNativePlatform()) {
+        Geolocation.getCurrentPosition({
+          enableHighAccuracy: false,
+          timeout: this.LOCATION_TIMEOUT,
+          maximumAge: 300000,
+        })
+          .then((position) => {
+            observer.next({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+            observer.complete();
+          })
+          .catch((error) => {
+            observer.error(error);
+          });
+        return;
+      }
+
       if (
         typeof window === 'undefined' ||
         typeof navigator === 'undefined' ||
