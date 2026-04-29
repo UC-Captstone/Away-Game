@@ -395,12 +395,12 @@ export class NavBarComponent implements OnDestroy {
 
   async onSignOut(): Promise<void> {
     try {
-      this.authService.clearInternalToken();
+      await this.authService.clearInternalToken();
       await this.clerkService.clerk()?.signOut();
     } catch (error) {
       console.error('Error signing out:', error);
     } finally {
-      this.authService.clearInternalToken();
+      await this.authService.clearInternalToken();
       this.closeMenu();
       this.router.navigate(['/login']);
     }

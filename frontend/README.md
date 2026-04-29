@@ -79,6 +79,7 @@ npm run cap:open:ios
 ### Environment config
 - iOS builds use `src/environments/environment.ios.ts`.
 - Update `apiUrl` and `clerkPublishableKey` for the target environment before building.
+- Set `production: true` and use a `pk_live_` publishable key for App Store builds.
 
 ### Signing + provisioning checklist
 - Set the bundle ID to match your Apple Developer account in `ios/App/App.xcodeproj`.

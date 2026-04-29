@@ -18,14 +18,14 @@ export class TokenStorageService {
     return this.cachedToken;
   }
 
-  setToken(token: string): void {
+  async setToken(token: string): Promise<void> {
     this.cachedToken = token;
-    void this.persistToken(token);
+    await this.persistToken(token);
   }
 
-  clearToken(): void {
+  async clearToken(): Promise<void> {
     this.cachedToken = null;
-    void this.removeToken();
+    await this.removeToken();
   }
 
   private async loadToken(): Promise<string | null> {
@@ -33,7 +33,8 @@ export class TokenStorageService {
       try {
         const result = await SecureStoragePlugin.get({ key: INTERNAL_JWT_STORAGE_KEY });
         return result?.value ?? null;
-      } catch {
+      } catch (error) {
+        console.warn('Failed to read secure token storage.', error);
         return null;
       }
     }
@@ -45,8 +46,8 @@ export class TokenStorageService {
     if (this.isNativePlatform()) {
       try {
         await SecureStoragePlugin.set({ key: INTERNAL_JWT_STORAGE_KEY, value: token });
-      } catch {
-        // Ignore secure storage write errors.
+      } catch (error) {
+        console.warn('Failed to persist token to secure storage.', error);
       }
       return;
     }
@@ -58,8 +59,8 @@ export class TokenStorageService {
     if (this.isNativePlatform()) {
       try {
         await SecureStoragePlugin.remove({ key: INTERNAL_JWT_STORAGE_KEY });
-      } catch {
-        // Ignore secure storage delete errors.
+      } catch (error) {
+        console.warn('Failed to clear secure token storage.', error);
       }
       return;
     }

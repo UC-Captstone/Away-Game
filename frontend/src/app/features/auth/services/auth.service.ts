@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ClerkService } from '@jsrob/ngx-clerk';
-import { from, Observable, shareReplay, switchMap, tap } from 'rxjs';
+import { from, map, Observable, of, shareReplay, switchMap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { UserAuthResponse } from '../models/authResponse';
 import { TokenStorageService } from '../../../shared/services/token-storage.service';
@@ -43,10 +43,11 @@ export class AuthService {
         const headers = this.getAuthHeaders(token);
         return this.http.post<UserAuthResponse>(`${API_URL}/sync`, {}, { headers });
       }),
-      tap((resp) => {
-        if (resp?.token) {
-          this.tokenStorage.setToken(resp.token);
+      switchMap((resp) => {
+        if (!resp?.token) {
+          return of(resp);
         }
+        return from(this.tokenStorage.setToken(resp.token)).pipe(map(() => resp));
       }),
       // shareReplay(1) multicasts the single result to all concurrent subscribers,
       // then the reference is cleared so the next sync gets a fresh observable.
@@ -79,8 +80,8 @@ export class AuthService {
     return expiresAt - nowSeconds < TOKEN_EXPIRY_BUFFER_SECONDS;
   }
 
-  clearInternalToken(): void {
-    this.tokenStorage.clearToken();
+  clearInternalToken(): Promise<void> {
+    return this.tokenStorage.clearToken();
   }
 
   getUserRole(): string | null {

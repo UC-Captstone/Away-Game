@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, defer, switchMap, throwError } from 'rxjs';
+import { catchError, defer, from, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
@@ -22,9 +22,8 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
   // the backend round-trip that would just return a 401. Go straight to
   // syncUser() to get a fresh token, then make the request once.
   if (hadToken && authService.isTokenExpiredOrExpiringSoon()) {
-    authService.clearInternalToken();
-
-    return defer(() => authService.syncUser()).pipe(
+    return defer(() => from(authService.clearInternalToken())).pipe(
+      switchMap(() => authService.syncUser()),
       switchMap(() => {
         const freshToken = authService.getInternalToken();
         const retryReq = freshToken
@@ -32,10 +31,11 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
           : req;
         return next(retryReq);
       }),
-      catchError((syncError) => {
-        authService.clearInternalToken();
-        return throwError(() => syncError);
-      }),
+      catchError((syncError) =>
+        defer(() => from(authService.clearInternalToken())).pipe(
+          switchMap(() => throwError(() => syncError)),
+        ),
+      ),
     );
   }
 
@@ -60,9 +60,8 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      authService.clearInternalToken();
-
-      return defer(() => authService.syncUser()).pipe(
+      return defer(() => from(authService.clearInternalToken())).pipe(
+        switchMap(() => authService.syncUser()),
         switchMap(() => {
           const refreshedToken = authService.getInternalToken();
 
@@ -79,10 +78,11 @@ export const authTokenInterceptor: HttpInterceptorFn = (req, next) => {
 
           return next(retryRequest);
         }),
-        catchError((syncError) => {
-          authService.clearInternalToken();
-          return throwError(() => syncError);
-        }),
+        catchError((syncError) =>
+          defer(() => from(authService.clearInternalToken())).pipe(
+            switchMap(() => throwError(() => syncError)),
+          ),
+        ),
       );
     }),
   );
