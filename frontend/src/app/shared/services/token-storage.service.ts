@@ -47,7 +47,10 @@ export class TokenStorageService {
       try {
         await SecureStoragePlugin.set({ key: INTERNAL_JWT_STORAGE_KEY, value: token });
       } catch (error) {
-        console.warn('Failed to persist token to secure storage.', error);
+        console.warn(
+          'Failed to persist token to secure storage; user may need to re-authenticate.',
+          error,
+        );
       }
       return;
     }
@@ -60,7 +63,7 @@ export class TokenStorageService {
       try {
         await SecureStoragePlugin.remove({ key: INTERNAL_JWT_STORAGE_KEY });
       } catch (error) {
-        console.warn('Failed to clear secure token storage.', error);
+        console.warn('Failed to clear secure token storage; user may need to re-authenticate.', error);
       }
       return;
     }

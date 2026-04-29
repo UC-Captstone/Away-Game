@@ -69,6 +69,7 @@ export class GeolocationService {
     return new Observable<ILocation>((observer) => {
       if (Capacitor.isNativePlatform()) {
         Geolocation.getCurrentPosition({
+          // Prefer lower accuracy to reduce battery usage; adjust if higher precision is needed.
           enableHighAccuracy: false,
           timeout: this.LOCATION_TIMEOUT,
           maximumAge: 300000,
