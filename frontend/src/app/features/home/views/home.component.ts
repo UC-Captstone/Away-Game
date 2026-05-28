@@ -17,9 +17,12 @@ import { LocationFallbackReason } from '../../../shared/services/geolocation.ser
   imports: [SearchBarComponent, EventTileComponent, MapComponent],
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  private readonly discordBannerStorageKey = 'home-discord-banner-dismissed';
+
   // Separate loading states so featured events and nearby events render independently.
   isFeaturedLoading: WritableSignal<boolean> = signal(false);
   isNearbyLoading: WritableSignal<boolean> = signal(false);
+  showDiscordBanner: WritableSignal<boolean> = signal(true);
   locationNotice: WritableSignal<string | null> = signal(null);
   userLocation: WritableSignal<ILocation | null> = signal(null);
   nearbyEvents: WritableSignal<IMapMarker[]> = signal([]);
@@ -34,6 +37,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.showDiscordBanner.set(!this.isDiscordBannerDismissed());
     this._loadFeaturedEvents();
     this._loadNearbyEvents();
   }
@@ -128,6 +132,24 @@ export class HomeComponent implements OnInit, OnDestroy {
       const nextIndex = (this.currentEventIndex() + 1) % this.featuredEvents().length;
       this.currentEventIndex.set(nextIndex);
     });
+  }
+
+  dismissDiscordBanner(): void {
+    this.showDiscordBanner.set(false);
+
+    try {
+      sessionStorage.setItem(this.discordBannerStorageKey, 'true');
+    } catch {
+      // Ignore storage failures and fall back to the in-memory dismissal state.
+    }
+  }
+
+  private isDiscordBannerDismissed(): boolean {
+    try {
+      return sessionStorage.getItem(this.discordBannerStorageKey) === 'true';
+    } catch {
+      return false;
+    }
   }
 
   private getLocationNotice(reason: LocationFallbackReason | null): string {
