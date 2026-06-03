@@ -1,4 +1,6 @@
 import { Component, Input } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { AppLauncher } from '@capacitor/app-launcher';
 import { ILocation } from '../../models/location';
 
 type DevicePlatform = 'ios' | 'android' | 'desktop';
@@ -32,6 +34,11 @@ export class OpenMapsButtonComponent {
       return;
     }
 
+    if (Capacitor.isNativePlatform()) {
+      void this.openNativeMaps(query);
+      return;
+    }
+
     const platform = this.getPlatform();
     if (platform === 'desktop') {
       const desktopUrl = this.buildGoogleMapsUrl(query);
@@ -45,6 +52,23 @@ export class OpenMapsButtonComponent {
     }
 
     window.location.href = this.buildNativeMapsUrl(platform, query);
+  }
+
+  private async openNativeMaps(query: string): Promise<void> {
+    const platform = Capacitor.getPlatform();
+    const nativeUrl = this.buildNativeMapsUrl(platform === 'ios' ? 'ios' : 'android', query);
+
+    try {
+      const canOpen = await AppLauncher.canOpenUrl({ url: nativeUrl });
+      if (canOpen.value) {
+        await AppLauncher.openUrl({ url: nativeUrl });
+        return;
+      }
+    } catch {
+      // Fall back to the URL navigation path below.
+    }
+
+    window.location.href = nativeUrl;
   }
 
   private getLocationQuery(): string | null {

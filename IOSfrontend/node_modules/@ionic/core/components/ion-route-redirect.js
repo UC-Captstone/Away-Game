@@ -1,0 +1,4 @@
+/*!
+ * (C) Ionic http://ionicframework.com - MIT License
+ */
+import{p as t,H as e,e as o,t as r}from"./p-BJoMtgfR.js";const i=t(class extends e{constructor(t){super(),!1!==t&&this.__registerHost(),this.ionRouteRedirectChanged=o(this,"ionRouteRedirectChanged",7)}propDidChange(){this.ionRouteRedirectChanged.emit()}connectedCallback(){this.ionRouteRedirectChanged.emit()}static get watchers(){return{from:[{propDidChange:0}],to:[{propDidChange:0}]}}},[0,"ion-route-redirect",{from:[1],to:[1]},void 0,{from:[{propDidChange:0}],to:[{propDidChange:0}]}]),n=i,s=function(){"undefined"!=typeof customElements&&["ion-route-redirect"].forEach((t=>{"ion-route-redirect"===t&&(customElements.get(r(t))||customElements.define(r(t),i))}))};export{n as IonRouteRedirect,s as defineCustomElement}

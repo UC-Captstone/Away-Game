@@ -1,0 +1,4 @@
+/*!
+ * (C) Ionic http://ionicframework.com - MIT License
+ */
+import{c as o}from"./p-DgbT0exM.js";import{u as s}from"./p-BJoMtgfR.js";const t="ion-content",a=".ion-content-scroll-host",r=`${t}, ${a}`,e=o=>"ION-CONTENT"===o.tagName,i=async s=>e(s)?(await new Promise((t=>o(s,t))),s.getScrollElement()):s,n=o=>o.querySelector(a)||o.querySelector(r),f=o=>o.closest(r),m=(o,s)=>e(o)?o.scrollToTop(s):Promise.resolve(o.scrollTo({top:0,left:0,behavior:"smooth"})),c=(o,s,t,a)=>e(o)?o.scrollByPoint(s,t,a):Promise.resolve(o.scrollBy({top:t,left:s,behavior:a>0?"smooth":"auto"})),p=o=>s(o,t),h=o=>{if(e(o)){const s=o.scrollY;return o.scrollY=!1,s}return o.style.setProperty("overflow","hidden"),!0},l=(o,s)=>{e(o)?o.scrollY=s:o.style.removeProperty("overflow")};export{a as I,f as a,t as b,c,h as d,n as f,i as g,e as i,p,l as r,m as s}

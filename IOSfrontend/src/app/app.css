@@ -1,0 +1,9 @@
+:host {
+	display: block;
+	min-height: 100dvh;
+	background: #020617;
+}
+
+ion-app {
+	min-height: 100dvh;
+}

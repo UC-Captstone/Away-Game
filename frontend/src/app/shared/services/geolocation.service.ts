@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 import { ILocation } from '../models/location';
 import { catchError, map, Observable, of } from 'rxjs';
 
@@ -42,7 +44,11 @@ export class GeolocationService {
   }
 
   getRealLocationAttempt(): Observable<ILocationResolution> {
-    return this.requestBrowserGeolocation().pipe(
+    const locationRequest = Capacitor.isNativePlatform()
+      ? this.requestNativeGeolocation()
+      : this.requestBrowserGeolocation();
+
+    return locationRequest.pipe(
       map((location) => {
         this.saveLocationToStorage(location);
         return {
@@ -61,6 +67,24 @@ export class GeolocationService {
         });
       }),
     );
+  }
+
+  private requestNativeGeolocation(): Observable<ILocation> {
+    return new Observable<ILocation>((observer) => {
+      Geolocation.getCurrentPosition({
+        enableHighAccuracy: false,
+        timeout: this.LOCATION_TIMEOUT,
+        maximumAge: 300000,
+      })
+        .then((position) => {
+          observer.next({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          observer.complete();
+        })
+        .catch((error) => observer.error(error));
+    });
   }
 
   private requestBrowserGeolocation(): Observable<ILocation> {

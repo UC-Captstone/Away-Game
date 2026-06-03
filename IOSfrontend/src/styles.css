@@ -1,0 +1,41 @@
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import 'tailwindcss';
+
+html {
+	color-scheme: dark;
+	scroll-behavior: smooth;
+}
+
+body,
+ion-app {
+	min-height: 100dvh;
+	overflow-x: hidden;
+	overflow-y: auto;
+	overscroll-behavior-y: none;
+	background: #020617;
+}
+
+* {
+	-webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #334155;
+	border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #475569;
+}
